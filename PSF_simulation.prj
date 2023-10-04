@@ -1,5 +1,9 @@
 <deployment-project plugin="plugin.apptool" plugin-version="1.0">
+<<<<<<< HEAD
   <configuration build-checksum="1247724197" file="/home/magdalena/Projects/PSF/psf-simulation-app/PSF simulation.prj" location="/home/magdalena/Projects/PSF/psf-simulation-app" name="PSF simulation" target="target.mlapps" target-name="Package App">
+=======
+  <configuration build-checksum="805510255" file="/home/magdalena/Projects/PSF/psf-simulation-app/PSF simulation.prj" location="/home/magdalena/Projects/PSF/psf-simulation-app" name="PSF simulation" target="target.mlapps" target-name="Package App">
+>>>>>>> e9e31ac565ff768f57f8a0289a7f56af111efa52
     <param.appname>PSF simulation</param.appname>
     <param.authnamewatermark>Schneider, Hinterer et al</param.authnamewatermark>
     <param.email />
@@ -33,6 +37,7 @@ See github repository for license and newest version: https://github.com/schneid
       <file>${PROJECT_ROOT}/MainSimulationPSF.mlapp</file>
     </fileset.main>
     <fileset.depfun>
+<<<<<<< HEAD
       <file>/home/magdalena/MATLAB Add-Ons/Apps/PSFsimulation/appFiles/@PSF/PSF.m</file>
       <file>/home/magdalena/MATLAB Add-Ons/Apps/PSFsimulation/appFiles/@PSF/getIntensitiesCamera.m</file>
       <file>/home/magdalena/MATLAB Add-Ons/Apps/PSFsimulation/appFiles/@PSF/readParameters.m</file>
@@ -43,6 +48,72 @@ See github repository for license and newest version: https://github.com/schneid
       <file>${PROJECT_ROOT}/functions</file>
       <file>${PROJECT_ROOT}/subwindows</file>
     </fileset.resources>
+=======
+      <file>${PROJECT_ROOT}/appFiles/@PSF/PSF.m</file>
+      <file>${PROJECT_ROOT}/appFiles/@PSF/getIntensitiesCamera.m</file>
+      <file>${PROJECT_ROOT}/appFiles/@PSF/readParameters.m</file>
+      <file>${PROJECT_ROOT}/appFiles/@PSF/sphericalAberrationFromRefractiveIndexMismatch.m</file>
+      <file>${PROJECT_ROOT}/appFiles/AttenuationMask/Aperture.m</file>
+      <file>${PROJECT_ROOT}/appFiles/AttenuationMask/Attenuation.m</file>
+      <file>${PROJECT_ROOT}/appFiles/AttenuationMask/ConstantAttenuationMask.m</file>
+      <file>${PROJECT_ROOT}/appFiles/AttenuationMask/EmptyTransmissionMask.m</file>
+      <file>${PROJECT_ROOT}/appFiles/AttenuationMask/Transmission.m</file>
+      <file>${PROJECT_ROOT}/appFiles/BackFocalPlane.m</file>
+      <file>${PROJECT_ROOT}/appFiles/ChirpZTransform.m</file>
+      <file>${PROJECT_ROOT}/appFiles/Dipole.m</file>
+      <file>${PROJECT_ROOT}/appFiles/IsotropicPSF.m</file>
+      <file>${PROJECT_ROOT}/appFiles/Length.m</file>
+      <file>${PROJECT_ROOT}/appFiles/LengthUnit.m</file>
+      <file>${PROJECT_ROOT}/appFiles/Mask.m</file>
+      <file>${PROJECT_ROOT}/appFiles/PhaseMask/Astigmatism.m</file>
+      <file>${PROJECT_ROOT}/appFiles/PhaseMask/ConstantPhaseMask.m</file>
+      <file>${PROJECT_ROOT}/appFiles/PhaseMask/DoubleHelix.m</file>
+      <file>${PROJECT_ROOT}/appFiles/PhaseMask/EmptyPhaseMask.m</file>
+      <file>${PROJECT_ROOT}/appFiles/PhaseMask/OpposingSectors.m</file>
+      <file>${PROJECT_ROOT}/appFiles/PhaseMask/PhaseMask.m</file>
+      <file>${PROJECT_ROOT}/appFiles/PhaseMask/PyramidPhaseMask.m</file>
+      <file>${PROJECT_ROOT}/appFiles/PhaseMask/Sector.m</file>
+      <file>${PROJECT_ROOT}/appFiles/PhaseMask/TiltPhaseMask.m</file>
+      <file>${PROJECT_ROOT}/appFiles/PhaseMask/Vortex.m</file>
+      <file>${PROJECT_ROOT}/appFiles/PixelSensitivity.m</file>
+      <file>${PROJECT_ROOT}/appFiles/StageDrift/NoStageDrift.m</file>
+      <file>${PROJECT_ROOT}/appFiles/StageDrift/StageDrift.m</file>
+      <file>${PROJECT_ROOT}/appFiles/helperFunctions/cropArray2D.m</file>
+      <file>${PROJECT_ROOT}/appFiles/helperFunctions/cropArray3D.m</file>
+      <file>${PROJECT_ROOT}/appFiles/helperFunctions/embedArray2D.m</file>
+      <file>${PROJECT_ROOT}/appFiles/helperFunctions/embedArray3D.m</file>
+      <file>${PROJECT_ROOT}/appFiles/helperFunctions/loadSingleMatrix.m</file>
+      <file>${PROJECT_ROOT}/appFiles/helperFunctions/loadZernikeIndicesAndWeights.m</file>
+      <file>${PROJECT_ROOT}/appFiles/helperFunctions/multiplyPagewise.m</file>
+      <file>${PROJECT_ROOT}/appFiles/helperFunctions/mustBeInFullRadialRange.m</file>
+      <file>${PROJECT_ROOT}/appFiles/helperFunctions/mustBeOdd.m</file>
+      <file>${PROJECT_ROOT}/appFiles/helperFunctions/mustBeOddSize.m</file>
+      <file>${PROJECT_ROOT}/appFiles/helperFunctions/reduceOversampling.m</file>
+      <file>${PROJECT_ROOT}/appFiles/helperFunctions/setInputParameters.m</file>
+      <file>${PROJECT_ROOT}/appFiles/zernike/ZernikeAberrations.m</file>
+      <file>${PROJECT_ROOT}/appFiles/zernike/ZernikePolynomials.m</file>
+      <file>${PROJECT_ROOT}/functions/ThirdPartyFunctions/ZernikeCalc/ZernikeCalc.m</file>
+      <file>${PROJECT_ROOT}/functions/centering.m</file>
+      <file>${PROJECT_ROOT}/functions/consider_bead_size.m</file>
+      <file>${PROJECT_ROOT}/functions/create_coord.m</file>
+      <file>${PROJECT_ROOT}/functions/czt2.m</file>
+      <file>${PROJECT_ROOT}/functions/czt2_fast.m</file>
+      <file>${PROJECT_ROOT}/functions/embed.m</file>
+      <file>${PROJECT_ROOT}/functions/fun_dipole_imaging.m</file>
+      <file>${PROJECT_ROOT}/functions/fun_errorcalc.m</file>
+      <file>${PROJECT_ROOT}/functions/remove_BG.m</file>
+      <file>${PROJECT_ROOT}/functions/simu_image_stack.m</file>
+      <file>${PROJECT_ROOT}/subwindows/WindowFluorophores.mlapp</file>
+      <file>${PROJECT_ROOT}/subwindows/WindowPhaseMask.mlapp</file>
+      <file>${PROJECT_ROOT}/subwindows/WindowPlotPSF.mlapp</file>
+      <file>${PROJECT_ROOT}/subwindows/WindowPlotPSFThreeDim.mlapp</file>
+      <file>${PROJECT_ROOT}/subwindows/WindowPolarizedEmission.mlapp</file>
+      <file>${PROJECT_ROOT}/subwindows/WindowTransmissionMask.mlapp</file>
+      <file>${PROJECT_ROOT}/subwindows/WindowZernikeAberrations.mlapp</file>
+      <file>${PROJECT_ROOT}/subwindows/aberration_measurement.mlapp</file>
+    </fileset.depfun>
+    <fileset.resources />
+>>>>>>> e9e31ac565ff768f57f8a0289a7f56af111efa52
     <fileset.package />
     <build-deliverables>
       <file location="/home/magdalena/Projects/PSF" name="psf-simulation-app" optional="false">/home/magdalena/Projects/PSF/psf-simulation-app</file>
