@@ -32,7 +32,7 @@ classdef WindowPlotPSF_exported < matlab.apps.AppBase
             set(app.UIAxesPSF,'visible','off')
             colormap(app.PSFimageUIFigure, app.CallingApp.ColormapDropDown.Value)
 
-            app.CallingApp.simulateAndDisplayPSF()
+            app.CallingApp.simulateAndDisplayPSF();
         end
 
         function updatePlot(app, psfImage)
@@ -79,7 +79,9 @@ classdef WindowPlotPSF_exported < matlab.apps.AppBase
                 app.CallingApp.ShowPsf3DCheckBox.Enable = "off";
             end
             app.CallingApp.CalculatingLamp.Enable = "off";
+            appPath = app.CallingApp.originalPath;
             delete(app)
+            path(appPath);
         end
 
         % Callback function: PushTool

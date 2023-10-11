@@ -41,7 +41,7 @@ classdef WindowPlotPSFThreeDim_exported < matlab.apps.AppBase
             set(app.UIAxesPSF,'visible','on')
             colormap(app.PSFThreeDimUIFigure, app.CallingApp.ColormapDropDown.Value)
 
-            app.CallingApp.simulateAndDisplayPSF()
+            app.CallingApp.simulateAndDisplayPSF();
         end
 
         function updatePlot(app, psfImage)

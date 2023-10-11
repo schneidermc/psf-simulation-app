@@ -51,7 +51,7 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
         RefractiveIndexIntermediateLayerLabel  matlab.ui.control.Label
         RefractiveIndexSpecimenSpinner  matlab.ui.control.Spinner
         RefractiveIndexSpecimenLabel    matlab.ui.control.Label
-        ReractiveindexLabel             matlab.ui.control.Label
+        RefractiveindexLabel            matlab.ui.control.Label
         defocus                         matlab.ui.control.NumericEditField
         FocusButton                     matlab.ui.control.Button
         ObjectiveNaSpinner              matlab.ui.control.Spinner
@@ -168,6 +168,7 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
     end
     
     properties (Hidden)
+        originalPath
         isTransmissionMaskLoaded = false
     end
 
@@ -384,6 +385,8 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
 
         % Code that executes after component creation
         function startupFcn(app)
+            app.originalPath = path; % save path at startup
+            
             par.objectiveNA = 0.7;
             par.nPhotons = 50000;
             par.dipole = Dipole(0,0);
@@ -789,7 +792,9 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
                 app.PlotPSF = WindowPlotPSF(app);
                 app.PlotPSF.initializePlot();
             else
+                appPath = app.originalPath;
                 delete(app.PlotPSF);
+                path(appPath);
                 app.CalculatingLamp.Enable = 'off';
                 app.ShowPsf2DCheckBox.Value = false;
                 app.ShowPsf3DCheckBox.Value = false;
@@ -805,7 +810,9 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
                 app.PlotPSF = WindowPlotPSF(app);
                 app.PlotPSF.initializePlot();
             else
+                appPath = app.originalPath;
                 delete(app.PlotPSF);
+                path(appPath);
                 if app.ShowPsf3DCheckBox.Value == false
                     app.ShowPSFCheckBox.Value = false;
                     app.ShowPsf2DCheckBox.Enable = "off";
@@ -1459,7 +1466,7 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.phi.RoundFractionalValues = 'on';
             app.phi.ValueDisplayFormat = '%d°';
             app.phi.ValueChangedFcn = createCallbackFcn(app, @phiValueChanged, true);
-            app.phi.Position = [304 36 47 22];
+            app.phi.Position = [303 36 47 22];
 
             % Create DipolerotationButtonGroup
             app.DipolerotationButtonGroup = uibuttongroup(app.FluorophoreTab);
@@ -1561,12 +1568,12 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.defocus.ValueChangedFcn = createCallbackFcn(app, @defocusValueChanged, true);
             app.defocus.Position = [330 225 69 22];
 
-            % Create ReractiveindexLabel
-            app.ReractiveindexLabel = uilabel(app.MicroscopeRITab);
-            app.ReractiveindexLabel.FontSize = 13;
-            app.ReractiveindexLabel.FontWeight = 'bold';
-            app.ReractiveindexLabel.Position = [12 157 115 22];
-            app.ReractiveindexLabel.Text = 'Reflective indices';
+            % Create RefractiveindexLabel
+            app.RefractiveindexLabel = uilabel(app.MicroscopeRITab);
+            app.RefractiveindexLabel.FontSize = 13;
+            app.RefractiveindexLabel.FontWeight = 'bold';
+            app.RefractiveindexLabel.Position = [12 157 116 22];
+            app.RefractiveindexLabel.Text = 'Refractive indices';
 
             % Create RefractiveIndexSpecimenLabel
             app.RefractiveIndexSpecimenLabel = uilabel(app.MicroscopeRITab);
@@ -1713,7 +1720,7 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             % Create TubeLensFocalLengthSpinner
             app.TubeLensFocalLengthSpinner = uispinner(app.MicroscopeRITab);
             app.TubeLensFocalLengthSpinner.Limits = [0.1 Inf];
-            app.TubeLensFocalLengthSpinner.ValueDisplayFormat = '%11.4g nm';
+            app.TubeLensFocalLengthSpinner.ValueDisplayFormat = '%11.4g mm';
             app.TubeLensFocalLengthSpinner.ValueChangedFcn = createCallbackFcn(app, @TubeLensFocalLengthSpinnerValueChanged, true);
             app.TubeLensFocalLengthSpinner.BusyAction = 'cancel';
             app.TubeLensFocalLengthSpinner.Position = [405 267 90 22];
@@ -1727,7 +1734,7 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             % Create ObjectiveFocalLengthSpinner
             app.ObjectiveFocalLengthSpinner = uispinner(app.MicroscopeRITab);
             app.ObjectiveFocalLengthSpinner.Limits = [0.1 Inf];
-            app.ObjectiveFocalLengthSpinner.ValueDisplayFormat = '%11.4g nm';
+            app.ObjectiveFocalLengthSpinner.ValueDisplayFormat = '%11.4g mm';
             app.ObjectiveFocalLengthSpinner.ValueChangedFcn = createCallbackFcn(app, @ObjectiveFocalLengthSpinnerValueChanged, true);
             app.ObjectiveFocalLengthSpinner.BusyAction = 'cancel';
             app.ObjectiveFocalLengthSpinner.Position = [405 296 90 22];
