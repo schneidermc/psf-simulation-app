@@ -438,7 +438,7 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
                     app.theta.Visible = "off";
                     app.ReducedexcitationSwitch.Visible = "off";
                     app.ReducedexcitationSwitchLabel.Visible = "off";
-                    app.ConfiguremultiplefluorophoresButton.Visible = "off";
+                    app.ConfiguremultiplefluorophoresButton.Visible = "on";
                 otherwise
                     error('Invalid input value for dipole rotation!')
             end
@@ -550,6 +550,9 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.zpositionSpinnerLabel.Visible = "off";
             app.zpositionSpinner.Visible = "off";
 
+            app.DipolerotationButtonGroup.Visible = 'off';
+            app.DipoleorientationLabel.Visible = 'off';
+          
             app.Fluorophores = WindowFluorophores(app);
             set(app.ConfiguremultiplefluorophoresButton, 'Enable', 'off')
         end

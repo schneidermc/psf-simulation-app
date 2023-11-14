@@ -104,6 +104,7 @@ classdef WindowFluorophores_exported < matlab.apps.AppBase
             theta = app.InclinationAngleSlider{k}.Value; % dipole inclination angle (in degree)
             phi = app.AzimuthalAngleSlider{k}.Value; % dipole azimuthal angle
             par.dipole = Dipole(theta*pi/180, phi*pi/ 180); % conversion to rad
+            
             par.position = Length([app.xpositionSpinner{k}.Value ...
                 app.ypositionSpinner{k}.Value ...
                 app.zpositionSpinner{k}.Value],'nm'); % position, for xy position 0 corresponds to the center of the center pixel
@@ -112,7 +113,7 @@ classdef WindowFluorophores_exported < matlab.apps.AppBase
             switch app.CallingApp.DipolerotationButtonGroup.SelectedObject.Text
                 case 'fixed'
                     psf = PSF(par);
-                case 'rotating'
+                case 'freely rotating'
                     psf = IsotropicPSF(par);
                 otherwise
                     error('Invalid input value for dipole rotation!')
@@ -168,9 +169,8 @@ classdef WindowFluorophores_exported < matlab.apps.AppBase
             app.UIAxesPSF{k}.ZTickLabelRotation = 0;
             app.UIAxesPSF{k}.FontSize = 15;
             app.UIAxesPSF{k}.Position = [345 25 280 231];
-
+           
             %% Dipole orientation
-
             % Create AzimuthalAngleSliderLabel
             app.AzimuthalAngleSliderLabel{k} = uilabel(app.Tabs{k});
             app.AzimuthalAngleSliderLabel{k}.Position = [17 173 92 22];
@@ -214,13 +214,22 @@ classdef WindowFluorophores_exported < matlab.apps.AppBase
             app.InclinationAngleEditField{k}.ValueDisplayFormat = '%d°';
             app.InclinationAngleEditField{k}.ValueChangedFcn = {@app.InclinationAngleEditFieldValueChanged, k};
             app.InclinationAngleEditField{k}.Position = [290 225 43 22];
-
+            
+            if strcmp(app.CallingApp.DipolerotationButtonGroup.SelectedObject.Text, 'freely rotating')
+                app.AzimuthalAngleSliderLabel{k}.Visible = 'off';
+                app.AzimuthalAngleSlider{k}.Visible = 'off';
+                app.AzimuthalAngleEditField{k}.Visible = 'off';
+                app.InclinationAngleSliderLabel{k}.Visible = 'off';
+                app.InclinationAngleSlider{k}.Visible = 'off';
+                app.InclinationAngleEditField{k}.Visible = 'off';
+            end
 
             %% Position
 
             % Create xpositionSpinner
             app.xpositionSpinnerLabel{k} = uilabel(app.Tabs{k});
             app.xpositionSpinnerLabel{k}.Position = [17 103 57 22];
+            
             app.xpositionSpinnerLabel{k}.Text = 'x-position';
             app.xpositionSpinnerLabel{k}.BusyAction = 'cancel';
 
@@ -267,6 +276,17 @@ classdef WindowFluorophores_exported < matlab.apps.AppBase
             app.zpositionSpinner{k}.ValueChangingFcn = {@app.zpositionSpinnerValueChanging, k};
             app.zpositionSpinner{k}.Position = [130 43 102 22];
             app.zpositionSpinner{k}.BusyAction = 'cancel';
+
+            % move position of (x,y,z) spinners if 
+            if strcmp(app.CallingApp.DipolerotationButtonGroup.SelectedObject.Text, 'freely rotating')
+                app.xpositionSpinnerLabel{k}.Position = [17 233 57 22];
+                app.ypositionSpinnerLabel{k}.Position = [17 203 57 22];
+                app.zpositionSpinnerLabel{k}.Position = [17 173 57 22];
+
+                app.xpositionSpinner{k}.Position = [130 233 102 22];
+                app.ypositionSpinner{k}.Position = [130 203 102 22];
+                app.zpositionSpinner{k}.Position = [130 173 102 22];
+            end
 
             
             % Create DeletefluorophoreButton
@@ -480,6 +500,8 @@ classdef WindowFluorophores_exported < matlab.apps.AppBase
             app.CallingApp.theta.Visible = "on";
             app.CallingApp.zpositionSpinnerLabel.Visible = "on";
             app.CallingApp.zpositionSpinner.Visible = "on";
+            app.CallingApp.DipolerotationButtonGroup.Visible = 'on';
+            app.CallingApp.DipoleorientationLabel.Visible = 'on';
             app.CallingApp.simulateAndDisplayPSF()
             set(app.CallingApp.ConfiguremultiplefluorophoresButton, 'Enable', 'on')
             % Switch on option for 3D plot again (currently not compatible
