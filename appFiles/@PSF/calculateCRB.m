@@ -1,11 +1,20 @@
 function CRB = calculateCRB(obj)
     % Calculate Cramer Rao bounds for the estimation of 3D position 
     % output is Length object 
-
     par = obj.readParameters;
-    dx = 1; % shift in nm 
     psf = obj.image; 
-    
+
+    % we only calculate the CRB from one z slice 
+    if numel(par.defocus)>1
+        nSteps = numel(par.defocus);
+        midSlice = ceil(nSteps/2);
+        defocusValues = par.defocus.inNanometer; 
+        par.defocus = Length(defocusValues(midSlice), 'nm');
+        psf = psf(:,:,midSlice);
+    end
+
+    dx = 1; % shift in nm 
+     
     % calculate displaced psf images;
     par.position = par.position + Length([dx 0 0],'nm');
     psf_x = PSF(par);

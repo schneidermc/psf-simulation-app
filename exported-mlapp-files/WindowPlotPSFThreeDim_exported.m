@@ -143,7 +143,7 @@ classdef WindowPlotPSFThreeDim_exported < matlab.apps.AppBase
             delete(app)
         end
 
-        % Callback function: PushTool
+        % Clicked callback: PushTool
         function PushToolClicked(app, event)
             % save image as .mat file 
             temp = app.CallingApp.readParametersPhaseMask();
@@ -213,11 +213,8 @@ classdef WindowPlotPSFThreeDim_exported < matlab.apps.AppBase
             app.UIAxesPSF.PlotBoxAspectRatio = [1 1 1];
             app.UIAxesPSF.XLim = [0 1];
             app.UIAxesPSF.XTick = [];
-            app.UIAxesPSF.XTickLabelRotation = 0;
             app.UIAxesPSF.XTickLabel = '';
             app.UIAxesPSF.YTick = [];
-            app.UIAxesPSF.YTickLabelRotation = 0;
-            app.UIAxesPSF.ZTickLabelRotation = 0;
             app.UIAxesPSF.FontSize = 12;
             app.UIAxesPSF.Position = [48 61 269 272];
 

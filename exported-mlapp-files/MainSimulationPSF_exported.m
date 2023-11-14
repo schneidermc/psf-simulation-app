@@ -214,7 +214,7 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
                     if app.ShowPSFCheckBox.Value
                         if numel(par.defocus)>1
                             nSteps = numel(par.defocus);
-                            midSlice = floor(nSteps/2);
+                            midSlice = ceil(nSteps/2);
                             app.PlotPSF.updatePlot(psfImage(:,:,midSlice));
                         else
                             app.PlotPSF.updatePlot(psfImage);
@@ -237,7 +237,7 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             if strcmp(app.TabGroup.SelectedTab.Title, 'Options') && app.CalculateCramrRaoBoundCheckBox.Value 
                 psf.CRB = psf.calculateCRB;
                 CRBinNanometer = round(psf.CRB.inNanometer, 3, 'significant');
-                app.CRBOutputField.Text = ['Cramér Rao Bound:' newline 'x:  ',num2str(CRBinNanometer(1)), 'nm' newline 'y:  ',num2str(CRBinNanometer(2)), 'nm' newline 'z:  ',num2str(CRBinNanometer(3)), 'nm'];
+                app.CRBOutputField.Text = ['x:  ',num2str(CRBinNanometer(1)), ' nm' newline 'y:  ',num2str(CRBinNanometer(2)), ' nm' newline 'z:  ',num2str(CRBinNanometer(3)), ' nm'];
             end
 
             app.CalculatingLamp.Color = "g";
@@ -2376,7 +2376,7 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
 
             % Create CRBOutputField
             app.CRBOutputField = uilabel(app.OptionsTab);
-            app.CRBOutputField.Position = [390 111 181 59];
+            app.CRBOutputField.Position = [390 123 137 47];
             app.CRBOutputField.Text = '';
 
             % Create CalculatingLamp
