@@ -41,6 +41,7 @@ classdef PSF
         % other
         Ix % x-polarized image 
         Iy % y-polarized image 
+        CRB (1,3) Length = Length([NaN NaN NaN],'nm') % Cramer Rao Bound 
     end
 
     properties (Hidden)
@@ -197,6 +198,8 @@ classdef PSF
             % (circle) Zernike polynomials
             Z = ZernikePolynomials.getInstance(obj.pupilMask);
             coeffPos = - (pos(1:2) + relativeMotion(k,1:2)) .* obj.oversampling .* zernikeConstant / (2*pi); % x/y-tilt
+            % Attention: xy-tilt is more than just a shift of the image!
+            % (tilt makes a rectangle become a rhomboid)
             defocusFactor = 1/(2*pi)*(axialMotionInMeter(k)+obj.defocus.inMeter);
             if obj.astigmatism ~= 0
                 coeffAstigmatism = obj.astigmatism; % vertical astigmatism
@@ -233,6 +236,7 @@ classdef PSF
         % Additional functions defined in separate files
         [SA_out,Defocus,a] = sphericalAberrationFromRefractiveIndexMismatch(obj, removeDefocus)
         [psf, Ix, Iy] = getIntensitiesCamera(obj, mask)
+        CRB = calculateCRB(obj);
         
         par = readParameters(obj)
         

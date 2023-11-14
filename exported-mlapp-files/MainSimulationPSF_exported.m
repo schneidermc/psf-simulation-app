@@ -121,7 +121,9 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
         TransmissionmaskDropDownLabel   matlab.ui.control.Label
         TransmissionMaskShowplotCheckBox  matlab.ui.control.CheckBox
         TransmissionLabel               matlab.ui.control.Label
-        PlotoptionsTab                  matlab.ui.container.Tab
+        OptionsTab                      matlab.ui.container.Tab
+        CRBOutputField                  matlab.ui.control.Label
+        CalculateCramrRaoBoundCheckBox  matlab.ui.control.CheckBox
         StepsizeEditField               matlab.ui.control.NumericEditField
         StepsizeEditFieldLabel          matlab.ui.control.Label
         NumberstepsEditField            matlab.ui.control.NumericEditField
@@ -232,6 +234,12 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
                     end
             end
             
+            if strcmp(app.TabGroup.SelectedTab.Title, 'Options') && app.CalculateCramrRaoBoundCheckBox.Value 
+                psf.CRB = psf.calculateCRB;
+                CRBinNanometer = round(psf.CRB.inNanometer, 3, 'significant');
+                app.CRBOutputField.Text = ['Cramér Rao Bound:' newline 'x:  ',num2str(CRBinNanometer(1)), 'nm' newline 'y:  ',num2str(CRBinNanometer(2)), 'nm' newline 'z:  ',num2str(CRBinNanometer(3)), 'nm'];
+            end
+
             app.CalculatingLamp.Color = "g";
         end
 
@@ -1332,6 +1340,24 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.StepsizeEditField.Value = event.Value;
             simulateAndDisplayPSF(app);
         end
+
+        % Value changed function: CalculateCramrRaoBoundCheckBox
+        function CalculateCramrRaoBoundCheckBoxValueChanged(app, event)
+            app.CalculateCramrRaoBoundCheckBox.Value = event.Value;
+            if event.Value
+                simulateAndDisplayPSF(app);
+            else
+                app.CRBOutputField.Text = ''; 
+            end
+        end
+
+        % Selection change function: TabGroup
+        function TabGroupSelectionChanged(app, event)
+            % calculate CRB if Options tab is selected
+            if strcmp(app.TabGroup.SelectedTab.Title, 'Options')
+                simulateAndDisplayPSF(app);
+            end
+        end
     end
 
     % Component initialization
@@ -1342,7 +1368,7 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
 
             % Create PSFsimulationUIFigure and hide until all components are created
             app.PSFsimulationUIFigure = uifigure('Visible', 'off');
-            app.PSFsimulationUIFigure.Position = [100 120 635 446];
+            app.PSFsimulationUIFigure.Position = [100 120 633 469];
             app.PSFsimulationUIFigure.Name = 'PSF simulation';
             app.PSFsimulationUIFigure.CloseRequestFcn = createCallbackFcn(app, @PSFsimulationUIFigureCloseRequest, true);
 
@@ -1350,12 +1376,13 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.SetparametersLabel = uilabel(app.PSFsimulationUIFigure);
             app.SetparametersLabel.FontSize = 14;
             app.SetparametersLabel.FontWeight = 'bold';
-            app.SetparametersLabel.Position = [14 411 107 22];
+            app.SetparametersLabel.Position = [14 434 107 22];
             app.SetparametersLabel.Text = 'Set parameters';
 
             % Create TabGroup
             app.TabGroup = uitabgroup(app.PSFsimulationUIFigure);
-            app.TabGroup.Position = [14 12 612 390];
+            app.TabGroup.SelectionChangedFcn = createCallbackFcn(app, @TabGroupSelectionChanged, true);
+            app.TabGroup.Position = [14 14 612 411];
 
             % Create FluorophoreTab
             app.FluorophoreTab = uitab(app.TabGroup);
@@ -1365,12 +1392,12 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.FluorophoreLabel = uilabel(app.FluorophoreTab);
             app.FluorophoreLabel.FontSize = 13;
             app.FluorophoreLabel.FontWeight = 'bold';
-            app.FluorophoreLabel.Position = [12 333 82 22];
+            app.FluorophoreLabel.Position = [12 354 82 22];
             app.FluorophoreLabel.Text = 'Fluorophore';
 
             % Create AzimuthalAngleSliderLabel
             app.AzimuthalAngleSliderLabel = uilabel(app.FluorophoreTab);
-            app.AzimuthalAngleSliderLabel.Position = [12 35 92 22];
+            app.AzimuthalAngleSliderLabel.Position = [12 56 92 22];
             app.AzimuthalAngleSliderLabel.Text = 'Azimuthal Angle';
 
             % Create AzimuthalAngleSlider
@@ -1379,11 +1406,11 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.AzimuthalAngleSlider.ValueChangedFcn = createCallbackFcn(app, @AzimuthalAngleSliderValueChanged, true);
             app.AzimuthalAngleSlider.ValueChangingFcn = createCallbackFcn(app, @AzimuthalAngleSliderValueChanging, true);
             app.AzimuthalAngleSlider.BusyAction = 'cancel';
-            app.AzimuthalAngleSlider.Position = [133 45 150 3];
+            app.AzimuthalAngleSlider.Position = [133 66 150 3];
 
             % Create InclinationAngleSliderLabel
             app.InclinationAngleSliderLabel = uilabel(app.FluorophoreTab);
-            app.InclinationAngleSliderLabel.Position = [12 85 94 22];
+            app.InclinationAngleSliderLabel.Position = [12 106 94 22];
             app.InclinationAngleSliderLabel.Text = 'Inclination Angle';
 
             % Create InclinationAngleSlider
@@ -1392,22 +1419,22 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.InclinationAngleSlider.ValueChangedFcn = createCallbackFcn(app, @InclinationAngleSliderValueChanged, true);
             app.InclinationAngleSlider.ValueChangingFcn = createCallbackFcn(app, @InclinationAngleSliderValueChanging, true);
             app.InclinationAngleSlider.BusyAction = 'cancel';
-            app.InclinationAngleSlider.Position = [133 94 150 3];
+            app.InclinationAngleSlider.Position = [133 115 150 3];
 
             % Create PhotonshotnoiseSwitchLabel
             app.PhotonshotnoiseSwitchLabel = uilabel(app.FluorophoreTab);
-            app.PhotonshotnoiseSwitchLabel.Position = [12 206 102 22];
+            app.PhotonshotnoiseSwitchLabel.Position = [12 227 102 22];
             app.PhotonshotnoiseSwitchLabel.Text = 'Photon shot noise';
 
             % Create PhotonshotnoiseSwitch
             app.PhotonshotnoiseSwitch = uiswitch(app.FluorophoreTab, 'slider');
             app.PhotonshotnoiseSwitch.ValueChangedFcn = createCallbackFcn(app, @PhotonshotnoiseSwitchValueChanged, true);
             app.PhotonshotnoiseSwitch.BusyAction = 'cancel';
-            app.PhotonshotnoiseSwitch.Position = [160 207 45 20];
+            app.PhotonshotnoiseSwitch.Position = [160 228 45 20];
 
             % Create PhotonnumberSpinnerLabel
             app.PhotonnumberSpinnerLabel = uilabel(app.FluorophoreTab);
-            app.PhotonnumberSpinnerLabel.Position = [12 269 85 22];
+            app.PhotonnumberSpinnerLabel.Position = [12 290 85 22];
             app.PhotonnumberSpinnerLabel.Text = 'Photon number';
 
             % Create PhotonnumberSpinner
@@ -1418,31 +1445,31 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.PhotonnumberSpinner.ValueDisplayFormat = '%.0f';
             app.PhotonnumberSpinner.ValueChangedFcn = createCallbackFcn(app, @PhotonnumberSpinnerValueChanged, true);
             app.PhotonnumberSpinner.BusyAction = 'cancel';
-            app.PhotonnumberSpinner.Position = [133 269 100 22];
+            app.PhotonnumberSpinner.Position = [133 290 100 22];
             app.PhotonnumberSpinner.Value = 50000;
 
             % Create ReducedexcitationSwitchLabel
             app.ReducedexcitationSwitchLabel = uilabel(app.FluorophoreTab);
             app.ReducedexcitationSwitchLabel.Tooltip = {'Consider fluorophore dipole orientation when calculating emission intensity'};
-            app.ReducedexcitationSwitchLabel.Position = [12 236 108 22];
+            app.ReducedexcitationSwitchLabel.Position = [12 257 108 22];
             app.ReducedexcitationSwitchLabel.Text = 'Reduced excitation';
 
             % Create ReducedexcitationSwitch
             app.ReducedexcitationSwitch = uiswitch(app.FluorophoreTab, 'slider');
             app.ReducedexcitationSwitch.ValueChangedFcn = createCallbackFcn(app, @ReducedexcitationSwitchValueChanged, true);
             app.ReducedexcitationSwitch.BusyAction = 'cancel';
-            app.ReducedexcitationSwitch.Position = [160 237 45 20];
+            app.ReducedexcitationSwitch.Position = [160 258 45 20];
 
             % Create ConfiguremultiplefluorophoresButton
             app.ConfiguremultiplefluorophoresButton = uibutton(app.FluorophoreTab, 'push');
             app.ConfiguremultiplefluorophoresButton.ButtonPushedFcn = createCallbackFcn(app, @ConfiguremultiplefluorophoresButtonPushed, true);
             app.ConfiguremultiplefluorophoresButton.BusyAction = 'cancel';
-            app.ConfiguremultiplefluorophoresButton.Position = [407 126 182 22];
+            app.ConfiguremultiplefluorophoresButton.Position = [407 147 182 22];
             app.ConfiguremultiplefluorophoresButton.Text = 'Configure multiple fluorophores';
 
             % Create zpositionSpinnerLabel
             app.zpositionSpinnerLabel = uilabel(app.FluorophoreTab);
-            app.zpositionSpinnerLabel.Position = [12 172 57 22];
+            app.zpositionSpinnerLabel.Position = [12 193 57 22];
             app.zpositionSpinnerLabel.Text = 'z-position';
 
             % Create zpositionSpinner
@@ -1453,7 +1480,7 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.zpositionSpinner.ValueDisplayFormat = '%11.4g nm';
             app.zpositionSpinner.ValueChangedFcn = createCallbackFcn(app, @zpositionSpinnerValueChanged, true);
             app.zpositionSpinner.BusyAction = 'cancel';
-            app.zpositionSpinner.Position = [132 172 102 22];
+            app.zpositionSpinner.Position = [132 193 102 22];
 
             % Create theta
             app.theta = uieditfield(app.FluorophoreTab, 'numeric');
@@ -1461,7 +1488,7 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.theta.RoundFractionalValues = 'on';
             app.theta.ValueDisplayFormat = '%d°';
             app.theta.ValueChangedFcn = createCallbackFcn(app, @thetaValueChanged, true);
-            app.theta.Position = [303 85 47 22];
+            app.theta.Position = [303 106 47 22];
 
             % Create phi
             app.phi = uieditfield(app.FluorophoreTab, 'numeric');
@@ -1469,14 +1496,14 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.phi.RoundFractionalValues = 'on';
             app.phi.ValueDisplayFormat = '%d°';
             app.phi.ValueChangedFcn = createCallbackFcn(app, @phiValueChanged, true);
-            app.phi.Position = [303 36 47 22];
+            app.phi.Position = [303 57 47 22];
 
             % Create DipolerotationButtonGroup
             app.DipolerotationButtonGroup = uibuttongroup(app.FluorophoreTab);
             app.DipolerotationButtonGroup.SelectionChangedFcn = createCallbackFcn(app, @DipolerotationButtonGroupSelectionChanged, true);
             app.DipolerotationButtonGroup.BorderType = 'none';
             app.DipolerotationButtonGroup.BusyAction = 'cancel';
-            app.DipolerotationButtonGroup.Position = [126 121 162 30];
+            app.DipolerotationButtonGroup.Position = [126 142 162 30];
 
             % Create freelyrotatingButton
             app.freelyrotatingButton = uiradiobutton(app.DipolerotationButtonGroup);
@@ -1492,12 +1519,12 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
 
             % Create DipoleorientationLabel
             app.DipoleorientationLabel = uilabel(app.FluorophoreTab);
-            app.DipoleorientationLabel.Position = [12 126 98 22];
+            app.DipoleorientationLabel.Position = [12 147 98 22];
             app.DipoleorientationLabel.Text = 'Dipole orientation';
 
             % Create EmissionwavelengthSpinnerLabel
             app.EmissionwavelengthSpinnerLabel = uilabel(app.FluorophoreTab);
-            app.EmissionwavelengthSpinnerLabel.Position = [12 300 118 22];
+            app.EmissionwavelengthSpinnerLabel.Position = [12 321 118 22];
             app.EmissionwavelengthSpinnerLabel.Text = 'Emission wavelength';
 
             % Create EmissionWavelengthSpinner
@@ -1507,7 +1534,7 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.EmissionWavelengthSpinner.ValueDisplayFormat = '%11.4g nm';
             app.EmissionWavelengthSpinner.ValueChangedFcn = createCallbackFcn(app, @EmissionWavelengthSpinnerValueChanged, true);
             app.EmissionWavelengthSpinner.BusyAction = 'cancel';
-            app.EmissionWavelengthSpinner.Position = [133 300 100 22];
+            app.EmissionWavelengthSpinner.Position = [133 321 100 22];
             app.EmissionWavelengthSpinner.Value = 680;
 
             % Create MicroscopeRITab
@@ -1518,17 +1545,17 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.ObjectiveandtubelensLabel = uilabel(app.MicroscopeRITab);
             app.ObjectiveandtubelensLabel.FontSize = 13;
             app.ObjectiveandtubelensLabel.FontWeight = 'bold';
-            app.ObjectiveandtubelensLabel.Position = [16 324 151 22];
+            app.ObjectiveandtubelensLabel.Position = [16 345 151 22];
             app.ObjectiveandtubelensLabel.Text = 'Objective and tube lens';
 
             % Create ObjectiveNaLabel
             app.ObjectiveNaLabel = uilabel(app.MicroscopeRITab);
-            app.ObjectiveNaLabel.Position = [16 296 85 22];
+            app.ObjectiveNaLabel.Position = [16 317 85 22];
             app.ObjectiveNaLabel.Text = 'Objective NA';
 
             % Create DefocusSliderLabel
             app.DefocusSliderLabel = uilabel(app.MicroscopeRITab);
-            app.DefocusSliderLabel.Position = [16 225 50 22];
+            app.DefocusSliderLabel.Position = [16 246 50 22];
             app.DefocusSliderLabel.Text = 'Defocus';
 
             % Create DefocusSlider
@@ -1538,11 +1565,11 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.DefocusSlider.ValueChangedFcn = createCallbackFcn(app, @DefocusSliderValueChanged, true);
             app.DefocusSlider.ValueChangingFcn = createCallbackFcn(app, @DefocusSliderValueChanging, true);
             app.DefocusSlider.BusyAction = 'cancel';
-            app.DefocusSlider.Position = [129 234 178 3];
+            app.DefocusSlider.Position = [129 255 178 3];
 
             % Create ObjectiveNALabel
             app.ObjectiveNALabel = uilabel(app.MicroscopeRITab);
-            app.ObjectiveNALabel.Position = [16 296 85 22];
+            app.ObjectiveNALabel.Position = [16 317 85 22];
             app.ObjectiveNALabel.Text = '';
 
             % Create ObjectiveNaSpinner
@@ -1552,7 +1579,7 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.ObjectiveNaSpinner.Limits = [0.1 2];
             app.ObjectiveNaSpinner.ValueChangedFcn = createCallbackFcn(app, @ObjectiveNaSpinnerValueChanged, true);
             app.ObjectiveNaSpinner.BusyAction = 'cancel';
-            app.ObjectiveNaSpinner.Position = [152 296 77 22];
+            app.ObjectiveNaSpinner.Position = [152 317 77 22];
             app.ObjectiveNaSpinner.Value = 0.7;
 
             % Create FocusButton
@@ -1560,7 +1587,7 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.FocusButton.ButtonPushedFcn = createCallbackFcn(app, @FocusButtonPushed, true);
             app.FocusButton.BusyAction = 'cancel';
             app.FocusButton.Tooltip = {'Set the defocus value to 0nm'};
-            app.FocusButton.Position = [422 224 71 23];
+            app.FocusButton.Position = [422 245 71 23];
             app.FocusButton.Text = 'Focus';
 
             % Create defocus
@@ -1569,18 +1596,18 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.defocus.RoundFractionalValues = 'on';
             app.defocus.ValueDisplayFormat = '%11.4g nm';
             app.defocus.ValueChangedFcn = createCallbackFcn(app, @defocusValueChanged, true);
-            app.defocus.Position = [330 225 69 22];
+            app.defocus.Position = [330 246 69 22];
 
             % Create RefractiveindexLabel
             app.RefractiveindexLabel = uilabel(app.MicroscopeRITab);
             app.RefractiveindexLabel.FontSize = 13;
             app.RefractiveindexLabel.FontWeight = 'bold';
-            app.RefractiveindexLabel.Position = [12 157 116 22];
+            app.RefractiveindexLabel.Position = [12 178 116 22];
             app.RefractiveindexLabel.Text = 'Refractive indices';
 
             % Create RefractiveIndexSpecimenLabel
             app.RefractiveIndexSpecimenLabel = uilabel(app.MicroscopeRITab);
-            app.RefractiveIndexSpecimenLabel.Position = [12 102 85 22];
+            app.RefractiveIndexSpecimenLabel.Position = [12 123 85 22];
             app.RefractiveIndexSpecimenLabel.Text = 'RI Specimen';
 
             % Create RefractiveIndexSpecimenSpinner
@@ -1589,13 +1616,13 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.RefractiveIndexSpecimenSpinner.Limits = [1 5];
             app.RefractiveIndexSpecimenSpinner.ValueChangedFcn = createCallbackFcn(app, @RefractiveIndexSpecimenSpinnerValueChanged, true);
             app.RefractiveIndexSpecimenSpinner.BusyAction = 'cancel';
-            app.RefractiveIndexSpecimenSpinner.Position = [169 102 77 22];
+            app.RefractiveIndexSpecimenSpinner.Position = [169 123 77 22];
             app.RefractiveIndexSpecimenSpinner.Value = 1.33;
 
             % Create RefractiveIndexIntermediateLayerLabel
             app.RefractiveIndexIntermediateLayerLabel = uilabel(app.MicroscopeRITab);
             app.RefractiveIndexIntermediateLayerLabel.Visible = 'off';
-            app.RefractiveIndexIntermediateLayerLabel.Position = [12 46 116 22];
+            app.RefractiveIndexIntermediateLayerLabel.Position = [12 67 116 22];
             app.RefractiveIndexIntermediateLayerLabel.Text = 'RI Intermediate layer';
 
             % Create RefractiveIndexIntermediateLayerSpinner
@@ -1606,12 +1633,12 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.RefractiveIndexIntermediateLayerSpinner.ValueChangedFcn = createCallbackFcn(app, @RefractiveIndexIntermediateLayerSpinnerValueChanged, true);
             app.RefractiveIndexIntermediateLayerSpinner.BusyAction = 'cancel';
             app.RefractiveIndexIntermediateLayerSpinner.Visible = 'off';
-            app.RefractiveIndexIntermediateLayerSpinner.Position = [169 46 77 22];
+            app.RefractiveIndexIntermediateLayerSpinner.Position = [169 67 77 22];
             app.RefractiveIndexIntermediateLayerSpinner.Value = 1.46;
 
             % Create RefractiveIndexImmersionMediumLabel
             app.RefractiveIndexImmersionMediumLabel = uilabel(app.MicroscopeRITab);
-            app.RefractiveIndexImmersionMediumLabel.Position = [12 74 122 22];
+            app.RefractiveIndexImmersionMediumLabel.Position = [12 95 122 22];
             app.RefractiveIndexImmersionMediumLabel.Text = 'RI Immersion medium';
 
             % Create RefractiveIndexImmersionMediumSpinner
@@ -1621,13 +1648,13 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.RefractiveIndexImmersionMediumSpinner.Limits = [1 5];
             app.RefractiveIndexImmersionMediumSpinner.ValueChangedFcn = createCallbackFcn(app, @RefractiveIndexImmersionMediumSpinnerValueChanged, true);
             app.RefractiveIndexImmersionMediumSpinner.BusyAction = 'cancel';
-            app.RefractiveIndexImmersionMediumSpinner.Position = [169 74 77 22];
+            app.RefractiveIndexImmersionMediumSpinner.Position = [169 95 77 22];
             app.RefractiveIndexImmersionMediumSpinner.Value = 1;
 
             % Create MagnificationLabel
             app.MagnificationLabel = uilabel(app.MicroscopeRITab);
             app.MagnificationLabel.Tooltip = {'Magnification = Focal length tube lens / Focal length objective'};
-            app.MagnificationLabel.Position = [16 266 85 22];
+            app.MagnificationLabel.Position = [16 287 85 22];
             app.MagnificationLabel.Text = 'Magnification';
 
             % Create MagnificationSpinner
@@ -1637,19 +1664,19 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.MagnificationSpinner.ValueDisplayFormat = '%11.4gx';
             app.MagnificationSpinner.ValueChangedFcn = createCallbackFcn(app, @MagnificationSpinnerValueChanged, true);
             app.MagnificationSpinner.BusyAction = 'cancel';
-            app.MagnificationSpinner.Position = [152 266 77 22];
+            app.MagnificationSpinner.Position = [152 287 77 22];
             app.MagnificationSpinner.Value = 60;
 
             % Create AddintermediatelayerCheckBox
             app.AddintermediatelayerCheckBox = uicheckbox(app.MicroscopeRITab);
             app.AddintermediatelayerCheckBox.ValueChangedFcn = createCallbackFcn(app, @AddintermediatelayerCheckBoxValueChanged, true);
             app.AddintermediatelayerCheckBox.Text = 'Add intermediate layer';
-            app.AddintermediatelayerCheckBox.Position = [12 129 142 22];
+            app.AddintermediatelayerCheckBox.Position = [12 150 142 22];
 
             % Create IntermediateLayerThicknessLabel
             app.IntermediateLayerThicknessLabel = uilabel(app.MicroscopeRITab);
             app.IntermediateLayerThicknessLabel.Visible = 'off';
-            app.IntermediateLayerThicknessLabel.Position = [12 18 154 22];
+            app.IntermediateLayerThicknessLabel.Position = [12 39 154 22];
             app.IntermediateLayerThicknessLabel.Text = 'Intermediate layer thickness';
 
             % Create IntermediateLayerThicknessSpinner
@@ -1660,18 +1687,18 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.IntermediateLayerThicknessSpinner.ValueChangedFcn = createCallbackFcn(app, @IntermediateLayerThicknessSpinnerValueChanged, true);
             app.IntermediateLayerThicknessSpinner.BusyAction = 'cancel';
             app.IntermediateLayerThicknessSpinner.Visible = 'off';
-            app.IntermediateLayerThicknessSpinner.Position = [169 18 77 22];
+            app.IntermediateLayerThicknessSpinner.Position = [169 39 77 22];
 
             % Create CameraLabel
             app.CameraLabel = uilabel(app.MicroscopeRITab);
             app.CameraLabel.FontSize = 13;
             app.CameraLabel.FontWeight = 'bold';
-            app.CameraLabel.Position = [267 153 53 22];
+            app.CameraLabel.Position = [267 174 53 22];
             app.CameraLabel.Text = 'Camera';
 
             % Create BackgroundnoisestdSpinnerLabel
             app.BackgroundnoisestdSpinnerLabel = uilabel(app.MicroscopeRITab);
-            app.BackgroundnoisestdSpinnerLabel.Position = [267 69 129 22];
+            app.BackgroundnoisestdSpinnerLabel.Position = [267 90 129 22];
             app.BackgroundnoisestdSpinnerLabel.Text = 'Background noise (std)';
 
             % Create BackgroundnoisestdSpinner
@@ -1682,11 +1709,11 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.BackgroundnoisestdSpinner.ValueDisplayFormat = '%.0f';
             app.BackgroundnoisestdSpinner.ValueChangedFcn = createCallbackFcn(app, @BackgroundnoisestdSpinnerValueChanged, true);
             app.BackgroundnoisestdSpinner.BusyAction = 'cancel';
-            app.BackgroundnoisestdSpinner.Position = [403 69 90 22];
+            app.BackgroundnoisestdSpinner.Position = [403 90 90 22];
 
             % Create PixelsizephysicalSpinnerLabel
             app.PixelsizephysicalSpinnerLabel = uilabel(app.MicroscopeRITab);
-            app.PixelsizephysicalSpinnerLabel.Position = [267 124 110 22];
+            app.PixelsizephysicalSpinnerLabel.Position = [267 145 110 22];
             app.PixelsizephysicalSpinnerLabel.Text = 'Pixel size (physical)';
 
             % Create PixelsizePhysicalSpinner
@@ -1697,12 +1724,12 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.PixelsizePhysicalSpinner.ValueDisplayFormat = '%11.4g µm';
             app.PixelsizePhysicalSpinner.ValueChangedFcn = createCallbackFcn(app, @PixelsizePhysicalSpinnerValueChanged, true);
             app.PixelsizePhysicalSpinner.BusyAction = 'cancel';
-            app.PixelsizePhysicalSpinner.Position = [403 124 90 22];
+            app.PixelsizePhysicalSpinner.Position = [403 145 90 22];
             app.PixelsizePhysicalSpinner.Value = 6;
 
             % Create PixelsizeobjectspaceLabel
             app.PixelsizeobjectspaceLabel = uilabel(app.MicroscopeRITab);
-            app.PixelsizeobjectspaceLabel.Position = [267 95 134 22];
+            app.PixelsizeobjectspaceLabel.Position = [267 116 134 22];
             app.PixelsizeobjectspaceLabel.Text = 'Pixel size (object space)';
 
             % Create PixelsizeObjectSpaceSpinner
@@ -1712,12 +1739,12 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.PixelsizeObjectSpaceSpinner.ValueDisplayFormat = '%11.4g nm';
             app.PixelsizeObjectSpaceSpinner.ValueChangedFcn = createCallbackFcn(app, @PixelsizeObjectSpaceSpinnerValueChanged, true);
             app.PixelsizeObjectSpaceSpinner.BusyAction = 'cancel';
-            app.PixelsizeObjectSpaceSpinner.Position = [403 95 90 22];
+            app.PixelsizeObjectSpaceSpinner.Position = [403 116 90 22];
             app.PixelsizeObjectSpaceSpinner.Value = 100;
 
             % Create TubelensfocallengthLabel
             app.TubelensfocallengthLabel = uilabel(app.MicroscopeRITab);
-            app.TubelensfocallengthLabel.Position = [269 267 122 22];
+            app.TubelensfocallengthLabel.Position = [269 288 122 22];
             app.TubelensfocallengthLabel.Text = 'Tube lens focal length';
 
             % Create TubeLensFocalLengthSpinner
@@ -1726,12 +1753,12 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.TubeLensFocalLengthSpinner.ValueDisplayFormat = '%11.4g mm';
             app.TubeLensFocalLengthSpinner.ValueChangedFcn = createCallbackFcn(app, @TubeLensFocalLengthSpinnerValueChanged, true);
             app.TubeLensFocalLengthSpinner.BusyAction = 'cancel';
-            app.TubeLensFocalLengthSpinner.Position = [405 267 90 22];
+            app.TubeLensFocalLengthSpinner.Position = [405 288 90 22];
             app.TubeLensFocalLengthSpinner.Value = 180;
 
             % Create ObjectivefocallengthLabel
             app.ObjectivefocallengthLabel = uilabel(app.MicroscopeRITab);
-            app.ObjectivefocallengthLabel.Position = [269 296 120 22];
+            app.ObjectivefocallengthLabel.Position = [269 317 120 22];
             app.ObjectivefocallengthLabel.Text = 'Objective focal length';
 
             % Create ObjectiveFocalLengthSpinner
@@ -1740,7 +1767,7 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.ObjectiveFocalLengthSpinner.ValueDisplayFormat = '%11.4g mm';
             app.ObjectiveFocalLengthSpinner.ValueChangedFcn = createCallbackFcn(app, @ObjectiveFocalLengthSpinnerValueChanged, true);
             app.ObjectiveFocalLengthSpinner.BusyAction = 'cancel';
-            app.ObjectiveFocalLengthSpinner.Position = [405 296 90 22];
+            app.ObjectiveFocalLengthSpinner.Position = [405 317 90 22];
             app.ObjectiveFocalLengthSpinner.Value = 3;
 
             % Create AberrationsTab
@@ -1751,7 +1778,7 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.SpecifyZernikeaberrationsButtonGroup = uibuttongroup(app.AberrationsTab);
             app.SpecifyZernikeaberrationsButtonGroup.SelectionChangedFcn = createCallbackFcn(app, @SpecifyZernikeaberrationsButtonGroupSelectionChanged, true);
             app.SpecifyZernikeaberrationsButtonGroup.Title = 'Specify Zernike aberrations';
-            app.SpecifyZernikeaberrationsButtonGroup.Position = [12 91 588 233];
+            app.SpecifyZernikeaberrationsButtonGroup.Position = [12 112 588 233];
 
             % Create ZernikeCommonAberrationsButton
             app.ZernikeCommonAberrationsButton = uiradiobutton(app.SpecifyZernikeaberrationsButtonGroup);
@@ -1793,80 +1820,80 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.ZernikeaberrationsLabel = uilabel(app.AberrationsTab);
             app.ZernikeaberrationsLabel.FontSize = 13;
             app.ZernikeaberrationsLabel.FontWeight = 'bold';
-            app.ZernikeaberrationsLabel.Position = [16 331 126 22];
+            app.ZernikeaberrationsLabel.Position = [16 352 126 22];
             app.ZernikeaberrationsLabel.Text = 'Zernike aberrations';
 
             % Create ZernikeAberrationsShowplotCheckBox
             app.ZernikeAberrationsShowplotCheckBox = uicheckbox(app.AberrationsTab);
             app.ZernikeAberrationsShowplotCheckBox.ValueChangedFcn = createCallbackFcn(app, @ZernikeAberrationsShowplotCheckBoxValueChanged, true);
             app.ZernikeAberrationsShowplotCheckBox.Text = 'Show plot';
-            app.ZernikeAberrationsShowplotCheckBox.Position = [166 331 76 22];
+            app.ZernikeAberrationsShowplotCheckBox.Position = [166 352 76 22];
 
             % Create FitZernikeaberrationsLabel
             app.FitZernikeaberrationsLabel = uilabel(app.AberrationsTab);
             app.FitZernikeaberrationsLabel.FontSize = 13;
             app.FitZernikeaberrationsLabel.FontWeight = 'bold';
-            app.FitZernikeaberrationsLabel.Position = [16 55 145 22];
+            app.FitZernikeaberrationsLabel.Position = [16 76 145 22];
             app.FitZernikeaberrationsLabel.Text = 'Fit Zernike aberrations';
 
             % Create FitZernikeLabel
             app.FitZernikeLabel = uilabel(app.AberrationsTab);
-            app.FitZernikeLabel.Position = [16 25 291 22];
+            app.FitZernikeLabel.Position = [16 46 291 22];
             app.FitZernikeLabel.Text = 'Estimate Zernike coefficients from experimental data:';
 
             % Create FitZernikeButton
             app.FitZernikeButton = uibutton(app.AberrationsTab, 'push');
             app.FitZernikeButton.ButtonPushedFcn = createCallbackFcn(app, @FitZernikeButtonPushed, true);
-            app.FitZernikeButton.Position = [311 24 100 23];
+            app.FitZernikeButton.Position = [311 45 100 23];
             app.FitZernikeButton.Text = 'Fit Zernike';
 
             % Create HorizontalComaCheckBox
             app.HorizontalComaCheckBox = uicheckbox(app.AberrationsTab);
             app.HorizontalComaCheckBox.ValueChangedFcn = createCallbackFcn(app, @HorizontalComaCheckBoxValueChanged, true);
             app.HorizontalComaCheckBox.Text = 'Horizontal coma';
-            app.HorizontalComaCheckBox.Position = [337 176 128 22];
+            app.HorizontalComaCheckBox.Position = [337 197 128 22];
 
             % Create VerticalComaCheckBox
             app.VerticalComaCheckBox = uicheckbox(app.AberrationsTab);
             app.VerticalComaCheckBox.ValueChangedFcn = createCallbackFcn(app, @VerticalComaCheckBoxValueChanged, true);
             app.VerticalComaCheckBox.Text = 'Vertical coma';
-            app.VerticalComaCheckBox.Position = [337 199 128 22];
+            app.VerticalComaCheckBox.Position = [337 220 128 22];
 
             % Create VerticalAstigmatismCheckBox
             app.VerticalAstigmatismCheckBox = uicheckbox(app.AberrationsTab);
             app.VerticalAstigmatismCheckBox.ValueChangedFcn = createCallbackFcn(app, @VerticalAstigmatismCheckBoxValueChanged, true);
             app.VerticalAstigmatismCheckBox.Text = 'Vertical astigmatism';
-            app.VerticalAstigmatismCheckBox.Position = [337 222 128 22];
+            app.VerticalAstigmatismCheckBox.Position = [337 243 128 22];
 
             % Create ObliqueAstigmatismCheckBox
             app.ObliqueAstigmatismCheckBox = uicheckbox(app.AberrationsTab);
             app.ObliqueAstigmatismCheckBox.ValueChangedFcn = createCallbackFcn(app, @ObliqueAstigmatismCheckBoxValueChanged, true);
             app.ObliqueAstigmatismCheckBox.Text = 'Oblique astigmatism';
-            app.ObliqueAstigmatismCheckBox.Position = [337 245 128 22];
+            app.ObliqueAstigmatismCheckBox.Position = [337 266 128 22];
 
             % Create PrimarySphericalCheckBox
             app.PrimarySphericalCheckBox = uicheckbox(app.AberrationsTab);
             app.PrimarySphericalCheckBox.ValueChangedFcn = createCallbackFcn(app, @PrimarySphericalCheckBoxValueChanged, true);
             app.PrimarySphericalCheckBox.Text = 'Primary spherical';
-            app.PrimarySphericalCheckBox.Position = [42 174 128 22];
+            app.PrimarySphericalCheckBox.Position = [42 195 128 22];
 
             % Create DefocusCheckBox
             app.DefocusCheckBox = uicheckbox(app.AberrationsTab);
             app.DefocusCheckBox.ValueChangedFcn = createCallbackFcn(app, @DefocusCheckBoxValueChanged, true);
             app.DefocusCheckBox.Text = 'Defocus';
-            app.DefocusCheckBox.Position = [42 198 128 22];
+            app.DefocusCheckBox.Position = [42 219 128 22];
 
             % Create HorizontalTiltCheckBox
             app.HorizontalTiltCheckBox = uicheckbox(app.AberrationsTab);
             app.HorizontalTiltCheckBox.ValueChangedFcn = createCallbackFcn(app, @HorizontalTiltCheckBoxValueChanged, true);
             app.HorizontalTiltCheckBox.Text = 'Horizontal tilt';
-            app.HorizontalTiltCheckBox.Position = [42 222 128 22];
+            app.HorizontalTiltCheckBox.Position = [42 243 128 22];
 
             % Create WeightVerticalTiltSpinnerLabel
             app.WeightVerticalTiltSpinnerLabel = uilabel(app.AberrationsTab);
             app.WeightVerticalTiltSpinnerLabel.HorizontalAlignment = 'right';
             app.WeightVerticalTiltSpinnerLabel.Enable = 'off';
-            app.WeightVerticalTiltSpinnerLabel.Position = [171 246 25 22];
+            app.WeightVerticalTiltSpinnerLabel.Position = [171 267 25 22];
             app.WeightVerticalTiltSpinnerLabel.Text = 'w =';
 
             % Create WeightVerticalTiltSpinner
@@ -1876,19 +1903,19 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.WeightVerticalTiltSpinner.ValueChangedFcn = createCallbackFcn(app, @WeightVerticalTiltSpinnerValueChanged, true);
             app.WeightVerticalTiltSpinner.BusyAction = 'cancel';
             app.WeightVerticalTiltSpinner.Enable = 'off';
-            app.WeightVerticalTiltSpinner.Position = [201 246 67 22];
+            app.WeightVerticalTiltSpinner.Position = [201 267 67 22];
 
             % Create VerticalTiltCheckBox
             app.VerticalTiltCheckBox = uicheckbox(app.AberrationsTab);
             app.VerticalTiltCheckBox.ValueChangedFcn = createCallbackFcn(app, @VerticalTiltCheckBoxValueChanged, true);
             app.VerticalTiltCheckBox.Text = 'Vertical tilt';
-            app.VerticalTiltCheckBox.Position = [42 246 128 22];
+            app.VerticalTiltCheckBox.Position = [42 267 128 22];
 
             % Create WeightHorizontalTiltSpinnerLabel
             app.WeightHorizontalTiltSpinnerLabel = uilabel(app.AberrationsTab);
             app.WeightHorizontalTiltSpinnerLabel.HorizontalAlignment = 'right';
             app.WeightHorizontalTiltSpinnerLabel.Enable = 'off';
-            app.WeightHorizontalTiltSpinnerLabel.Position = [171 222 25 22];
+            app.WeightHorizontalTiltSpinnerLabel.Position = [171 243 25 22];
             app.WeightHorizontalTiltSpinnerLabel.Text = 'w =';
 
             % Create WeightHorizontalTiltSpinner
@@ -1898,13 +1925,13 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.WeightHorizontalTiltSpinner.ValueChangedFcn = createCallbackFcn(app, @WeightHorizontalTiltSpinnerValueChanged, true);
             app.WeightHorizontalTiltSpinner.BusyAction = 'cancel';
             app.WeightHorizontalTiltSpinner.Enable = 'off';
-            app.WeightHorizontalTiltSpinner.Position = [201 222 67 22];
+            app.WeightHorizontalTiltSpinner.Position = [201 243 67 22];
 
             % Create WeightDefocusSpinnerLabel
             app.WeightDefocusSpinnerLabel = uilabel(app.AberrationsTab);
             app.WeightDefocusSpinnerLabel.HorizontalAlignment = 'right';
             app.WeightDefocusSpinnerLabel.Enable = 'off';
-            app.WeightDefocusSpinnerLabel.Position = [171 198 25 22];
+            app.WeightDefocusSpinnerLabel.Position = [171 219 25 22];
             app.WeightDefocusSpinnerLabel.Text = 'w =';
 
             % Create WeightDefocusSpinner
@@ -1914,13 +1941,13 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.WeightDefocusSpinner.ValueChangedFcn = createCallbackFcn(app, @WeightDefocusSpinnerValueChanged, true);
             app.WeightDefocusSpinner.BusyAction = 'cancel';
             app.WeightDefocusSpinner.Enable = 'off';
-            app.WeightDefocusSpinner.Position = [201 198 67 22];
+            app.WeightDefocusSpinner.Position = [201 219 67 22];
 
             % Create WeightPrimarySphericalSpinnerLabel
             app.WeightPrimarySphericalSpinnerLabel = uilabel(app.AberrationsTab);
             app.WeightPrimarySphericalSpinnerLabel.HorizontalAlignment = 'right';
             app.WeightPrimarySphericalSpinnerLabel.Enable = 'off';
-            app.WeightPrimarySphericalSpinnerLabel.Position = [171 174 25 22];
+            app.WeightPrimarySphericalSpinnerLabel.Position = [171 195 25 22];
             app.WeightPrimarySphericalSpinnerLabel.Text = 'w =';
 
             % Create WeightPrimarySphericalSpinner
@@ -1930,13 +1957,13 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.WeightPrimarySphericalSpinner.ValueChangedFcn = createCallbackFcn(app, @WeightPrimarySphericalSpinnerValueChanged, true);
             app.WeightPrimarySphericalSpinner.BusyAction = 'cancel';
             app.WeightPrimarySphericalSpinner.Enable = 'off';
-            app.WeightPrimarySphericalSpinner.Position = [201 174 67 22];
+            app.WeightPrimarySphericalSpinner.Position = [201 195 67 22];
 
             % Create WeightObliqueAstigmatismSpinnerLabel
             app.WeightObliqueAstigmatismSpinnerLabel = uilabel(app.AberrationsTab);
             app.WeightObliqueAstigmatismSpinnerLabel.HorizontalAlignment = 'right';
             app.WeightObliqueAstigmatismSpinnerLabel.Enable = 'off';
-            app.WeightObliqueAstigmatismSpinnerLabel.Position = [485 245 25 22];
+            app.WeightObliqueAstigmatismSpinnerLabel.Position = [485 266 25 22];
             app.WeightObliqueAstigmatismSpinnerLabel.Text = 'w =';
 
             % Create WeightObliqueAstigmatismSpinner
@@ -1946,13 +1973,13 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.WeightObliqueAstigmatismSpinner.ValueChangedFcn = createCallbackFcn(app, @WeightObliqueAstigmatismSpinnerValueChanged, true);
             app.WeightObliqueAstigmatismSpinner.BusyAction = 'cancel';
             app.WeightObliqueAstigmatismSpinner.Enable = 'off';
-            app.WeightObliqueAstigmatismSpinner.Position = [515 245 67 22];
+            app.WeightObliqueAstigmatismSpinner.Position = [515 266 67 22];
 
             % Create WeightVerticalAstigmatismSpinnerLabel
             app.WeightVerticalAstigmatismSpinnerLabel = uilabel(app.AberrationsTab);
             app.WeightVerticalAstigmatismSpinnerLabel.HorizontalAlignment = 'right';
             app.WeightVerticalAstigmatismSpinnerLabel.Enable = 'off';
-            app.WeightVerticalAstigmatismSpinnerLabel.Position = [485 222 25 22];
+            app.WeightVerticalAstigmatismSpinnerLabel.Position = [485 243 25 22];
             app.WeightVerticalAstigmatismSpinnerLabel.Text = 'w =';
 
             % Create WeightVerticalAstigmatismSpinner
@@ -1962,13 +1989,13 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.WeightVerticalAstigmatismSpinner.ValueChangedFcn = createCallbackFcn(app, @WeightVerticalAstigmatismSpinnerValueChanged, true);
             app.WeightVerticalAstigmatismSpinner.BusyAction = 'cancel';
             app.WeightVerticalAstigmatismSpinner.Enable = 'off';
-            app.WeightVerticalAstigmatismSpinner.Position = [515 222 67 22];
+            app.WeightVerticalAstigmatismSpinner.Position = [515 243 67 22];
 
             % Create WeightVerticalComaSpinnerLabel
             app.WeightVerticalComaSpinnerLabel = uilabel(app.AberrationsTab);
             app.WeightVerticalComaSpinnerLabel.HorizontalAlignment = 'right';
             app.WeightVerticalComaSpinnerLabel.Enable = 'off';
-            app.WeightVerticalComaSpinnerLabel.Position = [485 199 25 22];
+            app.WeightVerticalComaSpinnerLabel.Position = [485 220 25 22];
             app.WeightVerticalComaSpinnerLabel.Text = 'w =';
 
             % Create WeightVerticalComaSpinner
@@ -1978,13 +2005,13 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.WeightVerticalComaSpinner.ValueChangedFcn = createCallbackFcn(app, @WeightVerticalComaSpinnerValueChanged, true);
             app.WeightVerticalComaSpinner.BusyAction = 'cancel';
             app.WeightVerticalComaSpinner.Enable = 'off';
-            app.WeightVerticalComaSpinner.Position = [515 199 67 22];
+            app.WeightVerticalComaSpinner.Position = [515 220 67 22];
 
             % Create WeightHorizontalComaSpinnerLabel
             app.WeightHorizontalComaSpinnerLabel = uilabel(app.AberrationsTab);
             app.WeightHorizontalComaSpinnerLabel.HorizontalAlignment = 'right';
             app.WeightHorizontalComaSpinnerLabel.Enable = 'off';
-            app.WeightHorizontalComaSpinnerLabel.Position = [485 176 25 22];
+            app.WeightHorizontalComaSpinnerLabel.Position = [485 197 25 22];
             app.WeightHorizontalComaSpinnerLabel.Text = 'w =';
 
             % Create WeightHorizontalComaSpinner
@@ -1994,7 +2021,7 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.WeightHorizontalComaSpinner.ValueChangedFcn = createCallbackFcn(app, @WeightHorizontalComaSpinnerValueChanged, true);
             app.WeightHorizontalComaSpinner.BusyAction = 'cancel';
             app.WeightHorizontalComaSpinner.Enable = 'off';
-            app.WeightHorizontalComaSpinner.Position = [515 176 67 22];
+            app.WeightHorizontalComaSpinner.Position = [515 197 67 22];
 
             % Create PhasemaskTab
             app.PhasemaskTab = uitab(app.TabGroup);
@@ -2004,12 +2031,12 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.PhasemaskLabel = uilabel(app.PhasemaskTab);
             app.PhasemaskLabel.FontSize = 13;
             app.PhasemaskLabel.FontWeight = 'bold';
-            app.PhasemaskLabel.Position = [16 331 81 22];
+            app.PhasemaskLabel.Position = [16 352 81 22];
             app.PhasemaskLabel.Text = 'Phase mask';
 
             % Create BFPmanipulationDropDownLabel
             app.BFPmanipulationDropDownLabel = uilabel(app.PhasemaskTab);
-            app.BFPmanipulationDropDownLabel.Position = [16 294 101 22];
+            app.BFPmanipulationDropDownLabel.Position = [16 315 101 22];
             app.BFPmanipulationDropDownLabel.Text = 'BFP manipulation';
 
             % Create BFPmanipulationDropDown
@@ -2018,13 +2045,13 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.BFPmanipulationDropDown.ItemsData = {'none', 'Astigmatism', 'Vortex', 'Sector', 'OpposingSectors', 'Pyramid', 'DoubleHelix', 'Custom'};
             app.BFPmanipulationDropDown.ValueChangedFcn = createCallbackFcn(app, @BFPmanipulationDropDownValueChanged, true);
             app.BFPmanipulationDropDown.BusyAction = 'cancel';
-            app.BFPmanipulationDropDown.Position = [136 294 150 22];
+            app.BFPmanipulationDropDown.Position = [136 315 150 22];
             app.BFPmanipulationDropDown.Value = 'none';
 
             % Create InnerringradiusSliderLabel
             app.InnerringradiusSliderLabel = uilabel(app.PhasemaskTab);
             app.InnerringradiusSliderLabel.Visible = 'off';
-            app.InnerringradiusSliderLabel.Position = [16 218 92 22];
+            app.InnerringradiusSliderLabel.Position = [16 239 92 22];
             app.InnerringradiusSliderLabel.Text = 'Inner ring radius';
 
             % Create InnerringradiusSlider
@@ -2034,12 +2061,12 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.InnerringradiusSlider.ValueChangingFcn = createCallbackFcn(app, @InnerringradiusSliderValueChanging, true);
             app.InnerringradiusSlider.BusyAction = 'cancel';
             app.InnerringradiusSlider.Visible = 'off';
-            app.InnerringradiusSlider.Position = [136 227 150 3];
+            app.InnerringradiusSlider.Position = [136 248 150 3];
 
             % Create RotatephasemaskSliderLabel
             app.RotatephasemaskSliderLabel = uilabel(app.PhasemaskTab);
             app.RotatephasemaskSliderLabel.Visible = 'off';
-            app.RotatephasemaskSliderLabel.Position = [16 165 109 22];
+            app.RotatephasemaskSliderLabel.Position = [16 186 109 22];
             app.RotatephasemaskSliderLabel.Text = 'Rotate phase mask';
 
             % Create RotatephasemaskSlider
@@ -2049,12 +2076,12 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.RotatephasemaskSlider.ValueChangingFcn = createCallbackFcn(app, @RotatephasemaskSliderValueChanging, true);
             app.RotatephasemaskSlider.BusyAction = 'cancel';
             app.RotatephasemaskSlider.Visible = 'off';
-            app.RotatephasemaskSlider.Position = [136 174 150 3];
+            app.RotatephasemaskSlider.Position = [136 195 150 3];
 
             % Create SectorSliderLabel
             app.SectorSliderLabel = uilabel(app.PhasemaskTab);
             app.SectorSliderLabel.Visible = 'off';
-            app.SectorSliderLabel.Position = [16 104 40 22];
+            app.SectorSliderLabel.Position = [16 125 40 22];
             app.SectorSliderLabel.Text = 'Sector';
 
             % Create SectorSlider
@@ -2064,7 +2091,7 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.SectorSlider.ValueChangingFcn = createCallbackFcn(app, @SectorSliderValueChanging, true);
             app.SectorSlider.BusyAction = 'cancel';
             app.SectorSlider.Visible = 'off';
-            app.SectorSlider.Position = [136 119 150 3];
+            app.SectorSlider.Position = [136 140 150 3];
             app.SectorSlider.Value = 180;
 
             % Create PhaseMaskOptionsLabel
@@ -2072,13 +2099,13 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.PhaseMaskOptionsLabel.FontSize = 13;
             app.PhaseMaskOptionsLabel.FontWeight = 'bold';
             app.PhaseMaskOptionsLabel.Visible = 'off';
-            app.PhaseMaskOptionsLabel.Position = [16 246 55 22];
+            app.PhaseMaskOptionsLabel.Position = [16 267 55 22];
             app.PhaseMaskOptionsLabel.Text = 'Options';
 
             % Create NumberfacetsSpinnerLabel
             app.NumberfacetsSpinnerLabel = uilabel(app.PhasemaskTab);
             app.NumberfacetsSpinnerLabel.Visible = 'off';
-            app.NumberfacetsSpinnerLabel.Position = [16 103 92 22];
+            app.NumberfacetsSpinnerLabel.Position = [16 124 92 22];
             app.NumberfacetsSpinnerLabel.Text = 'Number facets';
 
             % Create NumberfacetsSpinner
@@ -2089,14 +2116,14 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.NumberfacetsSpinner.ValueChangedFcn = createCallbackFcn(app, @NumberfacetsSpinnerValueChanged, true);
             app.NumberfacetsSpinner.BusyAction = 'cancel';
             app.NumberfacetsSpinner.Visible = 'off';
-            app.NumberfacetsSpinner.Position = [136 102 56 22];
+            app.NumberfacetsSpinner.Position = [136 123 56 22];
             app.NumberfacetsSpinner.Value = 2;
 
             % Create MaxShiftSliderLabel
             app.MaxShiftSliderLabel = uilabel(app.PhasemaskTab);
             app.MaxShiftSliderLabel.HorizontalAlignment = 'right';
             app.MaxShiftSliderLabel.Visible = 'off';
-            app.MaxShiftSliderLabel.Position = [12 69 59 22];
+            app.MaxShiftSliderLabel.Position = [12 90 59 22];
             app.MaxShiftSliderLabel.Text = 'Max. Shift';
 
             % Create MaxShiftSlider
@@ -2107,26 +2134,26 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.MaxShiftSlider.ValueChangedFcn = createCallbackFcn(app, @MaxShiftSliderValueChanged, true);
             app.MaxShiftSlider.ValueChangingFcn = createCallbackFcn(app, @MaxShiftSliderValueChanging, true);
             app.MaxShiftSlider.Visible = 'off';
-            app.MaxShiftSlider.Position = [136 79 101 3];
+            app.MaxShiftSlider.Position = [136 100 101 3];
             app.MaxShiftSlider.Value = 6.28318530717959;
 
             % Create PhaseMaskShowplotCheckBox
             app.PhaseMaskShowplotCheckBox = uicheckbox(app.PhasemaskTab);
             app.PhaseMaskShowplotCheckBox.ValueChangedFcn = createCallbackFcn(app, @PhaseMaskShowplotCheckBoxValueChanged, true);
             app.PhaseMaskShowplotCheckBox.Text = 'Show plot';
-            app.PhaseMaskShowplotCheckBox.Position = [120 331 76 22];
+            app.PhaseMaskShowplotCheckBox.Position = [120 352 76 22];
 
             % Create LoadCustomPhaseMaskButton
             app.LoadCustomPhaseMaskButton = uibutton(app.PhasemaskTab, 'push');
             app.LoadCustomPhaseMaskButton.ButtonPushedFcn = createCallbackFcn(app, @LoadCustomPhaseMaskButtonPushed, true);
             app.LoadCustomPhaseMaskButton.Visible = 'off';
-            app.LoadCustomPhaseMaskButton.Position = [301 294 114 23];
+            app.LoadCustomPhaseMaskButton.Position = [301 315 114 23];
             app.LoadCustomPhaseMaskButton.Text = 'Load phase mask';
 
             % Create PhaseMaskFilepathLabel
             app.PhaseMaskFilepathLabel = uilabel(app.PhasemaskTab);
             app.PhaseMaskFilepathLabel.Visible = 'off';
-            app.PhaseMaskFilepathLabel.Position = [136 262 352 22];
+            app.PhaseMaskFilepathLabel.Position = [136 283 352 22];
             app.PhaseMaskFilepathLabel.Text = '';
 
             % Create TransmissionTab
@@ -2137,18 +2164,18 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.TransmissionLabel = uilabel(app.TransmissionTab);
             app.TransmissionLabel.FontSize = 13;
             app.TransmissionLabel.FontWeight = 'bold';
-            app.TransmissionLabel.Position = [16 331 115 22];
+            app.TransmissionLabel.Position = [16 352 115 22];
             app.TransmissionLabel.Text = 'Transmission';
 
             % Create TransmissionMaskShowplotCheckBox
             app.TransmissionMaskShowplotCheckBox = uicheckbox(app.TransmissionTab);
             app.TransmissionMaskShowplotCheckBox.ValueChangedFcn = createCallbackFcn(app, @TransmissionMaskShowplotCheckBoxValueChanged, true);
             app.TransmissionMaskShowplotCheckBox.Text = 'Show plot';
-            app.TransmissionMaskShowplotCheckBox.Position = [146 331 76 22];
+            app.TransmissionMaskShowplotCheckBox.Position = [146 352 76 22];
 
             % Create TransmissionmaskDropDownLabel
             app.TransmissionmaskDropDownLabel = uilabel(app.TransmissionTab);
-            app.TransmissionmaskDropDownLabel.Position = [16 294 108 22];
+            app.TransmissionmaskDropDownLabel.Position = [16 315 108 22];
             app.TransmissionmaskDropDownLabel.Text = 'Transmission mask';
 
             % Create TransmissionmaskDropDown
@@ -2157,33 +2184,33 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.TransmissionmaskDropDown.ItemsData = {'none', 'Custom'};
             app.TransmissionmaskDropDown.ValueChangedFcn = createCallbackFcn(app, @TransmissionmaskDropDownValueChanged, true);
             app.TransmissionmaskDropDown.BusyAction = 'cancel';
-            app.TransmissionmaskDropDown.Position = [146 294 145 22];
+            app.TransmissionmaskDropDown.Position = [146 315 145 22];
             app.TransmissionmaskDropDown.Value = 'none';
 
             % Create LoadCustomTransmissionMaskButton
             app.LoadCustomTransmissionMaskButton = uibutton(app.TransmissionTab, 'push');
             app.LoadCustomTransmissionMaskButton.ButtonPushedFcn = createCallbackFcn(app, @LoadCustomTransmissionMaskButtonPushed, true);
             app.LoadCustomTransmissionMaskButton.Visible = 'off';
-            app.LoadCustomTransmissionMaskButton.Position = [300 294 144 23];
+            app.LoadCustomTransmissionMaskButton.Position = [300 315 144 23];
             app.LoadCustomTransmissionMaskButton.Text = 'Load transmission mask';
 
             % Create TransmissionMaskFilepathLabel
             app.TransmissionMaskFilepathLabel = uilabel(app.TransmissionTab);
             app.TransmissionMaskFilepathLabel.Visible = 'off';
-            app.TransmissionMaskFilepathLabel.Position = [146 262 352 22];
+            app.TransmissionMaskFilepathLabel.Position = [146 283 352 22];
             app.TransmissionMaskFilepathLabel.Text = '';
 
-            % Create PlotoptionsTab
-            app.PlotoptionsTab = uitab(app.TabGroup);
-            app.PlotoptionsTab.Title = 'Plot options';
-            app.PlotoptionsTab.BusyAction = 'cancel';
+            % Create OptionsTab
+            app.OptionsTab = uitab(app.TabGroup);
+            app.OptionsTab.Title = 'Options';
+            app.OptionsTab.BusyAction = 'cancel';
 
             % Create SetcontrastButtonGroup
-            app.SetcontrastButtonGroup = uibuttongroup(app.PlotoptionsTab);
+            app.SetcontrastButtonGroup = uibuttongroup(app.OptionsTab);
             app.SetcontrastButtonGroup.SelectionChangedFcn = createCallbackFcn(app, @SetcontrastButtonGroupSelectionChanged, true);
             app.SetcontrastButtonGroup.BorderType = 'none';
             app.SetcontrastButtonGroup.BusyAction = 'cancel';
-            app.SetcontrastButtonGroup.Position = [80 110 266 38];
+            app.SetcontrastButtonGroup.Position = [80 131 266 38];
 
             % Create IntensitylimitsButton
             app.IntensitylimitsButton = uiradiobutton(app.SetcontrastButtonGroup);
@@ -2200,116 +2227,116 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.OptimizecontrastButton.Position = [126 11 127 22];
 
             % Create ColormapDropDownLabel
-            app.ColormapDropDownLabel = uilabel(app.PlotoptionsTab);
-            app.ColormapDropDownLabel.Position = [16 156 58 22];
+            app.ColormapDropDownLabel = uilabel(app.OptionsTab);
+            app.ColormapDropDownLabel.Position = [16 177 58 22];
             app.ColormapDropDownLabel.Text = 'Colormap';
 
             % Create ColormapDropDown
-            app.ColormapDropDown = uidropdown(app.PlotoptionsTab);
+            app.ColormapDropDown = uidropdown(app.OptionsTab);
             app.ColormapDropDown.Items = {'viridis', 'gray', 'parula', 'hot', 'jet', 'turbo'};
             app.ColormapDropDown.ValueChangedFcn = createCallbackFcn(app, @ColormapDropDownValueChanged, true);
             app.ColormapDropDown.BusyAction = 'cancel';
-            app.ColormapDropDown.Position = [88 156 117 22];
+            app.ColormapDropDown.Position = [88 177 117 22];
             app.ColormapDropDown.Value = 'viridis';
 
             % Create ROIsidelengthEditFieldLabel
-            app.ROIsidelengthEditFieldLabel = uilabel(app.PlotoptionsTab);
+            app.ROIsidelengthEditFieldLabel = uilabel(app.OptionsTab);
             app.ROIsidelengthEditFieldLabel.BusyAction = 'cancel';
             app.ROIsidelengthEditFieldLabel.Tooltip = {''};
-            app.ROIsidelengthEditFieldLabel.Position = [16 85 88 22];
+            app.ROIsidelengthEditFieldLabel.Position = [16 106 88 22];
             app.ROIsidelengthEditFieldLabel.Text = 'ROI side length';
 
             % Create ROIsidelengthEditField
-            app.ROIsidelengthEditField = uieditfield(app.PlotoptionsTab, 'numeric');
+            app.ROIsidelengthEditField = uieditfield(app.OptionsTab, 'numeric');
             app.ROIsidelengthEditField.Limits = [0 11];
             app.ROIsidelengthEditField.ValueDisplayFormat = '%11.4g µm';
             app.ROIsidelengthEditField.ValueChangedFcn = createCallbackFcn(app, @ROIsidelengthEditFieldValueChanged, true);
             app.ROIsidelengthEditField.BusyAction = 'cancel';
             app.ROIsidelengthEditField.Tooltip = {''};
-            app.ROIsidelengthEditField.Position = [141 85 64 22];
+            app.ROIsidelengthEditField.Position = [141 106 64 22];
             app.ROIsidelengthEditField.Value = 2.5;
 
             % Create PolarizedemissionchannelsCheckBox
-            app.PolarizedemissionchannelsCheckBox = uicheckbox(app.PlotoptionsTab);
+            app.PolarizedemissionchannelsCheckBox = uicheckbox(app.OptionsTab);
             app.PolarizedemissionchannelsCheckBox.ValueChangedFcn = createCallbackFcn(app, @PolarizedemissionchannelsCheckBoxValueChanged, true);
             app.PolarizedemissionchannelsCheckBox.BusyAction = 'cancel';
             app.PolarizedemissionchannelsCheckBox.Tooltip = {'Note: Polarized emission images are shown without background or shot noise.'};
             app.PolarizedemissionchannelsCheckBox.Text = 'Polarized emission channels';
-            app.PolarizedemissionchannelsCheckBox.Position = [16 226 199 22];
+            app.PolarizedemissionchannelsCheckBox.Position = [16 247 199 22];
 
             % Create ShowPSFCheckBox
-            app.ShowPSFCheckBox = uicheckbox(app.PlotoptionsTab);
+            app.ShowPSFCheckBox = uicheckbox(app.OptionsTab);
             app.ShowPSFCheckBox.ValueChangedFcn = createCallbackFcn(app, @ShowPSFCheckBoxValueChanged, true);
             app.ShowPSFCheckBox.BusyAction = 'cancel';
             app.ShowPSFCheckBox.Text = 'Point spread function';
-            app.ShowPSFCheckBox.Position = [16 299 135 22];
+            app.ShowPSFCheckBox.Position = [16 320 135 22];
             app.ShowPSFCheckBox.Value = true;
 
             % Create WindowselectionLabel
-            app.WindowselectionLabel = uilabel(app.PlotoptionsTab);
+            app.WindowselectionLabel = uilabel(app.OptionsTab);
             app.WindowselectionLabel.FontSize = 13;
             app.WindowselectionLabel.FontWeight = 'bold';
             app.WindowselectionLabel.Tooltip = {'Select which windows are shown'};
-            app.WindowselectionLabel.Position = [16 331 115 22];
+            app.WindowselectionLabel.Position = [16 352 115 22];
             app.WindowselectionLabel.Text = 'Window selection';
 
             % Create OptionsLabel
-            app.OptionsLabel = uilabel(app.PlotoptionsTab);
+            app.OptionsLabel = uilabel(app.OptionsTab);
             app.OptionsLabel.FontSize = 13;
             app.OptionsLabel.FontWeight = 'bold';
             app.OptionsLabel.Tooltip = {'Select which windows are shown'};
-            app.OptionsLabel.Position = [16 187 54 22];
+            app.OptionsLabel.Position = [16 208 54 22];
             app.OptionsLabel.Text = 'Options';
 
             % Create ContrastLabel
-            app.ContrastLabel = uilabel(app.PlotoptionsTab);
-            app.ContrastLabel.Position = [16 120 50 22];
+            app.ContrastLabel = uilabel(app.OptionsTab);
+            app.ContrastLabel.Position = [16 141 50 22];
             app.ContrastLabel.Text = 'Contrast';
 
             % Create PixelsperlateralaxisEditFieldLabel
-            app.PixelsperlateralaxisEditFieldLabel = uilabel(app.PlotoptionsTab);
+            app.PixelsperlateralaxisEditFieldLabel = uilabel(app.OptionsTab);
             app.PixelsperlateralaxisEditFieldLabel.BusyAction = 'cancel';
             app.PixelsperlateralaxisEditFieldLabel.Tooltip = {''};
-            app.PixelsperlateralaxisEditFieldLabel.Position = [16 55 118 22];
+            app.PixelsperlateralaxisEditFieldLabel.Position = [16 76 118 22];
             app.PixelsperlateralaxisEditFieldLabel.Text = 'Pixels per lateral axis';
 
             % Create PixelsperlateralaxisEditField
-            app.PixelsperlateralaxisEditField = uieditfield(app.PlotoptionsTab, 'numeric');
+            app.PixelsperlateralaxisEditField = uieditfield(app.OptionsTab, 'numeric');
             app.PixelsperlateralaxisEditField.Limits = [1 1000];
             app.PixelsperlateralaxisEditField.RoundFractionalValues = 'on';
             app.PixelsperlateralaxisEditField.ValueDisplayFormat = '%5d';
             app.PixelsperlateralaxisEditField.ValueChangedFcn = createCallbackFcn(app, @PixelsperlateralaxisEditFieldValueChanged, true);
             app.PixelsperlateralaxisEditField.BusyAction = 'cancel';
             app.PixelsperlateralaxisEditField.Tooltip = {''};
-            app.PixelsperlateralaxisEditField.Position = [141 55 64 22];
+            app.PixelsperlateralaxisEditField.Position = [141 76 64 22];
             app.PixelsperlateralaxisEditField.Value = 25;
 
             % Create ShowPsf3DCheckBox
-            app.ShowPsf3DCheckBox = uicheckbox(app.PlotoptionsTab);
+            app.ShowPsf3DCheckBox = uicheckbox(app.OptionsTab);
             app.ShowPsf3DCheckBox.ValueChangedFcn = createCallbackFcn(app, @ShowPsf3DCheckBoxValueChanged, true);
             app.ShowPsf3DCheckBox.BusyAction = 'cancel';
             app.ShowPsf3DCheckBox.Text = '3D';
-            app.ShowPsf3DCheckBox.Position = [36 256 37 22];
+            app.ShowPsf3DCheckBox.Position = [36 277 37 22];
 
             % Create ShowPsf2DCheckBox
-            app.ShowPsf2DCheckBox = uicheckbox(app.PlotoptionsTab);
+            app.ShowPsf2DCheckBox = uicheckbox(app.OptionsTab);
             app.ShowPsf2DCheckBox.ValueChangedFcn = createCallbackFcn(app, @ShowPsf2DCheckBoxValueChanged, true);
             app.ShowPsf2DCheckBox.BusyAction = 'cancel';
             app.ShowPsf2DCheckBox.Text = '2D';
-            app.ShowPsf2DCheckBox.Position = [36 277 37 22];
+            app.ShowPsf2DCheckBox.Position = [36 298 37 22];
             app.ShowPsf2DCheckBox.Value = true;
 
             % Create NumberstepsEditFieldLabel
-            app.NumberstepsEditFieldLabel = uilabel(app.PlotoptionsTab);
+            app.NumberstepsEditFieldLabel = uilabel(app.OptionsTab);
             app.NumberstepsEditFieldLabel.BusyAction = 'cancel';
             app.NumberstepsEditFieldLabel.Enable = 'off';
             app.NumberstepsEditFieldLabel.Visible = 'off';
             app.NumberstepsEditFieldLabel.Tooltip = {''};
-            app.NumberstepsEditFieldLabel.Position = [120 256 80 22];
+            app.NumberstepsEditFieldLabel.Position = [120 277 80 22];
             app.NumberstepsEditFieldLabel.Text = 'Number steps';
 
             % Create NumberstepsEditField
-            app.NumberstepsEditField = uieditfield(app.PlotoptionsTab, 'numeric');
+            app.NumberstepsEditField = uieditfield(app.OptionsTab, 'numeric');
             app.NumberstepsEditField.Limits = [1 1000];
             app.NumberstepsEditField.RoundFractionalValues = 'on';
             app.NumberstepsEditField.ValueDisplayFormat = '%5d';
@@ -2318,33 +2345,44 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.NumberstepsEditField.Enable = 'off';
             app.NumberstepsEditField.Visible = 'off';
             app.NumberstepsEditField.Tooltip = {''};
-            app.NumberstepsEditField.Position = [210 256 36 22];
+            app.NumberstepsEditField.Position = [210 277 36 22];
             app.NumberstepsEditField.Value = 25;
 
             % Create StepsizeEditFieldLabel
-            app.StepsizeEditFieldLabel = uilabel(app.PlotoptionsTab);
+            app.StepsizeEditFieldLabel = uilabel(app.OptionsTab);
             app.StepsizeEditFieldLabel.BusyAction = 'cancel';
             app.StepsizeEditFieldLabel.Enable = 'off';
             app.StepsizeEditFieldLabel.Visible = 'off';
             app.StepsizeEditFieldLabel.Tooltip = {''};
-            app.StepsizeEditFieldLabel.Position = [270 256 58 22];
+            app.StepsizeEditFieldLabel.Position = [270 277 58 22];
             app.StepsizeEditFieldLabel.Text = 'Step size';
 
             % Create StepsizeEditField
-            app.StepsizeEditField = uieditfield(app.PlotoptionsTab, 'numeric');
+            app.StepsizeEditField = uieditfield(app.OptionsTab, 'numeric');
             app.StepsizeEditField.Limits = [0 Inf];
             app.StepsizeEditField.ValueDisplayFormat = '%11.4g nm';
             app.StepsizeEditField.ValueChangedFcn = createCallbackFcn(app, @StepsizeEditFieldValueChanged, true);
             app.StepsizeEditField.BusyAction = 'cancel';
             app.StepsizeEditField.Enable = 'off';
             app.StepsizeEditField.Visible = 'off';
-            app.StepsizeEditField.Position = [336 256 68 22];
+            app.StepsizeEditField.Position = [336 277 68 22];
             app.StepsizeEditField.Value = 100;
+
+            % Create CalculateCramrRaoBoundCheckBox
+            app.CalculateCramrRaoBoundCheckBox = uicheckbox(app.OptionsTab);
+            app.CalculateCramrRaoBoundCheckBox.ValueChangedFcn = createCallbackFcn(app, @CalculateCramrRaoBoundCheckBoxValueChanged, true);
+            app.CalculateCramrRaoBoundCheckBox.Text = 'Calculate Cramér Rao Bound';
+            app.CalculateCramrRaoBoundCheckBox.Position = [376 174 179 22];
+
+            % Create CRBOutputField
+            app.CRBOutputField = uilabel(app.OptionsTab);
+            app.CRBOutputField.Position = [390 111 181 59];
+            app.CRBOutputField.Text = '';
 
             % Create CalculatingLamp
             app.CalculatingLamp = uilamp(app.PSFsimulationUIFigure);
             app.CalculatingLamp.Interruptible = 'off';
-            app.CalculatingLamp.Position = [602 412 20 20];
+            app.CalculatingLamp.Position = [602 435 20 20];
 
             % Show the figure after all components are created
             app.PSFsimulationUIFigure.Visible = 'on';
