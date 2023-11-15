@@ -2,7 +2,11 @@ function CRB = calculateCRB(obj)
     % Calculate Cramer Rao bounds for the estimation of 3D position 
     % output is Length object 
     par = obj.readParameters;
-    psf = obj.image; 
+    par.shotNoise = 0; % set shotnoise to 0 for CRB calculation
+
+    psf = PSF(par); % recalculate psf 
+   
+    psf = psf.image+1e-10; % add small number for numerical stability  
 
     % we only calculate the CRB from one z slice 
     if numel(par.defocus)>1
@@ -10,12 +14,17 @@ function CRB = calculateCRB(obj)
         midSlice = ceil(nSteps/2);
         defocusValues = par.defocus.inNanometer; 
         par.defocus = Length(defocusValues(midSlice), 'nm');
-        psf = psf(:,:,midSlice);
+        psf = psf(:,:,midSlice); 
     end
 
     dx = 1; % shift in nm 
-     
     % calculate displaced psf images;
+
+    % we need to add the background noise in an extra step (without
+    % applying Poissonian noise
+    noise = par.backgroundNoise; 
+    par.backgroundNoise = 0; 
+   
     par.position = par.position + Length([dx 0 0],'nm');
     psf_x = PSF(par);
     par.position = par.position + Length([-dx dx 0],'nm');
@@ -24,9 +33,9 @@ function CRB = calculateCRB(obj)
     psf_z = PSF(par);
     
     % calculate finite differences 
-    Dx = (-psf+psf_x.image)./dx; 
-    Dy = (-psf+psf_y.image)./dx; 
-    Dz = (-psf+psf_z.image)./dx; 
+    Dx = (-psf+(psf_x.image+noise))./dx; 
+    Dy = (-psf+(psf_y.image+noise))./dx; 
+    Dz = (-psf+(psf_z.image+noise))./dx; 
     
     % bring matrices into same size
     LI1=1:(size(psf,1)-1);

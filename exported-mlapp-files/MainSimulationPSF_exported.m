@@ -122,6 +122,7 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
         TransmissionMaskShowplotCheckBox  matlab.ui.control.CheckBox
         TransmissionLabel               matlab.ui.control.Label
         OptionsTab                      matlab.ui.container.Tab
+        CramrRaoBoundLabel              matlab.ui.control.Label
         CRBOutputField                  matlab.ui.control.Label
         CalculateCramrRaoBoundCheckBox  matlab.ui.control.CheckBox
         StepsizeEditField               matlab.ui.control.NumericEditField
@@ -133,7 +134,7 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
         PixelsperlateralaxisEditField   matlab.ui.control.NumericEditField
         PixelsperlateralaxisEditFieldLabel  matlab.ui.control.Label
         ContrastLabel                   matlab.ui.control.Label
-        OptionsLabel                    matlab.ui.control.Label
+        PlotoptionsLabel                matlab.ui.control.Label
         WindowselectionLabel            matlab.ui.control.Label
         ShowPSFCheckBox                 matlab.ui.control.CheckBox
         PolarizedemissionchannelsCheckBox  matlab.ui.control.CheckBox
@@ -2280,13 +2281,13 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.WindowselectionLabel.Position = [16 352 115 22];
             app.WindowselectionLabel.Text = 'Window selection';
 
-            % Create OptionsLabel
-            app.OptionsLabel = uilabel(app.OptionsTab);
-            app.OptionsLabel.FontSize = 13;
-            app.OptionsLabel.FontWeight = 'bold';
-            app.OptionsLabel.Tooltip = {'Select which windows are shown'};
-            app.OptionsLabel.Position = [16 208 54 22];
-            app.OptionsLabel.Text = 'Options';
+            % Create PlotoptionsLabel
+            app.PlotoptionsLabel = uilabel(app.OptionsTab);
+            app.PlotoptionsLabel.FontSize = 13;
+            app.PlotoptionsLabel.FontWeight = 'bold';
+            app.PlotoptionsLabel.Tooltip = {'Select which windows are shown'};
+            app.PlotoptionsLabel.Position = [16 208 80 22];
+            app.PlotoptionsLabel.Text = 'Plot options';
 
             % Create ContrastLabel
             app.ContrastLabel = uilabel(app.OptionsTab);
@@ -2372,12 +2373,20 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.CalculateCramrRaoBoundCheckBox = uicheckbox(app.OptionsTab);
             app.CalculateCramrRaoBoundCheckBox.ValueChangedFcn = createCallbackFcn(app, @CalculateCramrRaoBoundCheckBoxValueChanged, true);
             app.CalculateCramrRaoBoundCheckBox.Text = 'Calculate Cramér Rao Bound';
-            app.CalculateCramrRaoBoundCheckBox.Position = [376 174 179 22];
+            app.CalculateCramrRaoBoundCheckBox.Position = [388 175 179 22];
 
             % Create CRBOutputField
             app.CRBOutputField = uilabel(app.OptionsTab);
-            app.CRBOutputField.Position = [390 123 137 47];
+            app.CRBOutputField.Position = [407 122 137 47];
             app.CRBOutputField.Text = '';
+
+            % Create CramrRaoBoundLabel
+            app.CramrRaoBoundLabel = uilabel(app.OptionsTab);
+            app.CramrRaoBoundLabel.FontSize = 13;
+            app.CramrRaoBoundLabel.FontWeight = 'bold';
+            app.CramrRaoBoundLabel.Tooltip = {'Select which windows are shown'};
+            app.CramrRaoBoundLabel.Position = [388 208 125 22];
+            app.CramrRaoBoundLabel.Text = 'Cramér-Rao Bound';
 
             % Create CalculatingLamp
             app.CalculatingLamp = uilamp(app.PSFsimulationUIFigure);
