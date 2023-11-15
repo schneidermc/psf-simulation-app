@@ -277,7 +277,8 @@ classdef WindowFluorophores_exported < matlab.apps.AppBase
             app.zpositionSpinner{k}.Position = [130 43 102 22];
             app.zpositionSpinner{k}.BusyAction = 'cancel';
 
-            % move position of (x,y,z) spinners if 
+            % move position of (x,y,z) spinners if freely rotating is
+            % selected
             if strcmp(app.CallingApp.DipolerotationButtonGroup.SelectedObject.Text, 'freely rotating')
                 app.xpositionSpinnerLabel{k}.Position = [17 233 57 22];
                 app.ypositionSpinnerLabel{k}.Position = [17 203 57 22];
@@ -504,6 +505,10 @@ classdef WindowFluorophores_exported < matlab.apps.AppBase
             app.CallingApp.DipoleorientationLabel.Visible = 'on';
             app.CallingApp.simulateAndDisplayPSF()
             set(app.CallingApp.ConfiguremultiplefluorophoresButton, 'Enable', 'on')
+
+            app.CallingApp.CalculateCramrRaoBoundCheckBox.Visible = 'on'; 
+            app.CallingApp.CRBOutputField.Visible = 'on';
+            app.CallingApp.CramrRaoBoundLabel.Visible = 'on';
             % Switch on option for 3D plot again (currently not compatible
             % with multiple fluorophores
             set(app.CallingApp.ShowPsf3DCheckBox, 'Enable', 'on')

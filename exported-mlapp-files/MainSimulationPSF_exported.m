@@ -561,6 +561,10 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
 
             app.DipolerotationButtonGroup.Visible = 'off';
             app.DipoleorientationLabel.Visible = 'off';
+
+            app.CalculateCramrRaoBoundCheckBox.Visible = 'off'; 
+            app.CRBOutputField.Visible = 'off';
+            app.CramrRaoBoundLabel.Visible = 'off';
           
             app.Fluorophores = WindowFluorophores(app);
             set(app.ConfiguremultiplefluorophoresButton, 'Enable', 'off')
