@@ -51,6 +51,7 @@ classdef WindowPlotPSFThreeDim_exported < matlab.apps.AppBase
             % Projected side view (xz):
             projection = squeeze(sum(psfImage,1));
             imagesc(app.UIAxesPSF,projection);
+            set(app.UIAxesPSF,'DataAspectRatio',[1 1 1])
             
             nPixels = app.CallingApp.nPixels;
             pixelSize = app.CallingApp.PixelsizeObjectSpaceSpinner.Value;
@@ -135,6 +136,14 @@ classdef WindowPlotPSFThreeDim_exported < matlab.apps.AppBase
         % Close request function: PSFThreeDimUIFigure
         function PSFThreeDimUIFigureCloseRequest(app, event)
             app.CallingApp.ShowPsf3DCheckBox.Value = 0;
+            app.CallingApp.StepsizeEditFieldLabel.Visible = "off";
+            app.CallingApp.StepsizeEditFieldLabel.Enable = "off";
+            app.CallingApp.StepsizeEditField.Visible = "off";
+            app.CallingApp.StepsizeEditField.Enable = "off";
+            app.CallingApp.NumberstepsEditFieldLabel.Visible = "off";
+            app.CallingApp.NumberstepsEditFieldLabel.Enable = "off";
+            app.CallingApp.NumberstepsEditField.Visible = "off";
+            app.CallingApp.NumberstepsEditField.Enable = "off";
             if app.CallingApp.ShowPsf2DCheckBox.Value == false
                 app.CallingApp.ShowPSFCheckBox.Value = false;
                 app.CallingApp.ShowPsf2DCheckBox.Enable = "off";
@@ -143,7 +152,7 @@ classdef WindowPlotPSFThreeDim_exported < matlab.apps.AppBase
             delete(app)
         end
 
-        % Clicked callback: PushTool
+        % Callback function: PushTool
         function PushToolClicked(app, event)
             % save image as .mat file 
             temp = app.CallingApp.readParametersPhaseMask();
@@ -213,8 +222,11 @@ classdef WindowPlotPSFThreeDim_exported < matlab.apps.AppBase
             app.UIAxesPSF.PlotBoxAspectRatio = [1 1 1];
             app.UIAxesPSF.XLim = [0 1];
             app.UIAxesPSF.XTick = [];
+            app.UIAxesPSF.XTickLabelRotation = 0;
             app.UIAxesPSF.XTickLabel = '';
             app.UIAxesPSF.YTick = [];
+            app.UIAxesPSF.YTickLabelRotation = 0;
+            app.UIAxesPSF.ZTickLabelRotation = 0;
             app.UIAxesPSF.FontSize = 12;
             app.UIAxesPSF.Position = [48 61 269 272];
 
