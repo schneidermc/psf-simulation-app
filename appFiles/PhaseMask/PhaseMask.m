@@ -7,6 +7,7 @@ classdef PhaseMask
     properties (Dependent, Hidden)
         gridSize
         polarCoordinates
+        pupil
     end
 
 
@@ -30,6 +31,13 @@ classdef PhaseMask
             polarCoord.angle = theta;
             polarCoord.radius = rho;
         end
+        function pupil = get.pupil(obj)
+            parMask.nGrid = obj.gridSize;
+            pupilMask = Mask(parMask);
+            values = pupilMask.values;
+            values(values==0) = NaN;
+            pupil = values;
+        end
     end
 
     methods (Access=public)
@@ -44,7 +52,8 @@ classdef PhaseMask
             if nargin < 2
                 axesHandle = gca;
             end
-            imagesc(axesHandle, mod(obj.mask,2*pi))
+            h = imagesc(axesHandle, mod(obj.mask,2*pi));
+            set(h, 'AlphaData', ~isnan(obj.pupil))
             axis(axesHandle, 'equal');
             axis(axesHandle, 'tight');
             cb = colorbar(axesHandle);
@@ -69,7 +78,11 @@ classdef PhaseMask
                 relativeRadius = 1;
             end
             mustBeInRange(relativeRadius,0,1)
-            obj.mask(obj.polarCoordinates.radius > relativeRadius) = 0;
+            if relativeRadius == 1
+                obj.mask = obj.mask .* obj.pupil;
+            else
+                obj.mask(obj.polarCoordinates.radius > relativeRadius) = 0;
+            end
         end
 
         function obj = selectCircleSector(obj, sectorAngles)

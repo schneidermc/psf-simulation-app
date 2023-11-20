@@ -1,12 +1,13 @@
 classdef Transmission
 
     properties
-        mask (:,:) double {mustBeInRange(mask,0,1)}
+        mask (:,:) double
     end
 
     properties (Dependent, Hidden)
         gridSize
         polarCoordinates
+        pupil
     end
 
 
@@ -30,6 +31,13 @@ classdef Transmission
             polarCoord.angle = theta;
             polarCoord.radius = rho;
         end
+        function pupil = get.pupil(obj)
+            parMask.nGrid = obj.gridSize;
+            pupilMask = Mask(parMask);
+            values = pupilMask.values;
+            values(values==0) = NaN;
+            pupil = values;
+        end
     end
 
     methods (Access=public)
@@ -44,7 +52,8 @@ classdef Transmission
             if nargin < 2
                 axesHandle = gca;
             end
-            imagesc(axesHandle, obj.mask)
+            h = imagesc(axesHandle, obj.mask);
+            set(h, 'AlphaData', ~isnan(obj.pupil))
             axis(axesHandle, 'equal');
             axis(axesHandle, 'tight');
             cb = colorbar(axesHandle);
@@ -65,7 +74,11 @@ classdef Transmission
                 relativeRadius = 1;
             end
             mustBeInRange(relativeRadius,0,1)
-            obj.mask(obj.polarCoordinates.radius > relativeRadius) = 0;
+            if relativeRadius == 1
+                obj.mask = obj.mask .* obj.pupil;
+            else
+                obj.mask(obj.polarCoordinates.radius > relativeRadius) = 0;
+            end
         end
     end
     

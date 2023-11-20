@@ -25,7 +25,8 @@ classdef ZernikeAberrations < PhaseMask
             if nargin < 2
                 axesHandle = gca;
             end
-            imagesc(axesHandle, mod(obj.mask+pi,2*pi)-pi)
+            h = imagesc(axesHandle, (mod(obj.mask+pi,2*pi)-pi));
+            set(h, 'AlphaData', ~isnan(obj.pupil))
             axis(axesHandle, 'equal');
             axis(axesHandle, 'tight');
             cb = colorbar(axesHandle);

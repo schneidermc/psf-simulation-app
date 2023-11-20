@@ -13,7 +13,8 @@ classdef Astigmatism < PhaseMask
             if nargin < 2
                 axesHandle = gca;
             end
-            imagesc(axesHandle, obj.mask)
+            h = imagesc(axesHandle, obj.mask);
+            set(h, 'AlphaData', ~isnan(obj.pupil))
             axis(axesHandle, 'equal');
             axis(axesHandle, 'tight');
             cb = colorbar(axesHandle);
