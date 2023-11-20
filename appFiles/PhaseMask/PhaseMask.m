@@ -79,7 +79,9 @@ classdef PhaseMask
             end
             mustBeInRange(relativeRadius,0,1)
             if relativeRadius == 1
-                obj.mask = obj.mask .* obj.pupil;
+                values = obj.pupil;
+                values(isnan(values)) = 0;
+                obj.mask = obj.mask .* values;
             else
                 obj.mask(obj.polarCoordinates.radius > relativeRadius) = 0;
             end
