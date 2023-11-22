@@ -238,7 +238,27 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             if strcmp(app.TabGroup.SelectedTab.Title, 'Options') && app.CalculateCramrRaoBoundCheckBox.Value 
                 psf.CRB = psf.calculateCRB;
                 CRBinNanometer = round(psf.CRB.inNanometer, 3, 'significant');
-                app.CRBOutputField.Text = ['x:  ',num2str(CRBinNanometer(1)), ' nm' newline 'y:  ',num2str(CRBinNanometer(2)), ' nm' newline 'z:  ',num2str(CRBinNanometer(3)), ' nm'];
+                upperBound = 200; % display upper bound if CRB is larger than some threshold
+                if CRBinNanometer(1) > upperBound
+                    CRBxOutput = ['x:  ','> ', num2str(200), ' nm'];
+                else
+                    CRBxOutput = ['x:  ',num2str(CRBinNanometer(1)), ' nm']; 
+                end
+
+                if CRBinNanometer(2) > upperBound
+                    CRByOutput = ['y:  ','> ', num2str(200), ' nm'];
+                else
+                    CRByOutput = ['y:  ',num2str(CRBinNanometer(2)), ' nm']; 
+                end
+
+                if CRBinNanometer(3) > upperBound
+                    CRBzOutput = ['z:  ','> ', num2str(200), ' nm'];
+                else
+                    CRBzOutput = ['z:  ',num2str(CRBinNanometer(3)), ' nm']; 
+                end
+
+
+                app.CRBOutputField.Text = [CRBxOutput newline CRByOutput newline CRBzOutput ];
             end
 
             app.CalculatingLamp.Color = "g";

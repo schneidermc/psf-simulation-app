@@ -17,7 +17,7 @@ function CRB = calculateCRB(obj)
         psf = psf(:,:,midSlice); 
     end
 
-    dx = 1; % shift in nm 
+    dx = .1; % shift in nm 
     % calculate displaced psf images;
 
     % we need to add the background noise in an extra step (without
