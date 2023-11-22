@@ -150,6 +150,42 @@ classdef WindowFluorophores_exported < matlab.apps.AppBase
             psf.Iy = sum(cat(3,Iys{:}),3);
             app.CallingApp.PlotPolarizedEmission.updatePlot(psf);
         end
+
+        function updateDipoleRotation(app,str,k)
+            if strcmp(str, 'fixed')
+                app.AzimuthalAngleSliderLabel{k}.Visible = 'on';
+                app.AzimuthalAngleSlider{k}.Visible = 'on';
+                app.AzimuthalAngleEditField{k}.Visible = 'on';
+                app.InclinationAngleSliderLabel{k}.Visible = 'on';
+                app.InclinationAngleSlider{k}.Visible = 'on';
+                app.InclinationAngleEditField{k}.Visible = 'on';
+
+                app.xpositionSpinnerLabel{k}.Position = [17 103 57 22];
+                app.ypositionSpinnerLabel{k}.Position = [17 73 57 22];
+                app.zpositionSpinnerLabel{k}.Position = [17 43 57 22];
+                app.xpositionSpinner{k}.Position = [130 103 102 22];
+                app.ypositionSpinner{k}.Position = [130 73 102 22];
+                app.zpositionSpinner{k}.Position = [130 43 102 22];
+
+            elseif strcmp(str,'freely rotating')
+                app.AzimuthalAngleSliderLabel{k}.Visible = 'off';
+                app.AzimuthalAngleSlider{k}.Visible = 'off';
+                app.AzimuthalAngleEditField{k}.Visible = 'off';
+                app.InclinationAngleSliderLabel{k}.Visible = 'off';
+                app.InclinationAngleSlider{k}.Visible = 'off';
+                app.InclinationAngleEditField{k}.Visible = 'off';
+
+                app.xpositionSpinnerLabel{k}.Position = [17 233 57 22];
+                app.ypositionSpinnerLabel{k}.Position = [17 203 57 22];
+                app.zpositionSpinnerLabel{k}.Position = [17 173 57 22];
+                app.xpositionSpinner{k}.Position = [130 233 102 22];
+                app.ypositionSpinner{k}.Position = [130 203 102 22];
+                app.zpositionSpinner{k}.Position = [130 173 102 22];
+
+            else
+                error('Dipole rotation must be either fixed or freely rotating')
+            end
+        end
     end
 
 
@@ -214,15 +250,6 @@ classdef WindowFluorophores_exported < matlab.apps.AppBase
             app.InclinationAngleEditField{k}.ValueDisplayFormat = '%d°';
             app.InclinationAngleEditField{k}.ValueChangedFcn = {@app.InclinationAngleEditFieldValueChanged, k};
             app.InclinationAngleEditField{k}.Position = [290 225 43 22];
-            
-            if strcmp(app.CallingApp.DipolerotationButtonGroup.SelectedObject.Text, 'freely rotating')
-                app.AzimuthalAngleSliderLabel{k}.Visible = 'off';
-                app.AzimuthalAngleSlider{k}.Visible = 'off';
-                app.AzimuthalAngleEditField{k}.Visible = 'off';
-                app.InclinationAngleSliderLabel{k}.Visible = 'off';
-                app.InclinationAngleSlider{k}.Visible = 'off';
-                app.InclinationAngleEditField{k}.Visible = 'off';
-            end
 
             %% Position
 
@@ -277,19 +304,9 @@ classdef WindowFluorophores_exported < matlab.apps.AppBase
             app.zpositionSpinner{k}.Position = [130 43 102 22];
             app.zpositionSpinner{k}.BusyAction = 'cancel';
 
-            % move position of (x,y,z) spinners if freely rotating is
-            % selected
-            if strcmp(app.CallingApp.DipolerotationButtonGroup.SelectedObject.Text, 'freely rotating')
-                app.xpositionSpinnerLabel{k}.Position = [17 233 57 22];
-                app.ypositionSpinnerLabel{k}.Position = [17 203 57 22];
-                app.zpositionSpinnerLabel{k}.Position = [17 173 57 22];
+            % delete spinners if freely rotating dipole is selected
+            app.updateDipoleRotation(app.CallingApp.DipolerotationButtonGroup.SelectedObject.Text,k)
 
-                app.xpositionSpinner{k}.Position = [130 233 102 22];
-                app.ypositionSpinner{k}.Position = [130 203 102 22];
-                app.zpositionSpinner{k}.Position = [130 173 102 22];
-            end
-
-            
             % Create DeletefluorophoreButton
             app.DeletefluorophoreButton{k} = uibutton(app.Tabs{k}, 'push');
             app.DeletefluorophoreButton{k}.Position = [12 10 114 22];

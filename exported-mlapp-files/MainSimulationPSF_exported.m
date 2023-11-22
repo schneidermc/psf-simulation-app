@@ -449,25 +449,37 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
         function DipolerotationButtonGroupSelectionChanged(app, event)
             switch app.DipolerotationButtonGroup.SelectedObject.Text
                 case 'fixed'
-                    app.AzimuthalAngleSliderLabel.Visible = "on";
-                    app.AzimuthalAngleSlider.Visible = "on";
-                    app.phi.Visible = "on";
-                    app.InclinationAngleSliderLabel.Visible = "on";
-                    app.InclinationAngleSlider.Visible = "on";
-                    app.theta.Visible = "on";
-                    app.ReducedexcitationSwitch.Visible = "on";
-                    app.ReducedexcitationSwitchLabel.Visible = "on";
-                    app.ConfiguremultiplefluorophoresButton.Visible = "on";
+                    if app.SwitchMultipleFluorophores
+                        for k = 1:app.Fluorophores.getNumberFluorophores
+                            app.Fluorophores.updateDipoleRotation('fixed',k);
+                        end
+                    else % single fluorophore case 
+                        app.AzimuthalAngleSliderLabel.Visible = "on";
+                        app.AzimuthalAngleSlider.Visible = "on";
+                        app.phi.Visible = "on";
+                        app.InclinationAngleSliderLabel.Visible = "on";
+                        app.InclinationAngleSlider.Visible = "on";
+                        app.theta.Visible = "on";
+                        app.ReducedexcitationSwitch.Visible = "on";
+                        app.ReducedexcitationSwitchLabel.Visible = "on";
+                        app.ConfiguremultiplefluorophoresButton.Visible = "on";
+                    end
                 case 'freely rotating'
-                    app.AzimuthalAngleSliderLabel.Visible = "off";
-                    app.AzimuthalAngleSlider.Visible = "off";
-                    app.phi.Visible = "off";
-                    app.InclinationAngleSliderLabel.Visible = "off";
-                    app.InclinationAngleSlider.Visible = "off";
-                    app.theta.Visible = "off";
-                    app.ReducedexcitationSwitch.Visible = "off";
-                    app.ReducedexcitationSwitchLabel.Visible = "off";
-                    app.ConfiguremultiplefluorophoresButton.Visible = "on";
+                    if app.SwitchMultipleFluorophores
+                        for k = 1:app.Fluorophores.getNumberFluorophores
+                            app.Fluorophores.updateDipoleRotation('freely rotating',k);
+                        end
+                    else
+                        app.AzimuthalAngleSliderLabel.Visible = "off";
+                        app.AzimuthalAngleSlider.Visible = "off";
+                        app.phi.Visible = "off";
+                        app.InclinationAngleSliderLabel.Visible = "off";
+                        app.InclinationAngleSlider.Visible = "off";
+                        app.theta.Visible = "off";
+                        app.ReducedexcitationSwitch.Visible = "off";
+                        app.ReducedexcitationSwitchLabel.Visible = "off";
+                        app.ConfiguremultiplefluorophoresButton.Visible = "on";
+                    end
                 otherwise
                     error('Invalid input value for dipole rotation!')
             end
@@ -578,9 +590,6 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.theta.Visible = "off";
             app.zpositionSpinnerLabel.Visible = "off";
             app.zpositionSpinner.Visible = "off";
-
-            app.DipolerotationButtonGroup.Visible = 'off';
-            app.DipoleorientationLabel.Visible = 'off';
 
             app.CalculateCramrRaoBoundCheckBox.Visible = 'off'; 
             app.CRBOutputField.Visible = 'off';
