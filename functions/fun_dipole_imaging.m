@@ -11,7 +11,7 @@ function [E_BFP_x,E_BFP_y,mask_UAF,pupil]=fun_dipole_imaging(N, lambda_0, NA, RI
 %NA...numerical aperture of objective
 %RI...vector of refractive indices RI=[RI_specimen, RI_intermed., RI_immoil]
 %dipole...[theta phi]   polar and azimuthal anlges of dipole
-%optinal arguments: (assumed as zero if not defined)
+%optional arguments: (assumed as zero if not defined)
 %1) d2...thickness of intermediate layer (medium 2) in meter
 %2) z...distance of dipole from medium 2
 %3) f...focal length of objective (m) 
@@ -130,9 +130,11 @@ THETA3=asin(Kr/k3).*pupil; %angle in medium 3
     C=C/k3.^1; %NOTE: re-normalization here, to prevent large numbers
     
 %field magnitudes in layer 3 (pre-objective zone), along the s,p and z-axes (see paper for axes definitions)
-    E3p=C.*tp.*CTHETA3.*(mu_p./RI(3)+mu_z.*sin(THETA3)./CTHETA1);
+% See Erratum of paper for correct equations (https://onlinelibrary.wiley.com/doi/10.1111/jmi.12173)
+% Previously, the factor n1 in the denominator of the second term in the parenthesis was missing in the first and third line
+    E3p=C.*tp.*CTHETA3.*(mu_p./RI(3)+mu_z.*sin(THETA3)./(RI(1)*CTHETA1));
     E3s=C.*ts.*(mu_s/RI(3)./CTHETA1);
-    E3z=C.*tp.*sin(THETA3).*(mu_p./RI(3)+mu_z.*sin(THETA3)./CTHETA1);
+    E3z=C.*tp.*sin(THETA3).*(mu_p./RI(3)+mu_z.*sin(THETA3)./(RI(1)*CTHETA1));
 
 %influence of objective: rotation of rays by their angle theta3, such that they are all parallel to the optical axis: 
     Apo_p=1./sqrt(CTHETA3).*pupil.*T_p; %Apodization of objective lens, T_p is measured field transmission 
