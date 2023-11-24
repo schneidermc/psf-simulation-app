@@ -73,7 +73,9 @@ end
 I_simu = I_simu/sum(I_simu(:));
 
 %% Calculation of scalar error metric
-error = Image_stack(:)/sum(Image_stack(:)) - I_simu(:); % for use with lsqnonlin
+gamma = 0.5;
+error = eval_error(I_simu, Image_stack, gamma); 
+
 disp(std(error(:)));
 
 end

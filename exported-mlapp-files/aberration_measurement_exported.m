@@ -180,20 +180,6 @@ classdef aberration_measurement_exported < matlab.apps.AppBase
             app.UIAxesSimulationPsfXZ.PositionConstraint = 'innerposition';
 
             app.modes = 2:app.NumberZernikesEditField.Value;
-
-            % if nargin == 2
-            %     app.cam = [];
-            %     app.obj = []; 
-            % else            
-            %     app.cam = cam; 
-            %     app.obj = obj; 
-            %     app.cam_loaded = true; 
-            %     app.obj_loaded = true; 
-            %     app.ux = app.cam.pixsize/app.obj.M;
-            %     app.LoadzstackButton.Enable ="on"; 
-            %     app.text_cam.Value = app.cam.name; 
-            %     app.text_obj.Value = app.obj.name; 
-            % end
         end
 
         % Value changed function: BeaddiameterEditField
@@ -529,8 +515,8 @@ classdef aberration_measurement_exported < matlab.apps.AppBase
             app.UIAxes_Zernike.Visible = "on";
 
             % Aberration
-            aberrations = PhaseMask(phase);
-            imagesc(app.UIAxes_PhaseAberration, mod(aberrations.mask+pi,2*pi)-pi);
+            aberrations = ZernikeAberrations(app.modes, app.Z_phase', app.dia_pupil);
+            plot(aberrations, app.UIAxes_PhaseAberration);
             axis(app.UIAxes_PhaseAberration, 'equal');
             axis(app.UIAxes_PhaseAberration, 'tight');
             cb = colorbar(app.UIAxes_PhaseAberration);
@@ -544,7 +530,8 @@ classdef aberration_measurement_exported < matlab.apps.AppBase
             
             % Transmission
             fittedTransmissionMask = Transmission(amp.^2);
-            imagesc(app.UIAxes_Transmission, fittedTransmissionMask.mask);
+            plot(fittedTransmissionMask, app.UIAxes_Transmission);
+            %imagesc(app.UIAxes_Transmission, fittedTransmissionMask.mask);
             axis(app.UIAxes_Transmission, 'equal');
             axis(app.UIAxes_Transmission, 'tight');
             cb = colorbar(app.UIAxes_Transmission);
