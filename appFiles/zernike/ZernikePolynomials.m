@@ -65,34 +65,8 @@ classdef ZernikePolynomials < handle
         end
 
         function polynomials = calculateZernikePolynomials(n, m, mask, doNormalize)
-            %   The radial Zernike polynomials are the radial portion of the
-            %   Zernike functions, which are an orthogonal basis on the unit
-            %   circle.  The series representation of the radial Zernike
-            %   polynomials is
-            %
-            %          (n-m)/2
-            %            __
-            %    m      \       s                                          n-2s
-            %   Z(r) =  /__ (-1)  [(n-s)!/(s!((n-m)/2-s)!((n+m)/2-s)!)] * r
-            %    n      s=0
-            %
-            %   The following table shows the first 12 polynomials.
-            %
-            %       n    m    Zernike polynomial    Normalization
-            %       ---------------------------------------------
-            %       0    0    1                        sqrt(2)
-            %       1    1    r                        sqrt(4)
-            %       2    0    2*r^2 - 1                sqrt(6)
-            %       2    2    r^2                      sqrt(6)
-            %       3    1    3*r^3 - 2*r              sqrt(8)
-            %       3    3    r^3                      sqrt(8)
-            %       4    0    6*r^4 - 6*r^2 + 1        sqrt(10)
-            %       4    2    4*r^4 - 3*r^2            sqrt(10)
-            %       4    4    r^4                      sqrt(10)
-            %       5    1    10*r^5 - 12*r^3 + 3*r    sqrt(12)
-            %       5    3    5*r^5 - 4*r^3            sqrt(12)
-            %       5    5    r^5                      sqrt(12)
-            %       ---------------------------------------------
+            % See https://en.wikipedia.org/wiki/Zernike_polynomials for
+            % definition of Zernike polynomials and indexing conventions
 
             %% Check input
             if nargin<5
