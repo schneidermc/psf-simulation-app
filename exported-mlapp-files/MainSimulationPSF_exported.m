@@ -601,6 +601,7 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.ypositionSpinner.Visible = "off";
             app.zpositionSpinnerLabel.Visible = "off";
             app.zpositionSpinner.Visible = "off";
+            app.PositionLabel.Visible = 'off';
 
             app.CalculateCramrRaoBoundCheckBox.Visible = 'off'; 
             app.CRBOutputField.Visible = 'off';
@@ -1470,7 +1471,7 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
 
             % Create AzimuthalAngleSliderLabel
             app.AzimuthalAngleSliderLabel = uilabel(app.FluorophoreTab);
-            app.AzimuthalAngleSliderLabel.Position = [273 74 92 22];
+            app.AzimuthalAngleSliderLabel.Position = [12 69 92 22];
             app.AzimuthalAngleSliderLabel.Text = 'Azimuthal Angle';
 
             % Create AzimuthalAngleSlider
@@ -1479,11 +1480,11 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.AzimuthalAngleSlider.ValueChangedFcn = createCallbackFcn(app, @AzimuthalAngleSliderValueChanged, true);
             app.AzimuthalAngleSlider.ValueChangingFcn = createCallbackFcn(app, @AzimuthalAngleSliderValueChanging, true);
             app.AzimuthalAngleSlider.BusyAction = 'cancel';
-            app.AzimuthalAngleSlider.Position = [394 84 150 3];
+            app.AzimuthalAngleSlider.Position = [133 79 150 3];
 
             % Create InclinationAngleSliderLabel
             app.InclinationAngleSliderLabel = uilabel(app.FluorophoreTab);
-            app.InclinationAngleSliderLabel.Position = [273 121 94 22];
+            app.InclinationAngleSliderLabel.Position = [12 116 94 22];
             app.InclinationAngleSliderLabel.Text = 'Inclination Angle';
 
             % Create InclinationAngleSlider
@@ -1492,7 +1493,7 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.InclinationAngleSlider.ValueChangedFcn = createCallbackFcn(app, @InclinationAngleSliderValueChanged, true);
             app.InclinationAngleSlider.ValueChangingFcn = createCallbackFcn(app, @InclinationAngleSliderValueChanging, true);
             app.InclinationAngleSlider.BusyAction = 'cancel';
-            app.InclinationAngleSlider.Position = [394 130 150 3];
+            app.InclinationAngleSlider.Position = [133 125 150 3];
 
             % Create PhotonshotnoiseSwitchLabel
             app.PhotonshotnoiseSwitchLabel = uilabel(app.FluorophoreTab);
@@ -1537,12 +1538,12 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.ConfiguremultiplefluorophoresButton = uibutton(app.FluorophoreTab, 'push');
             app.ConfiguremultiplefluorophoresButton.ButtonPushedFcn = createCallbackFcn(app, @ConfiguremultiplefluorophoresButtonPushed, true);
             app.ConfiguremultiplefluorophoresButton.BusyAction = 'cancel';
-            app.ConfiguremultiplefluorophoresButton.Position = [17 25 182 22];
+            app.ConfiguremultiplefluorophoresButton.Position = [15 10 182 22];
             app.ConfiguremultiplefluorophoresButton.Text = 'Configure multiple fluorophores';
 
             % Create zpositionSpinnerLabel
             app.zpositionSpinnerLabel = uilabel(app.FluorophoreTab);
-            app.zpositionSpinnerLabel.Position = [12 86 59 22];
+            app.zpositionSpinnerLabel.Position = [301 259 59 22];
             app.zpositionSpinnerLabel.Text = 'z-position';
 
             % Create zpositionSpinner
@@ -1553,7 +1554,7 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.zpositionSpinner.ValueDisplayFormat = '%11.4g nm';
             app.zpositionSpinner.ValueChangedFcn = createCallbackFcn(app, @zpositionSpinnerValueChanged, true);
             app.zpositionSpinner.BusyAction = 'cancel';
-            app.zpositionSpinner.Position = [132 86 102 22];
+            app.zpositionSpinner.Position = [421 259 102 22];
 
             % Create theta
             app.theta = uieditfield(app.FluorophoreTab, 'numeric');
@@ -1561,7 +1562,7 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.theta.RoundFractionalValues = 'on';
             app.theta.ValueDisplayFormat = '%d°';
             app.theta.ValueChangedFcn = createCallbackFcn(app, @thetaValueChanged, true);
-            app.theta.Position = [555 118 47 22];
+            app.theta.Position = [299 113 47 22];
 
             % Create phi
             app.phi = uieditfield(app.FluorophoreTab, 'numeric');
@@ -1569,14 +1570,14 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.phi.RoundFractionalValues = 'on';
             app.phi.ValueDisplayFormat = '%d°';
             app.phi.ValueChangedFcn = createCallbackFcn(app, @phiValueChanged, true);
-            app.phi.Position = [556 74 47 22];
+            app.phi.Position = [299 69 47 22];
 
             % Create DipolerotationButtonGroup
             app.DipolerotationButtonGroup = uibuttongroup(app.FluorophoreTab);
             app.DipolerotationButtonGroup.SelectionChangedFcn = createCallbackFcn(app, @DipolerotationButtonGroupSelectionChanged, true);
             app.DipolerotationButtonGroup.BorderType = 'none';
             app.DipolerotationButtonGroup.BusyAction = 'cancel';
-            app.DipolerotationButtonGroup.Position = [387 153 162 30];
+            app.DipolerotationButtonGroup.Position = [131 148 162 30];
 
             % Create freelyrotatingButton
             app.freelyrotatingButton = uiradiobutton(app.DipolerotationButtonGroup);
@@ -1592,7 +1593,7 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
 
             % Create DipoleorientationLabel
             app.DipoleorientationLabel = uilabel(app.FluorophoreTab);
-            app.DipoleorientationLabel.Position = [273 157 98 22];
+            app.DipoleorientationLabel.Position = [12 152 98 22];
             app.DipoleorientationLabel.Text = 'Dipole orientation';
 
             % Create EmissionwavelengthSpinnerLabel
@@ -1612,7 +1613,7 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
 
             % Create ypositionSpinnerLabel
             app.ypositionSpinnerLabel = uilabel(app.FluorophoreTab);
-            app.ypositionSpinnerLabel.Position = [12 121 59 22];
+            app.ypositionSpinnerLabel.Position = [301 290 59 22];
             app.ypositionSpinnerLabel.Text = 'y-position';
 
             % Create ypositionSpinner
@@ -1622,11 +1623,11 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.ypositionSpinner.ValueDisplayFormat = '%11.4g nm';
             app.ypositionSpinner.ValueChangedFcn = createCallbackFcn(app, @ypositionSpinnerValueChanged, true);
             app.ypositionSpinner.BusyAction = 'cancel';
-            app.ypositionSpinner.Position = [132 121 102 22];
+            app.ypositionSpinner.Position = [421 290 102 22];
 
             % Create xpositionSpinnerLabel
             app.xpositionSpinnerLabel = uilabel(app.FluorophoreTab);
-            app.xpositionSpinnerLabel.Position = [12 157 59 22];
+            app.xpositionSpinnerLabel.Position = [301 321 59 22];
             app.xpositionSpinnerLabel.Text = 'x-position';
 
             % Create xpositionSpinner
@@ -1636,20 +1637,20 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.xpositionSpinner.ValueDisplayFormat = '%11.4g nm';
             app.xpositionSpinner.ValueChangedFcn = createCallbackFcn(app, @xpositionSpinnerValueChanged, true);
             app.xpositionSpinner.BusyAction = 'cancel';
-            app.xpositionSpinner.Position = [132 157 102 22];
+            app.xpositionSpinner.Position = [421 321 102 22];
 
             % Create PositionLabel
             app.PositionLabel = uilabel(app.FluorophoreTab);
             app.PositionLabel.FontSize = 13;
             app.PositionLabel.FontWeight = 'bold';
-            app.PositionLabel.Position = [13 187 82 22];
+            app.PositionLabel.Position = [302 354 82 22];
             app.PositionLabel.Text = 'Position';
 
             % Create OrientationLabel
             app.OrientationLabel = uilabel(app.FluorophoreTab);
             app.OrientationLabel.FontSize = 13;
             app.OrientationLabel.FontWeight = 'bold';
-            app.OrientationLabel.Position = [273 187 82 22];
+            app.OrientationLabel.Position = [12 183 82 22];
             app.OrientationLabel.Text = 'Orientation';
 
             % Create MicroscopeRITab
