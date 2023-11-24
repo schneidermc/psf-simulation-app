@@ -33,7 +33,7 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
         InclinationAngleSliderLabel     matlab.ui.control.Label
         AzimuthalAngleSlider            matlab.ui.control.Slider
         AzimuthalAngleSliderLabel       matlab.ui.control.Label
-        FluorophoreLabel                matlab.ui.control.Label
+        EmissionLabel                   matlab.ui.control.Label
         MicroscopeRITab                 matlab.ui.container.Tab
         ObjectiveFocalLengthSpinner     matlab.ui.control.Spinner
         ObjectivefocallengthLabel       matlab.ui.control.Label
@@ -1462,12 +1462,12 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.FluorophoreTab = uitab(app.TabGroup);
             app.FluorophoreTab.Title = 'Fluorophore';
 
-            % Create FluorophoreLabel
-            app.FluorophoreLabel = uilabel(app.FluorophoreTab);
-            app.FluorophoreLabel.FontSize = 13;
-            app.FluorophoreLabel.FontWeight = 'bold';
-            app.FluorophoreLabel.Position = [12 354 82 22];
-            app.FluorophoreLabel.Text = 'Fluorophore';
+            % Create EmissionLabel
+            app.EmissionLabel = uilabel(app.FluorophoreTab);
+            app.EmissionLabel.FontSize = 13;
+            app.EmissionLabel.FontWeight = 'bold';
+            app.EmissionLabel.Position = [12 354 82 22];
+            app.EmissionLabel.Text = 'Emission';
 
             % Create AzimuthalAngleSliderLabel
             app.AzimuthalAngleSliderLabel = uilabel(app.FluorophoreTab);
