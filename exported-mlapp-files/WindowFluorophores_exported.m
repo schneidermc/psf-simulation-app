@@ -516,8 +516,13 @@ classdef WindowFluorophores_exported < matlab.apps.AppBase
             app.CallingApp.InclinationAngleSliderLabel.Visible = "on";
             app.CallingApp.InclinationAngleSlider.Visible = "on";
             app.CallingApp.theta.Visible = "on";
+            app.CallingApp.xpositionSpinnerLabel.Visible = "on";
+            app.CallingApp.xpositionSpinner.Visible = "on";
+            app.CallingApp.ypositionSpinnerLabel.Visible = "on";
+            app.CallingApp.ypositionSpinner.Visible = "on";
             app.CallingApp.zpositionSpinnerLabel.Visible = "on";
             app.CallingApp.zpositionSpinner.Visible = "on";
+            app.CallingApp.PositionLabel.Visible = 'on';
             app.CallingApp.DipolerotationButtonGroup.Visible = 'on';
             app.CallingApp.DipoleorientationLabel.Visible = 'on';
             app.CallingApp.simulateAndDisplayPSF()
