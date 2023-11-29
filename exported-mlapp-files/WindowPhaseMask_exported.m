@@ -23,7 +23,7 @@ classdef WindowPhaseMask_exported < matlab.apps.AppBase
             if isMATLABReleaseOlderThan('R2022a')
                 caxis(app.UIAxesPhaseMask, [0 2*pi])
             else
-                caxis(app.UIAxesPhaseMask, [0 2*pi])
+                clim(app.UIAxesPhaseMask, [0 2*pi])
             end
             cb.Label.String = 'Phase shift';
             cb.Ticks = (0:0.5:2)*pi;
