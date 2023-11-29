@@ -128,6 +128,10 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
         TransmissionMaskShowplotCheckBox  matlab.ui.control.CheckBox
         TransmissionLabel               matlab.ui.control.Label
         OptionsTab                      matlab.ui.container.Tab
+        Export3DPSFOutputField          matlab.ui.control.Label
+        Export2DPSFOutputField          matlab.ui.control.Label
+        Export3DPSFButton               matlab.ui.control.Button
+        Export2DPSFButton               matlab.ui.control.Button
         CramrRaoBoundLabel              matlab.ui.control.Label
         CRBOutputField                  matlab.ui.control.Label
         CalculateCramrRaoBoundCheckBox  matlab.ui.control.CheckBox
@@ -892,6 +896,7 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
                 app.NumberstepsEditFieldLabel.Enable = "on";
                 app.NumberstepsEditField.Visible = "on";
                 app.NumberstepsEditField.Enable = "on";
+                app.Export3DPSFButton.Visible = "on";
                 simulateAndDisplayPSF(app);
             else
                 delete(app.PlotPSFThreeDim);
@@ -903,6 +908,7 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
                 app.NumberstepsEditFieldLabel.Enable = "off";
                 app.NumberstepsEditField.Visible = "off";
                 app.NumberstepsEditField.Enable = "off";
+                app.Export3DPSFButton.Visible = "off";
                 if app.ShowPsf2DCheckBox.Value == false
                     app.ShowPSFCheckBox.Value = false;
                     app.ShowPsf2DCheckBox.Enable = "off";
@@ -1431,6 +1437,43 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.ypositionSpinner.Value = event.Value;
             simulateAndDisplayPSF(app);
             
+        end
+
+        % Button pushed function: Export2DPSFButton
+        function Export2DPSFButtonPushed(app, event)
+            psf = simulateAndDisplayPSF(app);
+            if app.ShowPsf3DCheckBox.Value
+                image = psf.image;
+                nSteps = size(image,3);
+                midSlice = ceil(nSteps/2);
+                image = image(:,:,midSlice);
+            else
+                image = psf.image; 
+            end
+            
+            [baseFileName, folder] = uiputfile('2DPSF');
+            fullFileName = fullfile(folder, baseFileName);
+            save(fullFileName,'image');
+
+            app.Export2DPSFOutputField.Text = {'2D PSF saved'};
+            app.Export2DPSFOutputField.Visible = 'on'; 
+            pause(2)
+            app.Export2DPSFOutputField.Visible = 'off'; 
+        end
+
+        % Button pushed function: Export3DPSFButton
+        function Export3DPSFButtonPushed(app, event)
+            % Button only visible when 3D PSF is activated 
+            psf = simulateAndDisplayPSF(app);
+            image = psf.image; 
+            [baseFileName, folder] = uiputfile('3DPSF');
+            fullFileName = fullfile(folder, baseFileName);
+            save(fullFileName,'image');
+
+            app.Export3DPSFOutputField.Text = {'3D PSF saved'};
+            app.Export3DPSFOutputField.Visible = 'on'; 
+            pause(2)
+            app.Export3DPSFOutputField.Visible = 'off';
         end
     end
 
@@ -2502,6 +2545,29 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.CramrRaoBoundLabel.Tooltip = {'Select which windows are shown'};
             app.CramrRaoBoundLabel.Position = [388 177 125 22];
             app.CramrRaoBoundLabel.Text = 'Cramér-Rao Bound';
+
+            % Create Export2DPSFButton
+            app.Export2DPSFButton = uibutton(app.OptionsTab, 'push');
+            app.Export2DPSFButton.ButtonPushedFcn = createCallbackFcn(app, @Export2DPSFButtonPushed, true);
+            app.Export2DPSFButton.Position = [422 273 100 22];
+            app.Export2DPSFButton.Text = 'Export 2D PSF';
+
+            % Create Export3DPSFButton
+            app.Export3DPSFButton = uibutton(app.OptionsTab, 'push');
+            app.Export3DPSFButton.ButtonPushedFcn = createCallbackFcn(app, @Export3DPSFButtonPushed, true);
+            app.Export3DPSFButton.Visible = 'off';
+            app.Export3DPSFButton.Position = [422 246 100 22];
+            app.Export3DPSFButton.Text = 'Export 3D PSF';
+
+            % Create Export2DPSFOutputField
+            app.Export2DPSFOutputField = uilabel(app.OptionsTab);
+            app.Export2DPSFOutputField.Position = [526 273 63 21];
+            app.Export2DPSFOutputField.Text = '';
+
+            % Create Export3DPSFOutputField
+            app.Export3DPSFOutputField = uilabel(app.OptionsTab);
+            app.Export3DPSFOutputField.Position = [526 247 63 21];
+            app.Export3DPSFOutputField.Text = '';
 
             % Create CalculatingLamp
             app.CalculatingLamp = uilamp(app.PSFsimulationUIFigure);
