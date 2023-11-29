@@ -59,7 +59,7 @@ classdef PhaseMask
             cb = colorbar(axesHandle);
             caxis(axesHandle, [0 2*pi])
             cb.Label.String = 'Phase shift';
-            cb.Label.FontSize = 12;
+            cb.Label.FontSize = 16;
             cb.Ticks = (0:0.5:2)*pi;
             cb.TickLabels = {'0','','\pi','','2\pi'};
             set(axesHandle,'visible','off')

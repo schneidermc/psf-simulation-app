@@ -32,7 +32,7 @@ classdef ZernikeAberrations < PhaseMask
             cb = colorbar(axesHandle);
             caxis(axesHandle, [-pi pi])
             cb.Label.String = 'Phase shift';
-            cb.Label.FontSize = 12;
+            cb.Label.FontSize = 16;
             cb.Ticks = (-1:0.5:1)*pi;
             cb.TickLabels = {'-\pi','','0','','\pi'};
             set(axesHandle,'visible','off')

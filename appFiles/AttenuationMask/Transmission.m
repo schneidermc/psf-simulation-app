@@ -60,7 +60,7 @@ classdef Transmission
             colormap(axesHandle, gray)
             caxis(axesHandle, [0 1])
             cb.Label.String = 'Transmission';
-            cb.Label.FontSize = 12;
+            cb.Label.FontSize = 16;
             cb.Ticks = (0:0.25:1);
             cb.TickLabels = {'0','','0.5','','1'};
             set(axesHandle,'visible','off')
