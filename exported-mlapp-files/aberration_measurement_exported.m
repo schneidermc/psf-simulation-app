@@ -16,8 +16,8 @@ classdef aberration_measurement_exported < matlab.apps.AppBase
         NAEditFieldLabel              matlab.ui.control.Label
         MagnificationEditField        matlab.ui.control.NumericEditField
         MagnificationEditFieldLabel   matlab.ui.control.Label
-        RIfluidEditField              matlab.ui.control.NumericEditField
-        RIfluidEditFieldLabel         matlab.ui.control.Label
+        RIsamplelayerEditField        matlab.ui.control.NumericEditField
+        RIsamplelayerEditFieldLabel   matlab.ui.control.Label
         BeaddiameterEditField         matlab.ui.control.NumericEditField
         BeaddiameterEditFieldLabel    matlab.ui.control.Label
         EmissionwavelengthEditField   matlab.ui.control.NumericEditField
@@ -158,8 +158,8 @@ classdef aberration_measurement_exported < matlab.apps.AppBase
             wavelength = Length(app.CallingApp.EmissionWavelengthSpinner.Value,'nm');
             app.lambda = wavelength.inMeter;
             
-            app.RIfluidEditField.Value = app.CallingApp.RefractiveIndexSpecimenSpinner.Value;
-            app.RI_fluid = app.RIfluidEditField.Value;
+            app.RIsamplelayerEditField.Value = app.CallingApp.RefractiveIndexSpecimenSpinner.Value;
+            app.RI_fluid = app.RIsamplelayerEditField.Value;
             
             % Objective
             app.MagnificationEditField.Value = app.CallingApp.MagnificationSpinner.Value;
@@ -203,9 +203,9 @@ classdef aberration_measurement_exported < matlab.apps.AppBase
             end
         end
 
-        % Value changed function: RIfluidEditField
-        function RIfluidEditFieldValueChanged(app, event)
-            app.RI_fluid = app.RIfluidEditField.Value;
+        % Value changed function: RIsamplelayerEditField
+        function RIsamplelayerEditFieldValueChanged(app, event)
+            app.RI_fluid = app.RIsamplelayerEditField.Value;
             if app.UIAxesSimulationPsfXZ.Visible == "on"
                 CalculatemodelButtonPushed(app)
             end
@@ -272,7 +272,7 @@ classdef aberration_measurement_exported < matlab.apps.AppBase
                 load(fullfile(path,file),"parameters");
                 app.BeaddiameterEditField.Value = parameters.beadDiameter;
                 app.zincrementEditField.Value = parameters.zIncrement;
-                app.RIfluidEditField.Value = parameters.RiFluid;
+                app.RIsamplelayerEditField.Value = parameters.RiFluid;
                 app.EmissionwavelengthEditField.Value = parameters.emissionWavelength;
                 app.MagnificationEditField.Value = parameters.magnification;
                 app.NAEditField.Value = parameters.NA;
@@ -888,17 +888,17 @@ classdef aberration_measurement_exported < matlab.apps.AppBase
             app.BeaddiameterEditField.Position = [145 626 58 22];
             app.BeaddiameterEditField.Value = 0.17;
 
-            % Create RIfluidEditFieldLabel
-            app.RIfluidEditFieldLabel = uilabel(app.PSFcharacterizationUIFigure);
-            app.RIfluidEditFieldLabel.HorizontalAlignment = 'right';
-            app.RIfluidEditFieldLabel.Position = [93 568 43 22];
-            app.RIfluidEditFieldLabel.Text = 'RI fluid';
+            % Create RIsamplelayerEditFieldLabel
+            app.RIsamplelayerEditFieldLabel = uilabel(app.PSFcharacterizationUIFigure);
+            app.RIsamplelayerEditFieldLabel.HorizontalAlignment = 'right';
+            app.RIsamplelayerEditFieldLabel.Position = [48 568 88 22];
+            app.RIsamplelayerEditFieldLabel.Text = 'RI sample layer';
 
-            % Create RIfluidEditField
-            app.RIfluidEditField = uieditfield(app.PSFcharacterizationUIFigure, 'numeric');
-            app.RIfluidEditField.ValueChangedFcn = createCallbackFcn(app, @RIfluidEditFieldValueChanged, true);
-            app.RIfluidEditField.Position = [145 568 58 22];
-            app.RIfluidEditField.Value = 1.33;
+            % Create RIsamplelayerEditField
+            app.RIsamplelayerEditField = uieditfield(app.PSFcharacterizationUIFigure, 'numeric');
+            app.RIsamplelayerEditField.ValueChangedFcn = createCallbackFcn(app, @RIsamplelayerEditFieldValueChanged, true);
+            app.RIsamplelayerEditField.Position = [145 568 58 22];
+            app.RIsamplelayerEditField.Value = 1.33;
 
             % Create MagnificationEditFieldLabel
             app.MagnificationEditFieldLabel = uilabel(app.PSFcharacterizationUIFigure);

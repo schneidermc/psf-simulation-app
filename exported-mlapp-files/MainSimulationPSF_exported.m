@@ -1766,8 +1766,8 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
 
             % Create RefractiveIndexSpecimenLabel
             app.RefractiveIndexSpecimenLabel = uilabel(app.MicroscopeRITab);
-            app.RefractiveIndexSpecimenLabel.Position = [12 92 85 22];
-            app.RefractiveIndexSpecimenLabel.Text = 'RI Specimen';
+            app.RefractiveIndexSpecimenLabel.Position = [12 92 88 22];
+            app.RefractiveIndexSpecimenLabel.Text = 'RI sample layer';
 
             % Create RefractiveIndexSpecimenSpinner
             app.RefractiveIndexSpecimenSpinner = uispinner(app.MicroscopeRITab);
@@ -1782,7 +1782,7 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.RefractiveIndexIntermediateLayerLabel = uilabel(app.MicroscopeRITab);
             app.RefractiveIndexIntermediateLayerLabel.Visible = 'off';
             app.RefractiveIndexIntermediateLayerLabel.Position = [12 36 116 22];
-            app.RefractiveIndexIntermediateLayerLabel.Text = 'RI Intermediate layer';
+            app.RefractiveIndexIntermediateLayerLabel.Text = 'RI intermediate layer';
 
             % Create RefractiveIndexIntermediateLayerSpinner
             app.RefractiveIndexIntermediateLayerSpinner = uispinner(app.MicroscopeRITab);
@@ -1798,7 +1798,7 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             % Create RefractiveIndexImmersionMediumLabel
             app.RefractiveIndexImmersionMediumLabel = uilabel(app.MicroscopeRITab);
             app.RefractiveIndexImmersionMediumLabel.Position = [12 64 122 22];
-            app.RefractiveIndexImmersionMediumLabel.Text = 'RI Immersion medium';
+            app.RefractiveIndexImmersionMediumLabel.Text = 'RI immersion medium';
 
             % Create RefractiveIndexImmersionMediumSpinner
             app.RefractiveIndexImmersionMediumSpinner = uispinner(app.MicroscopeRITab);
