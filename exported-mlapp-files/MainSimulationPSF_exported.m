@@ -248,21 +248,21 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             if strcmp(app.TabGroup.SelectedTab.Title, 'Options') && app.CalculateCramrRaoBoundCheckBox.Value 
                 psf.CRB = psf.calculateCRB;
                 CRBinNanometer = round(psf.CRB.inNanometer, 3, 'significant');
-                upperBound = 200; % display upper bound if CRB is larger than some threshold
+                upperBound = 1000; % display upper bound if CRB is larger than some threshold
                 if CRBinNanometer(1) > upperBound
-                    CRBxOutput = ['x:  ','> ', num2str(200), ' nm'];
+                    CRBxOutput = ['x:  ','> ', num2str(upperBound), ' nm'];
                 else
                     CRBxOutput = ['x:  ',num2str(CRBinNanometer(1)), ' nm']; 
                 end
 
                 if CRBinNanometer(2) > upperBound
-                    CRByOutput = ['y:  ','> ', num2str(200), ' nm'];
+                    CRByOutput = ['y:  ','> ', num2str(upperBound), ' nm'];
                 else
                     CRByOutput = ['y:  ',num2str(CRBinNanometer(2)), ' nm']; 
                 end
 
                 if CRBinNanometer(3) > upperBound
-                    CRBzOutput = ['z:  ','> ', num2str(200), ' nm'];
+                    CRBzOutput = ['z:  ','> ', num2str(upperBound), ' nm'];
                 else
                     CRBzOutput = ['z:  ',num2str(CRBinNanometer(3)), ' nm']; 
                 end
@@ -2009,42 +2009,49 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             % Create HorizontalComaCheckBox
             app.HorizontalComaCheckBox = uicheckbox(app.AberrationsTab);
             app.HorizontalComaCheckBox.ValueChangedFcn = createCallbackFcn(app, @HorizontalComaCheckBoxValueChanged, true);
+            app.HorizontalComaCheckBox.Tooltip = {'Noll index: 8'};
             app.HorizontalComaCheckBox.Text = 'Horizontal coma';
             app.HorizontalComaCheckBox.Position = [337 166 128 22];
 
             % Create VerticalComaCheckBox
             app.VerticalComaCheckBox = uicheckbox(app.AberrationsTab);
             app.VerticalComaCheckBox.ValueChangedFcn = createCallbackFcn(app, @VerticalComaCheckBoxValueChanged, true);
+            app.VerticalComaCheckBox.Tooltip = {'Noll index: 7'};
             app.VerticalComaCheckBox.Text = 'Vertical coma';
             app.VerticalComaCheckBox.Position = [337 189 128 22];
 
             % Create VerticalAstigmatismCheckBox
             app.VerticalAstigmatismCheckBox = uicheckbox(app.AberrationsTab);
             app.VerticalAstigmatismCheckBox.ValueChangedFcn = createCallbackFcn(app, @VerticalAstigmatismCheckBoxValueChanged, true);
+            app.VerticalAstigmatismCheckBox.Tooltip = {'Noll index: 6'};
             app.VerticalAstigmatismCheckBox.Text = 'Vertical astigmatism';
             app.VerticalAstigmatismCheckBox.Position = [337 212 128 22];
 
             % Create ObliqueAstigmatismCheckBox
             app.ObliqueAstigmatismCheckBox = uicheckbox(app.AberrationsTab);
             app.ObliqueAstigmatismCheckBox.ValueChangedFcn = createCallbackFcn(app, @ObliqueAstigmatismCheckBoxValueChanged, true);
+            app.ObliqueAstigmatismCheckBox.Tooltip = {'Noll index: 5'};
             app.ObliqueAstigmatismCheckBox.Text = 'Oblique astigmatism';
             app.ObliqueAstigmatismCheckBox.Position = [337 235 128 22];
 
             % Create PrimarySphericalCheckBox
             app.PrimarySphericalCheckBox = uicheckbox(app.AberrationsTab);
             app.PrimarySphericalCheckBox.ValueChangedFcn = createCallbackFcn(app, @PrimarySphericalCheckBoxValueChanged, true);
+            app.PrimarySphericalCheckBox.Tooltip = {'Noll index: 11'};
             app.PrimarySphericalCheckBox.Text = 'Primary spherical';
             app.PrimarySphericalCheckBox.Position = [42 164 128 22];
 
             % Create DefocusCheckBox
             app.DefocusCheckBox = uicheckbox(app.AberrationsTab);
             app.DefocusCheckBox.ValueChangedFcn = createCallbackFcn(app, @DefocusCheckBoxValueChanged, true);
+            app.DefocusCheckBox.Tooltip = {'Noll index: 4'};
             app.DefocusCheckBox.Text = 'Defocus';
             app.DefocusCheckBox.Position = [42 188 128 22];
 
             % Create HorizontalTiltCheckBox
             app.HorizontalTiltCheckBox = uicheckbox(app.AberrationsTab);
             app.HorizontalTiltCheckBox.ValueChangedFcn = createCallbackFcn(app, @HorizontalTiltCheckBoxValueChanged, true);
+            app.HorizontalTiltCheckBox.Tooltip = {'Noll index: 2'};
             app.HorizontalTiltCheckBox.Text = 'Horizontal tilt';
             app.HorizontalTiltCheckBox.Position = [42 212 128 22];
 
@@ -2067,6 +2074,7 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             % Create VerticalTiltCheckBox
             app.VerticalTiltCheckBox = uicheckbox(app.AberrationsTab);
             app.VerticalTiltCheckBox.ValueChangedFcn = createCallbackFcn(app, @VerticalTiltCheckBoxValueChanged, true);
+            app.VerticalTiltCheckBox.Tooltip = {'Noll index: 3'};
             app.VerticalTiltCheckBox.Text = 'Vertical tilt';
             app.VerticalTiltCheckBox.Position = [42 236 128 22];
 
