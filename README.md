@@ -23,3 +23,4 @@ This project contains contributions by the following authors:
 * Magdalena C Schneider
 * Fabian Hinterer
 * Alexander Jesacher
+* Gerhard J Schütz
