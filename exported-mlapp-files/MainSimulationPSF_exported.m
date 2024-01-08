@@ -1369,12 +1369,12 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             try
                 mask = loadSingleMatrix(fullfile(pathname, filename));
                 app.transmissionMask = Transmission(mask);
-                if ~isempty(app.PlotTransmissionMask)
-                    app.PlotTransmissionMask.updatePlot();
-                end
                 simulateAndDisplayPSF(app);
                 app.TransmissionMaskFilepathLabel.Text = ['Loaded file: ', filename];
                 app.isTransmissionMaskLoaded = true;
+                if ~isempty(app.PlotTransmissionMask)
+                    app.PlotTransmissionMask.updatePlot();
+                end
             catch
                 warndlg('Error loading file.','Warning');
             end
