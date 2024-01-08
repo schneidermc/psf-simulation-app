@@ -543,6 +543,8 @@ classdef aberration_measurement_exported < matlab.apps.AppBase
             cb.Ticks = (0:0.25:1);
             cb.TickLabels = {'0','','0.5','','1'};
             set(app.UIAxes_Transmission,'box','off')
+
+            app.transmissionMask = fittedTransmissionMask;
             
             % Zernikes
             stem(app.UIAxes_Zernike, app.modes(3:end), app.Z_phase(3:end)); % omit 2nd and 3rd (tip/tilt) as they are set to 0
@@ -642,7 +644,7 @@ classdef aberration_measurement_exported < matlab.apps.AppBase
 
         % Button pushed function: SavetransmissionButton
         function SavetransmissionButtonPushed(app, event)
-            transmission = app.transmissionMask;            
+            transmission = app.transmissionMask.mask;            
             [file,path] = uiputfile('*.mat','Save results','transmission.mat');
             save(fullfile(path,file),"transmission")
         end
@@ -731,8 +733,8 @@ classdef aberration_measurement_exported < matlab.apps.AppBase
             app.UIAxes_Transmission.YTick = [];
             app.UIAxes_Transmission.ZTick = [];
             app.UIAxes_Transmission.Box = 'on';
-            app.UIAxes_Transmission.Visible = 'off';
             colormap(app.UIAxes_Transmission, 'gray')
+            app.UIAxes_Transmission.Visible = 'off';
             app.UIAxes_Transmission.Position = [729 289 165 160];
 
             % Create SavetransmissionButton
