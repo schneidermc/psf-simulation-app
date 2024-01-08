@@ -3,10 +3,11 @@ classdef aberration_measurement_exported < matlab.apps.AppBase
     % Properties that correspond to app components
     properties (Access = public)
         PSFcharacterizationUIFigure   matlab.ui.Figure
+        PloterrorButton               matlab.ui.control.StateButton
         NumberZernikesEditField       matlab.ui.control.NumericEditField
         NumberZernikesEditFieldLabel  matlab.ui.control.Label
         parameterFile                 matlab.ui.control.EditField
-        LoadparametersButton          matlab.ui.control.StateButton
+        LoadparametersButton          matlab.ui.control.Button
         FitresultsLabel               matlab.ui.control.Label
         PixelsizephysicalEditField    matlab.ui.control.NumericEditField
         PixelsizephysicalLabel        matlab.ui.control.Label
@@ -31,7 +32,7 @@ classdef aberration_measurement_exported < matlab.apps.AppBase
         text_stackfile                matlab.ui.control.EditField
         ErrorLabel                    matlab.ui.control.Label
         Lamp                          matlab.ui.control.Lamp
-        LoadzstackButton              matlab.ui.control.StateButton
+        LoadzstackButton              matlab.ui.control.Button
         FitButton                     matlab.ui.control.Button
         zSliderSimulation             matlab.ui.control.Slider
         CalculatemodelButton          matlab.ui.control.Button
@@ -63,10 +64,13 @@ classdef aberration_measurement_exported < matlab.apps.AppBase
         
         stack % z-stack of experimental bead image
         stack_simu % z-stack of simulated bead image
-        PSF_xz % max. intensity projection
+        stack_error % error between experimental and simulated image
+        PSF_xz % projection
         PSF_xy
         PSF_simu_xz
         PSF_simu_xy
+        PSF_simu_xz_error
+        PSF_simu_xy_error
         E_BFP % stack of 6 back focal plane fields
         dia_bead = 100e-9 % diameter of bead (in SI units [m])
         pupil % binary mask defining objective pupil in Fourier space
@@ -109,6 +113,7 @@ classdef aberration_measurement_exported < matlab.apps.AppBase
             y_axis = linspace(0, (Ny-1)*ux*1e6, Ny);
             imagesc(h,x_axis, y_axis, data);
             set(h,'DataAspectRatio',[ux, ux, ux]);
+            set(h,'YDir','normal')
             axis(h,"tight");
             colormap(h,app.CallingApp.ColormapDropDown.Value)
         end
@@ -137,6 +142,12 @@ classdef aberration_measurement_exported < matlab.apps.AppBase
             axis(axes, 'tight');
             colorbar(axes);          
             axis(axes, "off");
+        end
+
+        function calculate_error(app)
+            app.stack_error = abs(app.stack_simu - app.stack);
+            app.PSF_simu_xz_error = abs(app.PSF_simu_xz - app.PSF_xz);
+            app.PSF_simu_xy_error = abs(app.PSF_simu_xy - app.PSF_xy);
         end
         
         function error = show_error(app, stack_A, stack_B)
@@ -262,7 +273,7 @@ classdef aberration_measurement_exported < matlab.apps.AppBase
             end
         end
 
-        % Value changed function: LoadparametersButton
+        % Button pushed function: LoadparametersButton
         function LoadparametersButtonValueChanged(app, event)
             [file, path] = uigetfile('*.mat');
 
@@ -296,8 +307,8 @@ classdef aberration_measurement_exported < matlab.apps.AppBase
             end
         end
 
-        % Value changed function: LoadzstackButton
-        function LoadzstackButtonValueChanged(app, event)
+        % Button pushed function: LoadzstackButton
+        function LoadzstackButtonPushed(app, event)
             % Loading stack of bead images
             [filename, pathname] = uigetfile('*.tif');
             app.info = imfinfo([pathname, filename]);
@@ -387,13 +398,17 @@ classdef aberration_measurement_exported < matlab.apps.AppBase
 
             if app.stack_loaded == 1
                 val = round(app.zSliderMeasurement.Value);
+                calculate_error(app)
                 show_error(app, app.stack, app.stack_simu);
                 app.FitButton.Enable = "on";
+                app.PloterrorButton.Visible = "on";
+                app.PloterrorButton.Enable = "on";
             else
                 val = app.Nz;
             end
             flippedValue = app.Nz + 1 - val;
             app.zSliderSimulation.Value = val;
+            app.PloterrorButton.Value = 0;
 
             display_projection(app, app.UIAxesSimulationPsfXZ, app.PSF_simu_xz, app.Nx, app.Ny, app.Nz, app.ux, app.dz);
             display_single_image(app, app.UIAxesSimulationPsfXY, app.Nx, app.Ny, app.ux, app.stack_simu(:,:,val));
@@ -557,13 +572,21 @@ classdef aberration_measurement_exported < matlab.apps.AppBase
             app.PSF_simu_xz = rot90(squeeze(sum(app.stack_simu,2))); %standard projection
             display_projection(app, app.UIAxesSimulationPsfXZ, app.PSF_simu_xz, app.Nx, app.Ny, app.Nz, app.ux, app.dz);
             display_single_image(app, app.UIAxesSimulationPsfXY, app.Nx, app.Ny, app.ux, app.stack_simu(:,:,1));
+            app.UIAxesSimulationPsfXZ.Title.String = 'Model';
+            app.PloterrorButton.Text = 'Plot error';
             app.zSliderSimulation.Value = app.Nz;
             drawZLineMeasurement(app, 0);
             display_single_image(app, app.UIAxesMeasurementPsfXY, app.Nx, app.Ny, app.ux, app.stack(:,:,1));
             app.zSliderMeasurement.Value = app.Nz;
             drawZLineSimulation(app, 0);
             
+            % Error
+            if app.PloterrorButton.Value == 1
+                app.PloterrorButton.Value = 0; % reset button
+            end
+            calculate_error(app)
             show_error(app, app.stack, app.stack_simu);
+
             app.SaveaberrationsButton.Enable = "on";
             app.SavetransmissionButton.Enable = "on";
         end
@@ -573,8 +596,19 @@ classdef aberration_measurement_exported < matlab.apps.AppBase
             app.zSliderSimulation.Value = round(event.Value);
             app.zSliderMeasurement.Value = app.zSliderSimulation.Value;
             flippedValue = app.Nz + 1 - app.zSliderSimulation.Value;
-            data = app.stack_simu(:,:,flippedValue);
-            display_single_image(app, app.UIAxesSimulationPsfXY, app.Nx, app.Ny, app.ux, data)
+            if app.PloterrorButton.Value
+                % Show error plot
+                data = app.stack_error(:,:,flippedValue);
+                display_single_image(app, app.UIAxesSimulationPsfXY, app.Nx, app.Ny, app.ux, data)
+                colormap(app.UIAxesSimulationPsfXZ,'hot')
+                colormap(app.UIAxesSimulationPsfXY,'hot')
+            else
+                % Show fitted model
+                data = app.stack_simu(:,:,flippedValue);
+                display_single_image(app, app.UIAxesSimulationPsfXY, app.Nx, app.Ny, app.ux, data)
+                colormap(app.UIAxesSimulationPsfXZ,app.CallingApp.ColormapDropDown.Value)
+                colormap(app.UIAxesSimulationPsfXY,app.CallingApp.ColormapDropDown.Value)
+            end
             display_single_image(app, app.UIAxesMeasurementPsfXY, app.Nx, app.Ny, app.ux, app.stack(:,:,flippedValue))
             app.drawZLineMeasurement((flippedValue-1)*app.zincrementEditField.Value)
             app.drawZLineSimulation((flippedValue-1)*app.zincrementEditField.Value)
@@ -582,14 +616,7 @@ classdef aberration_measurement_exported < matlab.apps.AppBase
 
         % Value changing function: zSliderSimulation
         function zSliderSimulationValueChanging(app, event)
-            app.zSliderSimulation.Value = round(event.Value);
-            app.zSliderMeasurement.Value = app.zSliderSimulation.Value;
-            flippedValue = app.Nz + 1 - app.zSliderSimulation.Value;
-            data = app.stack_simu(:,:,flippedValue);
-            display_single_image(app, app.UIAxesSimulationPsfXY, app.Nx, app.Ny, app.ux, data)
-            display_single_image(app, app.UIAxesMeasurementPsfXY, app.Nx, app.Ny, app.ux, app.stack(:,:,flippedValue))
-            app.drawZLineMeasurement((flippedValue-1)*app.zincrementEditField.Value)
-            app.drawZLineSimulation((flippedValue-1)*app.zincrementEditField.Value)
+            zSliderSimulationValueChanged(app, event)
         end
 
         % Value changed function: zSliderMeasurement
@@ -653,6 +680,30 @@ classdef aberration_measurement_exported < matlab.apps.AppBase
         function NumberZernikesEditFieldValueChanged(app, event)
             app.NumberZernikesEditField.Value = event.Value;
             app.modes = 2:app.NumberZernikesEditField.Value;
+        end
+
+        % Value changed function: PloterrorButton
+        function PloterrorButtonValueChanged(app, event)
+            app.PloterrorButton.Value = event.Value;
+            val = app.Nz + 1 - app.zSliderSimulation.Value;
+            if app.PloterrorButton.Value
+                app.PloterrorButton.Text = 'Plot model';
+                % Show error plot
+                display_projection(app, app.UIAxesSimulationPsfXZ, app.PSF_simu_xz_error, app.Nx, app.Ny, app.Nz, app.ux, app.dz);
+                display_single_image(app, app.UIAxesSimulationPsfXY, app.Nx, app.Ny, app.ux, app.stack_error(:,:,val));
+                app.UIAxesSimulationPsfXZ.Title.String = 'Model error';
+                colormap(app.UIAxesSimulationPsfXZ,'hot')
+                colormap(app.UIAxesSimulationPsfXY,'hot')
+            else
+                app.PloterrorButton.Text = 'Plot error';
+                % Show fitted model
+                display_projection(app, app.UIAxesSimulationPsfXZ, app.PSF_simu_xz, app.Nx, app.Ny, app.Nz, app.ux, app.dz);
+                display_single_image(app, app.UIAxesSimulationPsfXY, app.Nx, app.Ny, app.ux, app.stack_simu(:,:,val));
+                app.UIAxesSimulationPsfXZ.Title.String = 'Model';
+                colormap(app.UIAxesSimulationPsfXZ,app.CallingApp.ColormapDropDown.Value)
+                colormap(app.UIAxesSimulationPsfXY,app.CallingApp.ColormapDropDown.Value)
+            end
+            app.drawZLineSimulation((val-1)*app.zincrementEditField.Value)
         end
     end
 
@@ -802,11 +853,10 @@ classdef aberration_measurement_exported < matlab.apps.AppBase
             app.FitButton.Text = 'Fit';
 
             % Create LoadzstackButton
-            app.LoadzstackButton = uibutton(app.PSFcharacterizationUIFigure, 'state');
-            app.LoadzstackButton.ValueChangedFcn = createCallbackFcn(app, @LoadzstackButtonValueChanged, true);
-            app.LoadzstackButton.VerticalAlignment = 'top';
+            app.LoadzstackButton = uibutton(app.PSFcharacterizationUIFigure, 'push');
+            app.LoadzstackButton.ButtonPushedFcn = createCallbackFcn(app, @LoadzstackButtonPushed, true);
+            app.LoadzstackButton.Position = [549 596 110 23];
             app.LoadzstackButton.Text = 'Load z-stack';
-            app.LoadzstackButton.Position = [548 597 110 23];
 
             % Create Lamp
             app.Lamp = uilamp(app.PSFcharacterizationUIFigure);
@@ -817,7 +867,7 @@ classdef aberration_measurement_exported < matlab.apps.AppBase
             % Create ErrorLabel
             app.ErrorLabel = uilabel(app.PSFcharacterizationUIFigure);
             app.ErrorLabel.Visible = 'off';
-            app.ErrorLabel.Position = [667 568 154 22];
+            app.ErrorLabel.Position = [667 568 148 22];
             app.ErrorLabel.Text = 'Error = ';
 
             % Create text_stackfile
@@ -966,11 +1016,10 @@ classdef aberration_measurement_exported < matlab.apps.AppBase
             app.FitresultsLabel.Text = 'Fit results';
 
             % Create LoadparametersButton
-            app.LoadparametersButton = uibutton(app.PSFcharacterizationUIFigure, 'state');
-            app.LoadparametersButton.ValueChangedFcn = createCallbackFcn(app, @LoadparametersButtonValueChanged, true);
-            app.LoadparametersButton.VerticalAlignment = 'top';
+            app.LoadparametersButton = uibutton(app.PSFcharacterizationUIFigure, 'push');
+            app.LoadparametersButton.ButtonPushedFcn = createCallbackFcn(app, @LoadparametersButtonValueChanged, true);
+            app.LoadparametersButton.Position = [549 625 110 23];
             app.LoadparametersButton.Text = 'Load parameters';
-            app.LoadparametersButton.Position = [548 626 110 23];
 
             % Create parameterFile
             app.parameterFile = uieditfield(app.PSFcharacterizationUIFigure, 'text');
@@ -990,6 +1039,14 @@ classdef aberration_measurement_exported < matlab.apps.AppBase
             app.NumberZernikesEditField.ValueChangedFcn = createCallbackFcn(app, @NumberZernikesEditFieldValueChanged, true);
             app.NumberZernikesEditField.Position = [667 539 32 22];
             app.NumberZernikesEditField.Value = 21;
+
+            % Create PloterrorButton
+            app.PloterrorButton = uibutton(app.PSFcharacterizationUIFigure, 'state');
+            app.PloterrorButton.ValueChangedFcn = createCallbackFcn(app, @PloterrorButtonValueChanged, true);
+            app.PloterrorButton.Enable = 'off';
+            app.PloterrorButton.Visible = 'off';
+            app.PloterrorButton.Text = 'Plot error';
+            app.PloterrorButton.Position = [820 568 75 23];
 
             % Show the figure after all components are created
             app.PSFcharacterizationUIFigure.Visible = 'on';
