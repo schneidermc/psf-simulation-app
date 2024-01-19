@@ -91,9 +91,6 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
         VerticalAstigmatismCheckBox     matlab.ui.control.CheckBox
         VerticalComaCheckBox            matlab.ui.control.CheckBox
         HorizontalComaCheckBox          matlab.ui.control.CheckBox
-        FitZernikeButton                matlab.ui.control.Button
-        FitZernikeLabel                 matlab.ui.control.Label
-        FitZernikeaberrationsLabel      matlab.ui.control.Label
         ZernikeAberrationsShowplotCheckBox  matlab.ui.control.CheckBox
         ZernikeaberrationsLabel         matlab.ui.control.Label
         SpecifyZernikeaberrationsButtonGroup  matlab.ui.container.ButtonGroup
@@ -128,6 +125,14 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
         TransmissionMaskShowplotCheckBox  matlab.ui.control.CheckBox
         TransmissionLabel               matlab.ui.control.Label
         OptionsTab                      matlab.ui.container.Tab
+        RandomdatasetLabel              matlab.ui.control.Label
+        GenerateButton                  matlab.ui.control.Button
+        FitPSFButton                    matlab.ui.control.Button
+        PSFfittingLabel                 matlab.ui.control.Label
+        AdvancedfeaturesLabel           matlab.ui.control.Label
+        ComputationalsettingsLabel      matlab.ui.control.Label
+        DiscretizationBFPEditField      matlab.ui.control.NumericEditField
+        DiscretizationBFPEditFieldLabel  matlab.ui.control.Label
         Export3DPSFOutputField          matlab.ui.control.Label
         Export2DPSFOutputField          matlab.ui.control.Label
         Export3DPSFButton               matlab.ui.control.Button
@@ -175,7 +180,7 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
         zernikeWeights % store Zernike weights
 
         nPixels {mustBeInteger} = 25
-        nDiscretizationBFP = 129
+        nDiscretizationBFP {mustBeInteger, mustBeOdd} = 129
         
         parameters
     end
@@ -289,7 +294,8 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             par.nPhotons = app.PhotonnumberSpinner.Value; % signal photon count
             par.backgroundNoise = (app.BackgroundnoisestdSpinner.Value)^2; % background mean photon count
             par.heightIntermediateLayer = Length(app.IntermediateLayerThicknessSpinner.Value, 'mu');
-            
+            par.nDiscretizationBFP = app.DiscretizationBFPEditField.Value;
+
             if app.ShowPsf3DCheckBox.Value
                 zStep = app.StepsizeEditField.Value;
                 nSteps = app.NumberstepsEditField.Value - 1;
@@ -1048,8 +1054,8 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             simulateAndDisplayPSF(app);
         end
 
-        % Button pushed function: FitZernikeButton
-        function FitZernikeButtonPushed(app, event)
+        % Button pushed function: FitPSFButton
+        function FitPSFButtonPushed(app, event)
             app.FitZernikeApp = aberration_measurement(app);
         end
 
@@ -1422,21 +1428,18 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
         function xpositionSpinnerValueChanging(app, event)
             app.xpositionSpinner.Value = event.Value;
             simulateAndDisplayPSF(app);
-            
         end
 
         % Value changed function: ypositionSpinner
         function ypositionSpinnerValueChanged(app, event)
             app.ypositionSpinner.Value = event.Value;
             simulateAndDisplayPSF(app);
-            
         end
 
         % Value changing function: ypositionSpinner
         function ypositionSpinnerValueChanging(app, event)
             app.ypositionSpinner.Value = event.Value;
             simulateAndDisplayPSF(app);
-            
         end
 
         % Button pushed function: Export2DPSFButton
@@ -1474,6 +1477,18 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.Export3DPSFOutputField.Visible = 'on'; 
             pause(2)
             app.Export3DPSFOutputField.Visible = 'off';
+        end
+
+        % Value changed function: DiscretizationBFPEditField
+        function DiscretizationBFPEditFieldValueChanged(app, event)
+            nBFP = event.Value;
+            if mod(nBFP,2)==0
+                nBFP = nBFP+1; 
+            end
+            app.DiscretizationBFPEditField.Value = nBFP;
+            app.nDiscretizationBFP = nBFP;
+            %app.parameters.nDiscretizationBFP = nBFP;
+            simulateAndDisplayPSF(app);
         end
     end
 
@@ -1988,24 +2003,6 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.ZernikeAberrationsShowplotCheckBox.Text = 'Show plot';
             app.ZernikeAberrationsShowplotCheckBox.Position = [166 321 76 22];
 
-            % Create FitZernikeaberrationsLabel
-            app.FitZernikeaberrationsLabel = uilabel(app.AberrationsTab);
-            app.FitZernikeaberrationsLabel.FontSize = 13;
-            app.FitZernikeaberrationsLabel.FontWeight = 'bold';
-            app.FitZernikeaberrationsLabel.Position = [16 45 145 22];
-            app.FitZernikeaberrationsLabel.Text = 'Fit Zernike aberrations';
-
-            % Create FitZernikeLabel
-            app.FitZernikeLabel = uilabel(app.AberrationsTab);
-            app.FitZernikeLabel.Position = [16 15 291 22];
-            app.FitZernikeLabel.Text = 'Estimate Zernike coefficients from experimental data:';
-
-            % Create FitZernikeButton
-            app.FitZernikeButton = uibutton(app.AberrationsTab, 'push');
-            app.FitZernikeButton.ButtonPushedFcn = createCallbackFcn(app, @FitZernikeButtonPushed, true);
-            app.FitZernikeButton.Position = [311 14 100 23];
-            app.FitZernikeButton.Text = 'Fit Zernike';
-
             % Create HorizontalComaCheckBox
             app.HorizontalComaCheckBox = uicheckbox(app.AberrationsTab);
             app.HorizontalComaCheckBox.ValueChangedFcn = createCallbackFcn(app, @HorizontalComaCheckBoxValueChanged, true);
@@ -2499,7 +2496,7 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.NumberstepsEditFieldLabel.Enable = 'off';
             app.NumberstepsEditFieldLabel.Visible = 'off';
             app.NumberstepsEditFieldLabel.Tooltip = {''};
-            app.NumberstepsEditFieldLabel.Position = [120 246 80 22];
+            app.NumberstepsEditFieldLabel.Position = [351 258 80 22];
             app.NumberstepsEditFieldLabel.Text = 'Number steps';
 
             % Create NumberstepsEditField
@@ -2512,7 +2509,7 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.NumberstepsEditField.Enable = 'off';
             app.NumberstepsEditField.Visible = 'off';
             app.NumberstepsEditField.Tooltip = {''};
-            app.NumberstepsEditField.Position = [210 246 36 22];
+            app.NumberstepsEditField.Position = [445 258 36 22];
             app.NumberstepsEditField.Value = 25;
 
             % Create StepsizeEditFieldLabel
@@ -2521,7 +2518,7 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.StepsizeEditFieldLabel.Enable = 'off';
             app.StepsizeEditFieldLabel.Visible = 'off';
             app.StepsizeEditFieldLabel.Tooltip = {''};
-            app.StepsizeEditFieldLabel.Position = [270 246 58 22];
+            app.StepsizeEditFieldLabel.Position = [351 229 58 22];
             app.StepsizeEditFieldLabel.Text = 'Step size';
 
             % Create StepsizeEditField
@@ -2532,50 +2529,107 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.StepsizeEditField.BusyAction = 'cancel';
             app.StepsizeEditField.Enable = 'off';
             app.StepsizeEditField.Visible = 'off';
-            app.StepsizeEditField.Position = [336 246 68 22];
+            app.StepsizeEditField.Position = [417 229 68 22];
             app.StepsizeEditField.Value = 100;
 
             % Create CalculateCramrRaoBoundCheckBox
             app.CalculateCramrRaoBoundCheckBox = uicheckbox(app.OptionsTab);
             app.CalculateCramrRaoBoundCheckBox.ValueChangedFcn = createCallbackFcn(app, @CalculateCramrRaoBoundCheckBoxValueChanged, true);
             app.CalculateCramrRaoBoundCheckBox.Text = 'Calculate Cramér Rao Bound';
-            app.CalculateCramrRaoBoundCheckBox.Position = [388 144 179 22];
+            app.CalculateCramrRaoBoundCheckBox.Position = [351 54 179 22];
 
             % Create CRBOutputField
             app.CRBOutputField = uilabel(app.OptionsTab);
-            app.CRBOutputField.Position = [407 91 137 47];
+            app.CRBOutputField.Position = [359 5 137 47];
             app.CRBOutputField.Text = '';
 
             % Create CramrRaoBoundLabel
             app.CramrRaoBoundLabel = uilabel(app.OptionsTab);
-            app.CramrRaoBoundLabel.FontSize = 13;
             app.CramrRaoBoundLabel.FontWeight = 'bold';
             app.CramrRaoBoundLabel.Tooltip = {'Select which windows are shown'};
-            app.CramrRaoBoundLabel.Position = [388 177 125 22];
+            app.CramrRaoBoundLabel.Position = [351 82 116 22];
             app.CramrRaoBoundLabel.Text = 'Cramér-Rao Bound';
 
             % Create Export2DPSFButton
             app.Export2DPSFButton = uibutton(app.OptionsTab, 'push');
             app.Export2DPSFButton.ButtonPushedFcn = createCallbackFcn(app, @Export2DPSFButtonPushed, true);
-            app.Export2DPSFButton.Position = [422 273 100 22];
+            app.Export2DPSFButton.Position = [114 267 100 22];
             app.Export2DPSFButton.Text = 'Export 2D PSF';
 
             % Create Export3DPSFButton
             app.Export3DPSFButton = uibutton(app.OptionsTab, 'push');
             app.Export3DPSFButton.ButtonPushedFcn = createCallbackFcn(app, @Export3DPSFButtonPushed, true);
             app.Export3DPSFButton.Visible = 'off';
-            app.Export3DPSFButton.Position = [422 246 100 22];
+            app.Export3DPSFButton.Position = [115 241 100 22];
             app.Export3DPSFButton.Text = 'Export 3D PSF';
 
             % Create Export2DPSFOutputField
             app.Export2DPSFOutputField = uilabel(app.OptionsTab);
-            app.Export2DPSFOutputField.Position = [526 273 63 21];
+            app.Export2DPSFOutputField.Position = [223 268 63 21];
             app.Export2DPSFOutputField.Text = '';
 
             % Create Export3DPSFOutputField
             app.Export3DPSFOutputField = uilabel(app.OptionsTab);
-            app.Export3DPSFOutputField.Position = [526 247 63 21];
+            app.Export3DPSFOutputField.Position = [223 242 63 21];
             app.Export3DPSFOutputField.Text = '';
+
+            % Create DiscretizationBFPEditFieldLabel
+            app.DiscretizationBFPEditFieldLabel = uilabel(app.OptionsTab);
+            app.DiscretizationBFPEditFieldLabel.BusyAction = 'cancel';
+            app.DiscretizationBFPEditFieldLabel.Tooltip = {'Number of discretization points in the back focal plane (in each direction)'};
+            app.DiscretizationBFPEditFieldLabel.Position = [351 286 118 22];
+            app.DiscretizationBFPEditFieldLabel.Text = 'Discretization BFP';
+
+            % Create DiscretizationBFPEditField
+            app.DiscretizationBFPEditField = uieditfield(app.OptionsTab, 'numeric');
+            app.DiscretizationBFPEditField.Limits = [3 999];
+            app.DiscretizationBFPEditField.RoundFractionalValues = 'on';
+            app.DiscretizationBFPEditField.ValueDisplayFormat = '%5d';
+            app.DiscretizationBFPEditField.ValueChangedFcn = createCallbackFcn(app, @DiscretizationBFPEditFieldValueChanged, true);
+            app.DiscretizationBFPEditField.BusyAction = 'cancel';
+            app.DiscretizationBFPEditField.Tooltip = {'must be an odd integer'};
+            app.DiscretizationBFPEditField.Position = [476 286 40 22];
+            app.DiscretizationBFPEditField.Value = 129;
+
+            % Create ComputationalsettingsLabel
+            app.ComputationalsettingsLabel = uilabel(app.OptionsTab);
+            app.ComputationalsettingsLabel.FontSize = 13;
+            app.ComputationalsettingsLabel.FontWeight = 'bold';
+            app.ComputationalsettingsLabel.Tooltip = {'Select which windows are shown'};
+            app.ComputationalsettingsLabel.Position = [351 321 150 22];
+            app.ComputationalsettingsLabel.Text = 'Computational settings';
+
+            % Create AdvancedfeaturesLabel
+            app.AdvancedfeaturesLabel = uilabel(app.OptionsTab);
+            app.AdvancedfeaturesLabel.FontSize = 13;
+            app.AdvancedfeaturesLabel.FontWeight = 'bold';
+            app.AdvancedfeaturesLabel.Tooltip = {'Select which windows are shown'};
+            app.AdvancedfeaturesLabel.Position = [351 177 122 22];
+            app.AdvancedfeaturesLabel.Text = 'Advanced features';
+
+            % Create PSFfittingLabel
+            app.PSFfittingLabel = uilabel(app.OptionsTab);
+            app.PSFfittingLabel.FontWeight = 'bold';
+            app.PSFfittingLabel.Position = [351 144 145 22];
+            app.PSFfittingLabel.Text = 'PSF fitting';
+
+            % Create FitPSFButton
+            app.FitPSFButton = uibutton(app.OptionsTab, 'push');
+            app.FitPSFButton.ButtonPushedFcn = createCallbackFcn(app, @FitPSFButtonPushed, true);
+            app.FitPSFButton.Tooltip = {'Estimate Zernike coefficients and transmission from experimental data'};
+            app.FitPSFButton.Position = [456 145 100 20];
+            app.FitPSFButton.Text = 'Fit PSF';
+
+            % Create GenerateButton
+            app.GenerateButton = uibutton(app.OptionsTab, 'push');
+            app.GenerateButton.Position = [456 114 100 20];
+            app.GenerateButton.Text = 'Generate';
+
+            % Create RandomdatasetLabel
+            app.RandomdatasetLabel = uilabel(app.OptionsTab);
+            app.RandomdatasetLabel.FontWeight = 'bold';
+            app.RandomdatasetLabel.Position = [351 113 145 22];
+            app.RandomdatasetLabel.Text = 'Random dataset';
 
             % Create CalculatingLamp
             app.CalculatingLamp = uilamp(app.PSFsimulationUIFigure);
