@@ -6,6 +6,7 @@ classdef PSF
         nPixels (1,1) {mustBeInteger, mustBePositive} = 17
 
         % Fluorophore
+        wavelength (1,1) Length {mustBePositive} = Length(680,'nm')
         dipole Dipole = Dipole(0,0)
         position (1,3) Length = Length([0 0 0], 'nm')
         nPhotons (1,1) {mustBeInteger, mustBeNonnegative} = 1e5
@@ -15,7 +16,6 @@ classdef PSF
         rotationalConstraint (1,1) double {mustBeInRange(rotationalConstraint,0,1)} = 1 % 0 = no constraint, 1 = fully constraint
         
         % Microscope setup
-        wavelength (1,1) Length {mustBePositive} = Length(680,'nm')
         defocus (:,1) Length = Length(0, 'nm') % defocus of objective lens (negative values = moving focus into fluid)
         astigmatism = 0 % Zernike coefficient (in units of wavelength, i.e. 0.11 for Zernike coefficient 0.11*lambda)
         objectiveNA (1,1) {mustBePositive} = 0.7

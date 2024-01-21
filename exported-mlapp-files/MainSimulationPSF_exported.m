@@ -14,6 +14,8 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
         xpositionSpinnerLabel           matlab.ui.control.Label
         ypositionSpinner                matlab.ui.control.Spinner
         ypositionSpinnerLabel           matlab.ui.control.Label
+        zpositionSpinner                matlab.ui.control.Spinner
+        zpositionSpinnerLabel           matlab.ui.control.Label
         EmissionWavelengthSpinner       matlab.ui.control.Spinner
         EmissionwavelengthSpinnerLabel  matlab.ui.control.Label
         DipoleorientationLabel          matlab.ui.control.Label
@@ -23,8 +25,6 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
         freelyrotatingButton            matlab.ui.control.RadioButton
         phi                             matlab.ui.control.NumericEditField
         theta                           matlab.ui.control.NumericEditField
-        zpositionSpinner                matlab.ui.control.Spinner
-        zpositionSpinnerLabel           matlab.ui.control.Label
         ConfiguremultiplefluorophoresButton  matlab.ui.control.Button
         ReducedexcitationSwitch         matlab.ui.control.Switch
         ReducedexcitationSwitchLabel    matlab.ui.control.Label
@@ -129,7 +129,7 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
         TransmissionLabel               matlab.ui.control.Label
         OptionsTab                      matlab.ui.container.Tab
         RandomdatasetLabel              matlab.ui.control.Label
-        GenerateButton                  matlab.ui.control.Button
+        GeneratedataButton              matlab.ui.control.Button
         FitPSFButton                    matlab.ui.control.Button
         PSFfittingLabel                 matlab.ui.control.Label
         AdvancedfeaturesLabel           matlab.ui.control.Label
@@ -167,20 +167,22 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
     end
 
     properties (Access = public)
-        PlotPSF             % Plot PSF app
-        PlotPSFThreeDim             % Plot PSF 3D app
-        PlotPhaseMask       % Plot Phase mask app
-        PlotTransmissionMask
-        PlotZernikeAberrations % Plot Zernike aberrations app
-        PlotPolarizedEmission % Plot Polarized emission app
-        Fluorophores        % Fluorophore window
+        PlotPSF                % Subwindow PSF plot
+        PlotPSFThreeDim        % Subwindow 3D PSF
+        PlotPhaseMask          % Subwindow phase mask
+        PlotZernikeAberrations % Subwindow aberrations
+        PlotTransmissionMask   % Subwindow transmission mask
+        PlotPolarizedEmission  % Subwindow polarized emission
+        Fluorophores           % Subwindow fluorophores
+        FitZernikeApp          % Subwindow PSF fitting
+        GenerateDataset        % Subwindow generate dataset
+        
         SwitchMultipleFluorophores logical = 0
-        FitZernikeApp % Call app for Zernike fitting
 
-        phaseMask % store loaded phase mask
+        phaseMask        % store loaded phase mask
         transmissionMask % store loaded transmission mask
-        zernikeIndices % store Zernike indices
-        zernikeWeights % store Zernike weights
+        zernikeIndices   % store Zernike indices
+        zernikeWeights   % store Zernike weights
 
         nPixels {mustBeInteger} = 25
         nDiscretizationBFP {mustBeInteger, mustBeOdd} = 129
@@ -1543,6 +1545,11 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.RotationalconstraintSpinner.Value = event.Value;
             simulateAndDisplayPSF(app);
         end
+
+        % Button pushed function: GeneratedataButton
+        function GeneratedataButtonPushed(app, event)
+            app.GenerateDataset = WindowGenerateDataset(app);
+        end
     end
 
     % Component initialization
@@ -1652,21 +1659,6 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.ConfiguremultiplefluorophoresButton.Position = [419 17 182 22];
             app.ConfiguremultiplefluorophoresButton.Text = 'Configure multiple fluorophores';
 
-            % Create zpositionSpinnerLabel
-            app.zpositionSpinnerLabel = uilabel(app.FluorophoreTab);
-            app.zpositionSpinnerLabel.Position = [308 228 59 22];
-            app.zpositionSpinnerLabel.Text = 'z-position';
-
-            % Create zpositionSpinner
-            app.zpositionSpinner = uispinner(app.FluorophoreTab);
-            app.zpositionSpinner.Step = 10;
-            app.zpositionSpinner.ValueChangingFcn = createCallbackFcn(app, @zpositionSpinnerValueChanging, true);
-            app.zpositionSpinner.Limits = [0 Inf];
-            app.zpositionSpinner.ValueDisplayFormat = '%11.4g nm';
-            app.zpositionSpinner.ValueChangedFcn = createCallbackFcn(app, @zpositionSpinnerValueChanged, true);
-            app.zpositionSpinner.BusyAction = 'cancel';
-            app.zpositionSpinner.Position = [407 228 102 22];
-
             % Create theta
             app.theta = uieditfield(app.FluorophoreTab, 'numeric');
             app.theta.Limits = [0 90];
@@ -1727,6 +1719,21 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.EmissionWavelengthSpinner.BusyAction = 'cancel';
             app.EmissionWavelengthSpinner.Position = [133 290 100 22];
             app.EmissionWavelengthSpinner.Value = 680;
+
+            % Create zpositionSpinnerLabel
+            app.zpositionSpinnerLabel = uilabel(app.FluorophoreTab);
+            app.zpositionSpinnerLabel.Position = [308 228 59 22];
+            app.zpositionSpinnerLabel.Text = 'z-position';
+
+            % Create zpositionSpinner
+            app.zpositionSpinner = uispinner(app.FluorophoreTab);
+            app.zpositionSpinner.Step = 10;
+            app.zpositionSpinner.ValueChangingFcn = createCallbackFcn(app, @zpositionSpinnerValueChanging, true);
+            app.zpositionSpinner.Limits = [0 Inf];
+            app.zpositionSpinner.ValueDisplayFormat = '%11.4g nm';
+            app.zpositionSpinner.ValueChangedFcn = createCallbackFcn(app, @zpositionSpinnerValueChanged, true);
+            app.zpositionSpinner.BusyAction = 'cancel';
+            app.zpositionSpinner.Position = [407 228 102 22];
 
             % Create ypositionSpinnerLabel
             app.ypositionSpinnerLabel = uilabel(app.FluorophoreTab);
@@ -2697,10 +2704,11 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.FitPSFButton.Position = [456 147 100 23];
             app.FitPSFButton.Text = 'Fit PSF';
 
-            % Create GenerateButton
-            app.GenerateButton = uibutton(app.OptionsTab, 'push');
-            app.GenerateButton.Position = [456 116 100 23];
-            app.GenerateButton.Text = 'Generate';
+            % Create GeneratedataButton
+            app.GeneratedataButton = uibutton(app.OptionsTab, 'push');
+            app.GeneratedataButton.ButtonPushedFcn = createCallbackFcn(app, @GeneratedataButtonPushed, true);
+            app.GeneratedataButton.Position = [456 116 100 23];
+            app.GeneratedataButton.Text = 'Generate data';
 
             % Create RandomdatasetLabel
             app.RandomdatasetLabel = uilabel(app.OptionsTab);
