@@ -12,6 +12,7 @@ classdef PSF
         shotNoise (1,1) logical = 0
         reducedExcitation (1,1) logical = 0
         stageDrift StageDrift = NoStageDrift() % relative lateral motion from start point (3rd component = defocus) 
+        rotationalConstraint (1,1) double {mustBeInRange(rotationalConstraint,0,1)} = 1 % 0 = no constraint, 1 = fully constraint
         
         % Microscope setup
         wavelength (1,1) Length {mustBePositive} = Length(680,'nm')

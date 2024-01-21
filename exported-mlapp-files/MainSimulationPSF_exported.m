@@ -6,6 +6,8 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
         CalculatingLamp                 matlab.ui.control.Lamp
         TabGroup                        matlab.ui.container.TabGroup
         FluorophoreTab                  matlab.ui.container.Tab
+        RotationalconstraintSpinner     matlab.ui.control.Spinner
+        RotationalconstraintSpinnerLabel  matlab.ui.control.Label
         OrientationLabel                matlab.ui.control.Label
         PositionLabel                   matlab.ui.control.Label
         xpositionSpinner                matlab.ui.control.Spinner
@@ -16,6 +18,7 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
         EmissionwavelengthSpinnerLabel  matlab.ui.control.Label
         DipoleorientationLabel          matlab.ui.control.Label
         DipolerotationButtonGroup       matlab.ui.container.ButtonGroup
+        partiallyrotatingButton         matlab.ui.control.RadioButton
         fixedButton                     matlab.ui.control.RadioButton
         freelyrotatingButton            matlab.ui.control.RadioButton
         phi                             matlab.ui.control.NumericEditField
@@ -140,10 +143,10 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
         CramrRaoBoundLabel              matlab.ui.control.Label
         CRBOutputField                  matlab.ui.control.Label
         CalculateCramrRaoBoundCheckBox  matlab.ui.control.CheckBox
-        StepsizeEditField               matlab.ui.control.NumericEditField
-        StepsizeEditFieldLabel          matlab.ui.control.Label
-        NumberstepsEditField            matlab.ui.control.NumericEditField
-        NumberstepsEditFieldLabel       matlab.ui.control.Label
+        zstepsize3DPSFEditField         matlab.ui.control.NumericEditField
+        zstepsize3DPSFEditFieldLabel    matlab.ui.control.Label
+        Numberzsteps3DPSFEditField      matlab.ui.control.NumericEditField
+        Numberzsteps3DPSFEditFieldLabel  matlab.ui.control.Label
         ShowPsf2DCheckBox               matlab.ui.control.CheckBox
         ShowPsf3DCheckBox               matlab.ui.control.CheckBox
         PixelsperlateralaxisEditField   matlab.ui.control.NumericEditField
@@ -222,6 +225,8 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
                             psf = PSF(par);
                         case 'freely rotating'
                             psf = IsotropicPSF(par);
+                        case 'partially rotating'
+                            psf = PartiallyIsotropicPSF(par);
                         otherwise
                             error('Invalid input value for dipole rotation!')
                     end
@@ -255,21 +260,21 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
                 CRBinNanometer = round(psf.CRB.inNanometer, 3, 'significant');
                 upperBound = 1000; % display upper bound if CRB is larger than some threshold
                 if CRBinNanometer(1) > upperBound
-                    CRBxOutput = ['x:  ','> ', num2str(upperBound), ' nm'];
+                    CRBxOutput = ['CRB x:  ','> ', num2str(upperBound), ' nm'];
                 else
-                    CRBxOutput = ['x:  ',num2str(CRBinNanometer(1)), ' nm']; 
+                    CRBxOutput = ['CRB x:  ',num2str(CRBinNanometer(1)), ' nm']; 
                 end
 
                 if CRBinNanometer(2) > upperBound
-                    CRByOutput = ['y:  ','> ', num2str(upperBound), ' nm'];
+                    CRByOutput = ['CRB y:  ','> ', num2str(upperBound), ' nm'];
                 else
-                    CRByOutput = ['y:  ',num2str(CRBinNanometer(2)), ' nm']; 
+                    CRByOutput = ['CRB y:  ',num2str(CRBinNanometer(2)), ' nm']; 
                 end
 
                 if CRBinNanometer(3) > upperBound
-                    CRBzOutput = ['z:  ','> ', num2str(upperBound), ' nm'];
+                    CRBzOutput = ['CRB z:  ','> ', num2str(upperBound), ' nm'];
                 else
-                    CRBzOutput = ['z:  ',num2str(CRBinNanometer(3)), ' nm']; 
+                    CRBzOutput = ['CRB z:  ',num2str(CRBinNanometer(3)), ' nm']; 
                 end
 
 
@@ -296,9 +301,18 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             par.heightIntermediateLayer = Length(app.IntermediateLayerThicknessSpinner.Value, 'mu');
             par.nDiscretizationBFP = app.DiscretizationBFPEditField.Value;
 
+            switch app.DipolerotationButtonGroup.SelectedObject.Text
+                case 'partially rotating'
+                    par.rotationalConstraint = app.RotationalconstraintSpinner.Value;
+                case 'freely rotating'
+                    par.rotationalConstraint = 0;
+                case 'fixed'
+                    par.rotationalConstraint = 1;
+            end
+
             if app.ShowPsf3DCheckBox.Value
-                zStep = app.StepsizeEditField.Value;
-                nSteps = app.NumberstepsEditField.Value - 1;
+                zStep = app.zstepsize3DPSFEditField.Value;
+                nSteps = app.Numberzsteps3DPSFEditField.Value - 1;
                 par.defocus = Length(app.DefocusSlider.Value-nSteps/2*zStep:zStep:app.DefocusSlider.Value+nSteps/2*zStep,'nm'); % defocus in nm
             else
                 par.defocus = Length(app.DefocusSlider.Value,'nm'); % defocus in nm
@@ -465,11 +479,13 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
         function DipolerotationButtonGroupSelectionChanged(app, event)
             switch app.DipolerotationButtonGroup.SelectedObject.Text
                 case 'fixed'
+                    app.RotationalconstraintSpinner.Visible = "off";
+                    app.RotationalconstraintSpinnerLabel.Visible = "off";
                     if app.SwitchMultipleFluorophores
                         for k = 1:app.Fluorophores.getNumberFluorophores
                             app.Fluorophores.updateDipoleRotation('fixed',k);
                         end
-                    else % single fluorophore case 
+                    else % single fluorophore case
                         app.AzimuthalAngleSliderLabel.Visible = "on";
                         app.AzimuthalAngleSlider.Visible = "on";
                         app.phi.Visible = "on";
@@ -481,6 +497,8 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
                         app.ConfiguremultiplefluorophoresButton.Visible = "on";
                     end
                 case 'freely rotating'
+                    app.RotationalconstraintSpinner.Visible = "off";
+                    app.RotationalconstraintSpinnerLabel.Visible = "off";
                     if app.SwitchMultipleFluorophores
                         for k = 1:app.Fluorophores.getNumberFluorophores
                             app.Fluorophores.updateDipoleRotation('freely rotating',k);
@@ -494,6 +512,26 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
                         app.theta.Visible = "off";
                         app.ReducedexcitationSwitch.Visible = "off";
                         app.ReducedexcitationSwitchLabel.Visible = "off";
+                        app.ConfiguremultiplefluorophoresButton.Visible = "on";
+                    end
+                case 'partially rotating'
+                    if app.SwitchMultipleFluorophores
+                        app.RotationalconstraintSpinner.Visible = "off";
+                        app.RotationalconstraintSpinnerLabel.Visible = "off";
+                        for k = 1:app.Fluorophores.getNumberFluorophores
+                            app.Fluorophores.updateDipoleRotation('partially rotating',k);
+                        end
+                    else
+                        app.RotationalconstraintSpinner.Visible = "on";
+                        app.RotationalconstraintSpinnerLabel.Visible = "on";
+                        app.AzimuthalAngleSliderLabel.Visible = "on";
+                        app.AzimuthalAngleSlider.Visible = "on";
+                        app.phi.Visible = "on";
+                        app.InclinationAngleSliderLabel.Visible = "on";
+                        app.InclinationAngleSlider.Visible = "on";
+                        app.theta.Visible = "on";
+                        app.ReducedexcitationSwitch.Visible = "on";
+                        app.ReducedexcitationSwitchLabel.Visible = "on";
                         app.ConfiguremultiplefluorophoresButton.Visible = "on";
                     end
                 otherwise
@@ -604,6 +642,8 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.InclinationAngleSliderLabel.Visible = "off";
             app.InclinationAngleSlider.Visible = "off";
             app.theta.Visible = "off";
+            app.RotationalconstraintSpinnerLabel.Visible = "off";
+            app.RotationalconstraintSpinner.Visible = "off";
 
             app.xpositionSpinnerLabel.Visible = "off";
             app.xpositionSpinner.Visible = "off";
@@ -855,7 +895,9 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
                 app.CalculatingLamp.Enable = 'on';
                 app.ShowPsf2DCheckBox.Value = true;
                 app.ShowPsf2DCheckBox.Enable = "on";
-                app.ShowPsf3DCheckBox.Enable = "on";
+                if app.SwitchMultipleFluorophores == 0
+                    app.ShowPsf3DCheckBox.Enable = "on";
+                end
                 app.PlotPSF = WindowPlotPSF(app);
                 app.PlotPSF.initializePlot();
             else
@@ -894,26 +936,26 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             if value
                 app.PlotPSFThreeDim = WindowPlotPSFThreeDim(app);
                 app.PlotPSFThreeDim.initializePlot();
-                app.StepsizeEditFieldLabel.Visible = "on";
-                app.StepsizeEditFieldLabel.Enable = "on";
-                app.StepsizeEditField.Visible = "on";
-                app.StepsizeEditField.Enable = "on";
-                app.NumberstepsEditFieldLabel.Visible = "on";
-                app.NumberstepsEditFieldLabel.Enable = "on";
-                app.NumberstepsEditField.Visible = "on";
-                app.NumberstepsEditField.Enable = "on";
+                app.zstepsize3DPSFEditFieldLabel.Visible = "on";
+                app.zstepsize3DPSFEditFieldLabel.Enable = "on";
+                app.zstepsize3DPSFEditField.Visible = "on";
+                app.zstepsize3DPSFEditField.Enable = "on";
+                app.Numberzsteps3DPSFEditFieldLabel.Visible = "on";
+                app.Numberzsteps3DPSFEditFieldLabel.Enable = "on";
+                app.Numberzsteps3DPSFEditField.Visible = "on";
+                app.Numberzsteps3DPSFEditField.Enable = "on";
                 app.Export3DPSFButton.Visible = "on";
                 simulateAndDisplayPSF(app);
             else
                 delete(app.PlotPSFThreeDim);
-                app.StepsizeEditFieldLabel.Visible = "off";
-                app.StepsizeEditFieldLabel.Enable = "off";
-                app.StepsizeEditField.Visible = "off";
-                app.StepsizeEditField.Enable = "off";
-                app.NumberstepsEditFieldLabel.Visible = "off";
-                app.NumberstepsEditFieldLabel.Enable = "off";
-                app.NumberstepsEditField.Visible = "off";
-                app.NumberstepsEditField.Enable = "off";
+                app.zstepsize3DPSFEditFieldLabel.Visible = "off";
+                app.zstepsize3DPSFEditFieldLabel.Enable = "off";
+                app.zstepsize3DPSFEditField.Visible = "off";
+                app.zstepsize3DPSFEditField.Enable = "off";
+                app.Numberzsteps3DPSFEditFieldLabel.Visible = "off";
+                app.Numberzsteps3DPSFEditFieldLabel.Enable = "off";
+                app.Numberzsteps3DPSFEditField.Visible = "off";
+                app.Numberzsteps3DPSFEditField.Enable = "off";
                 app.Export3DPSFButton.Visible = "off";
                 if app.ShowPsf2DCheckBox.Value == false
                     app.ShowPSFCheckBox.Value = false;
@@ -1386,16 +1428,16 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             end
         end
 
-        % Value changed function: NumberstepsEditField
-        function NumberstepsEditFieldValueChanged(app, event)
+        % Value changed function: Numberzsteps3DPSFEditField
+        function Numberzsteps3DPSFEditFieldValueChanged(app, event)
             value = event.Value;
-            app.NumberstepsEditField.Value = value;
+            app.Numberzsteps3DPSFEditField.Value = value;
             simulateAndDisplayPSF(app);
         end
 
-        % Value changed function: StepsizeEditField
-        function StepsizeEditFieldValueChanged(app, event)
-            app.StepsizeEditField.Value = event.Value;
+        % Value changed function: zstepsize3DPSFEditField
+        function zstepsize3DPSFEditFieldValueChanged(app, event)
+            app.zstepsize3DPSFEditField.Value = event.Value;
             simulateAndDisplayPSF(app);
         end
 
@@ -1487,7 +1529,18 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             end
             app.DiscretizationBFPEditField.Value = nBFP;
             app.nDiscretizationBFP = nBFP;
-            %app.parameters.nDiscretizationBFP = nBFP;
+            simulateAndDisplayPSF(app);
+        end
+
+        % Value changed function: RotationalconstraintSpinner
+        function RotationalconstraintSpinnerValueChanged(app, event)
+            app.RotationalconstraintSpinner.Value = event.Value;
+            simulateAndDisplayPSF(app);
+        end
+
+        % Value changing function: RotationalconstraintSpinner
+        function RotationalconstraintSpinnerValueChanging(app, event)
+            app.RotationalconstraintSpinner.Value = event.Value;
             simulateAndDisplayPSF(app);
         end
     end
@@ -1596,7 +1649,7 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.ConfiguremultiplefluorophoresButton = uibutton(app.FluorophoreTab, 'push');
             app.ConfiguremultiplefluorophoresButton.ButtonPushedFcn = createCallbackFcn(app, @ConfiguremultiplefluorophoresButtonPushed, true);
             app.ConfiguremultiplefluorophoresButton.BusyAction = 'cancel';
-            app.ConfiguremultiplefluorophoresButton.Position = [407 17 182 22];
+            app.ConfiguremultiplefluorophoresButton.Position = [419 17 182 22];
             app.ConfiguremultiplefluorophoresButton.Text = 'Configure multiple fluorophores';
 
             % Create zpositionSpinnerLabel
@@ -1635,19 +1688,25 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.DipolerotationButtonGroup.SelectionChangedFcn = createCallbackFcn(app, @DipolerotationButtonGroupSelectionChanged, true);
             app.DipolerotationButtonGroup.BorderType = 'none';
             app.DipolerotationButtonGroup.BusyAction = 'cancel';
-            app.DipolerotationButtonGroup.Position = [131 117 162 30];
+            app.DipolerotationButtonGroup.Position = [127 117 281 30];
 
             % Create freelyrotatingButton
             app.freelyrotatingButton = uiradiobutton(app.DipolerotationButtonGroup);
             app.freelyrotatingButton.Tooltip = {'Freely rotating dipole results in isotropic PSF'};
             app.freelyrotatingButton.Text = 'freely rotating';
-            app.freelyrotatingButton.Position = [63 5 95 22];
+            app.freelyrotatingButton.Position = [64 5 95 22];
 
             % Create fixedButton
             app.fixedButton = uiradiobutton(app.DipolerotationButtonGroup);
             app.fixedButton.Text = 'fixed';
-            app.fixedButton.Position = [7 5 47 22];
+            app.fixedButton.Position = [5 5 47 22];
             app.fixedButton.Value = true;
+
+            % Create partiallyrotatingButton
+            app.partiallyrotatingButton = uiradiobutton(app.DipolerotationButtonGroup);
+            app.partiallyrotatingButton.Tooltip = {'Freely rotating dipole results in isotropic PSF'};
+            app.partiallyrotatingButton.Text = 'partially rotating';
+            app.partiallyrotatingButton.Position = [171 5 107 22];
 
             % Create DipoleorientationLabel
             app.DipoleorientationLabel = uilabel(app.FluorophoreTab);
@@ -1710,6 +1769,24 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.OrientationLabel.FontWeight = 'bold';
             app.OrientationLabel.Position = [12 152 82 22];
             app.OrientationLabel.Text = 'Orientation';
+
+            % Create RotationalconstraintSpinnerLabel
+            app.RotationalconstraintSpinnerLabel = uilabel(app.FluorophoreTab);
+            app.RotationalconstraintSpinnerLabel.Visible = 'off';
+            app.RotationalconstraintSpinnerLabel.Position = [426 121 118 22];
+            app.RotationalconstraintSpinnerLabel.Text = 'Rotational constraint';
+
+            % Create RotationalconstraintSpinner
+            app.RotationalconstraintSpinner = uispinner(app.FluorophoreTab);
+            app.RotationalconstraintSpinner.Step = 0.05;
+            app.RotationalconstraintSpinner.ValueChangingFcn = createCallbackFcn(app, @RotationalconstraintSpinnerValueChanging, true);
+            app.RotationalconstraintSpinner.Limits = [0 1];
+            app.RotationalconstraintSpinner.ValueChangedFcn = createCallbackFcn(app, @RotationalconstraintSpinnerValueChanged, true);
+            app.RotationalconstraintSpinner.BusyAction = 'cancel';
+            app.RotationalconstraintSpinner.Visible = 'off';
+            app.RotationalconstraintSpinner.Tooltip = {'0 = freely rotating, 1 = fixed'};
+            app.RotationalconstraintSpinner.Position = [543 121 58 22];
+            app.RotationalconstraintSpinner.Value = 0.1;
 
             % Create MicroscopeRITab
             app.MicroscopeRITab = uitab(app.TabGroup);
@@ -2490,64 +2567,64 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.ShowPsf2DCheckBox.Position = [36 267 37 22];
             app.ShowPsf2DCheckBox.Value = true;
 
-            % Create NumberstepsEditFieldLabel
-            app.NumberstepsEditFieldLabel = uilabel(app.OptionsTab);
-            app.NumberstepsEditFieldLabel.BusyAction = 'cancel';
-            app.NumberstepsEditFieldLabel.Enable = 'off';
-            app.NumberstepsEditFieldLabel.Visible = 'off';
-            app.NumberstepsEditFieldLabel.Tooltip = {''};
-            app.NumberstepsEditFieldLabel.Position = [351 258 80 22];
-            app.NumberstepsEditFieldLabel.Text = 'Number steps';
+            % Create Numberzsteps3DPSFEditFieldLabel
+            app.Numberzsteps3DPSFEditFieldLabel = uilabel(app.OptionsTab);
+            app.Numberzsteps3DPSFEditFieldLabel.BusyAction = 'cancel';
+            app.Numberzsteps3DPSFEditFieldLabel.Enable = 'off';
+            app.Numberzsteps3DPSFEditFieldLabel.Visible = 'off';
+            app.Numberzsteps3DPSFEditFieldLabel.Tooltip = {''};
+            app.Numberzsteps3DPSFEditFieldLabel.Position = [351 258 143 22];
+            app.Numberzsteps3DPSFEditFieldLabel.Text = 'Number z-steps (3D PSF)';
 
-            % Create NumberstepsEditField
-            app.NumberstepsEditField = uieditfield(app.OptionsTab, 'numeric');
-            app.NumberstepsEditField.Limits = [1 1000];
-            app.NumberstepsEditField.RoundFractionalValues = 'on';
-            app.NumberstepsEditField.ValueDisplayFormat = '%5d';
-            app.NumberstepsEditField.ValueChangedFcn = createCallbackFcn(app, @NumberstepsEditFieldValueChanged, true);
-            app.NumberstepsEditField.BusyAction = 'cancel';
-            app.NumberstepsEditField.Enable = 'off';
-            app.NumberstepsEditField.Visible = 'off';
-            app.NumberstepsEditField.Tooltip = {''};
-            app.NumberstepsEditField.Position = [445 258 36 22];
-            app.NumberstepsEditField.Value = 25;
+            % Create Numberzsteps3DPSFEditField
+            app.Numberzsteps3DPSFEditField = uieditfield(app.OptionsTab, 'numeric');
+            app.Numberzsteps3DPSFEditField.Limits = [1 1000];
+            app.Numberzsteps3DPSFEditField.RoundFractionalValues = 'on';
+            app.Numberzsteps3DPSFEditField.ValueDisplayFormat = '%5d';
+            app.Numberzsteps3DPSFEditField.ValueChangedFcn = createCallbackFcn(app, @Numberzsteps3DPSFEditFieldValueChanged, true);
+            app.Numberzsteps3DPSFEditField.BusyAction = 'cancel';
+            app.Numberzsteps3DPSFEditField.Enable = 'off';
+            app.Numberzsteps3DPSFEditField.Visible = 'off';
+            app.Numberzsteps3DPSFEditField.Tooltip = {''};
+            app.Numberzsteps3DPSFEditField.Position = [520 258 36 22];
+            app.Numberzsteps3DPSFEditField.Value = 25;
 
-            % Create StepsizeEditFieldLabel
-            app.StepsizeEditFieldLabel = uilabel(app.OptionsTab);
-            app.StepsizeEditFieldLabel.BusyAction = 'cancel';
-            app.StepsizeEditFieldLabel.Enable = 'off';
-            app.StepsizeEditFieldLabel.Visible = 'off';
-            app.StepsizeEditFieldLabel.Tooltip = {''};
-            app.StepsizeEditFieldLabel.Position = [351 229 58 22];
-            app.StepsizeEditFieldLabel.Text = 'Step size';
+            % Create zstepsize3DPSFEditFieldLabel
+            app.zstepsize3DPSFEditFieldLabel = uilabel(app.OptionsTab);
+            app.zstepsize3DPSFEditFieldLabel.BusyAction = 'cancel';
+            app.zstepsize3DPSFEditFieldLabel.Enable = 'off';
+            app.zstepsize3DPSFEditFieldLabel.Visible = 'off';
+            app.zstepsize3DPSFEditFieldLabel.Tooltip = {''};
+            app.zstepsize3DPSFEditFieldLabel.Position = [351 229 116 22];
+            app.zstepsize3DPSFEditFieldLabel.Text = 'z-step size (3D PSF)';
 
-            % Create StepsizeEditField
-            app.StepsizeEditField = uieditfield(app.OptionsTab, 'numeric');
-            app.StepsizeEditField.Limits = [0 Inf];
-            app.StepsizeEditField.ValueDisplayFormat = '%11.4g nm';
-            app.StepsizeEditField.ValueChangedFcn = createCallbackFcn(app, @StepsizeEditFieldValueChanged, true);
-            app.StepsizeEditField.BusyAction = 'cancel';
-            app.StepsizeEditField.Enable = 'off';
-            app.StepsizeEditField.Visible = 'off';
-            app.StepsizeEditField.Position = [417 229 68 22];
-            app.StepsizeEditField.Value = 100;
+            % Create zstepsize3DPSFEditField
+            app.zstepsize3DPSFEditField = uieditfield(app.OptionsTab, 'numeric');
+            app.zstepsize3DPSFEditField.Limits = [0 Inf];
+            app.zstepsize3DPSFEditField.ValueDisplayFormat = '%11.4g nm';
+            app.zstepsize3DPSFEditField.ValueChangedFcn = createCallbackFcn(app, @zstepsize3DPSFEditFieldValueChanged, true);
+            app.zstepsize3DPSFEditField.BusyAction = 'cancel';
+            app.zstepsize3DPSFEditField.Enable = 'off';
+            app.zstepsize3DPSFEditField.Visible = 'off';
+            app.zstepsize3DPSFEditField.Position = [488 229 68 22];
+            app.zstepsize3DPSFEditField.Value = 100;
 
             % Create CalculateCramrRaoBoundCheckBox
             app.CalculateCramrRaoBoundCheckBox = uicheckbox(app.OptionsTab);
             app.CalculateCramrRaoBoundCheckBox.ValueChangedFcn = createCallbackFcn(app, @CalculateCramrRaoBoundCheckBoxValueChanged, true);
             app.CalculateCramrRaoBoundCheckBox.Text = 'Calculate Cramér Rao Bound';
-            app.CalculateCramrRaoBoundCheckBox.Position = [351 54 179 22];
+            app.CalculateCramrRaoBoundCheckBox.Position = [351 59 179 22];
 
             % Create CRBOutputField
             app.CRBOutputField = uilabel(app.OptionsTab);
-            app.CRBOutputField.Position = [359 5 137 47];
+            app.CRBOutputField.Position = [370 9 137 47];
             app.CRBOutputField.Text = '';
 
             % Create CramrRaoBoundLabel
             app.CramrRaoBoundLabel = uilabel(app.OptionsTab);
             app.CramrRaoBoundLabel.FontWeight = 'bold';
             app.CramrRaoBoundLabel.Tooltip = {'Select which windows are shown'};
-            app.CramrRaoBoundLabel.Position = [351 82 116 22];
+            app.CramrRaoBoundLabel.Position = [351 83 116 22];
             app.CramrRaoBoundLabel.Text = 'Cramér-Rao Bound';
 
             % Create Export2DPSFButton
@@ -2587,8 +2664,8 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.DiscretizationBFPEditField.ValueDisplayFormat = '%5d';
             app.DiscretizationBFPEditField.ValueChangedFcn = createCallbackFcn(app, @DiscretizationBFPEditFieldValueChanged, true);
             app.DiscretizationBFPEditField.BusyAction = 'cancel';
-            app.DiscretizationBFPEditField.Tooltip = {'must be an odd integer'};
-            app.DiscretizationBFPEditField.Position = [476 286 40 22];
+            app.DiscretizationBFPEditField.Tooltip = {'Must be an odd integer'};
+            app.DiscretizationBFPEditField.Position = [516 286 40 22];
             app.DiscretizationBFPEditField.Value = 129;
 
             % Create ComputationalsettingsLabel
@@ -2610,25 +2687,25 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             % Create PSFfittingLabel
             app.PSFfittingLabel = uilabel(app.OptionsTab);
             app.PSFfittingLabel.FontWeight = 'bold';
-            app.PSFfittingLabel.Position = [351 144 145 22];
+            app.PSFfittingLabel.Position = [351 148 145 22];
             app.PSFfittingLabel.Text = 'PSF fitting';
 
             % Create FitPSFButton
             app.FitPSFButton = uibutton(app.OptionsTab, 'push');
             app.FitPSFButton.ButtonPushedFcn = createCallbackFcn(app, @FitPSFButtonPushed, true);
             app.FitPSFButton.Tooltip = {'Estimate Zernike coefficients and transmission from experimental data'};
-            app.FitPSFButton.Position = [456 145 100 20];
+            app.FitPSFButton.Position = [456 147 100 23];
             app.FitPSFButton.Text = 'Fit PSF';
 
             % Create GenerateButton
             app.GenerateButton = uibutton(app.OptionsTab, 'push');
-            app.GenerateButton.Position = [456 114 100 20];
+            app.GenerateButton.Position = [456 116 100 23];
             app.GenerateButton.Text = 'Generate';
 
             % Create RandomdatasetLabel
             app.RandomdatasetLabel = uilabel(app.OptionsTab);
             app.RandomdatasetLabel.FontWeight = 'bold';
-            app.RandomdatasetLabel.Position = [351 113 145 22];
+            app.RandomdatasetLabel.Position = [351 117 145 22];
             app.RandomdatasetLabel.Text = 'Random dataset';
 
             % Create CalculatingLamp

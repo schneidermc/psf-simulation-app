@@ -60,7 +60,7 @@ classdef WindowPlotPSFThreeDim_exported < matlab.apps.AppBase
             
             % Show xz projection
             imagesc(app.UIAxesPSF, xAxis, zAxis, projection');
-            zLimit = 1/2*app.CallingApp.StepsizeEditField.Value*(app.CallingApp.NumberstepsEditField.Value-1);
+            zLimit = 1/2*app.CallingApp.zstepsize3DPSFEditField.Value*(app.CallingApp.Numberzsteps3DPSFEditField.Value-1);
             app.UIAxesPSF.YTick = [zAxis(1), 0, zAxis(length(zAxis))];
             app.UIAxesPSF.YTickLabel = {num2str(-zLimit), num2str(0), num2str(zLimit)};
             colormap(app.UIAxesPSF, app.CallingApp.ColormapDropDown.Value)
@@ -136,14 +136,14 @@ classdef WindowPlotPSFThreeDim_exported < matlab.apps.AppBase
         % Close request function: PSFThreeDimUIFigure
         function PSFThreeDimUIFigureCloseRequest(app, event)
             app.CallingApp.ShowPsf3DCheckBox.Value = 0;
-            app.CallingApp.StepsizeEditFieldLabel.Visible = "off";
-            app.CallingApp.StepsizeEditFieldLabel.Enable = "off";
-            app.CallingApp.StepsizeEditField.Visible = "off";
-            app.CallingApp.StepsizeEditField.Enable = "off";
-            app.CallingApp.NumberstepsEditFieldLabel.Visible = "off";
-            app.CallingApp.NumberstepsEditFieldLabel.Enable = "off";
-            app.CallingApp.NumberstepsEditField.Visible = "off";
-            app.CallingApp.NumberstepsEditField.Enable = "off";
+            app.CallingApp.zstepsize3DPSFEditField.Visible = "off";
+            app.CallingApp.zstepsize3DPSFEditField.Enable = "off";
+            app.CallingApp.zstepsize3DPSFEditFieldLabel.Visible = "off";
+            app.CallingApp.zstepsize3DPSFEditFieldLabel.Enable = "off";
+            app.CallingApp.Numberzsteps3DPSFEditField.Visible = "off";
+            app.CallingApp.Numberzsteps3DPSFEditField.Enable = "off";
+            app.CallingApp.Numberzsteps3DPSFEditFieldLabel.Visible = "off";
+            app.CallingApp.Numberzsteps3DPSFEditFieldLabel.Enable = "off";
             if app.CallingApp.ShowPsf2DCheckBox.Value == false
                 app.CallingApp.ShowPSFCheckBox.Value = false;
                 app.CallingApp.ShowPsf2DCheckBox.Enable = "off";
