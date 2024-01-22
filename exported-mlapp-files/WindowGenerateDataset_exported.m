@@ -4,6 +4,8 @@ classdef WindowGenerateDataset_exported < matlab.apps.AppBase
     properties (Access = public)
         GeneratedatasetUIFigure       matlab.ui.Figure
         GridLayout                    matlab.ui.container.GridLayout
+        RotationalconstraintCheckBox  matlab.ui.control.CheckBox
+        DipoleorientationCheckBox     matlab.ui.control.CheckBox
         SaveimagesCheckBox            matlab.ui.control.CheckBox
         OutputFolder                  matlab.ui.control.Label
         OutputfolderLabel             matlab.ui.control.Label
@@ -59,6 +61,20 @@ classdef WindowGenerateDataset_exported < matlab.apps.AppBase
                 randomValues = repmat(defaultValue, n, 1);
             end
         end
+
+        function [inclination, azimuth] = getRandomDipole(app, n, checkBoxValue)
+            if checkBoxValue
+                lowerLimit = 0;
+                upperLimit = pi/2;
+                inclination = lowerLimit + (upperLimit-lowerLimit) * rand(n,1);
+                upperLimit = 2*pi;
+                azimuth = lowerLimit + (upperLimit-lowerLimit) * rand(n,1); 
+            else
+                % Repeat default parameter n times
+                inclination = repmat(app.CallingApp.theta.Value*pi/180, n, 1);
+                azimuth = repmat(app.CallingApp.phi.Value*pi/180, n, 1);
+            end
+        end
     end
 
     methods (Access = private)
@@ -79,6 +95,12 @@ classdef WindowGenerateDataset_exported < matlab.apps.AppBase
         % Code that executes after component creation
         function startupFcn(app, mainapp)
             app.CallingApp = mainapp; % Store main app object
+
+            if strcmp(app.CallingApp.DipolerotationButtonGroup.SelectedObject.Text, 'partially rotating')
+                app.RotationalconstraintCheckBox.Visible = "on";
+            else
+                app.RotationalconstraintCheckBox.Visible = "off";
+            end
         end
 
         % Button pushed function: GeneraterandomizeddataButton
@@ -111,6 +133,12 @@ classdef WindowGenerateDataset_exported < matlab.apps.AppBase
             parRandomYPositions = app.getRandomParameter(n, app.yPositionLowerLimitSpinner.Value, app.yPositionUpperLimitSpinner.Value, app.ypositionCheckBox.Value, app.CallingApp.ypositionSpinner.Value);
             parRandomZPositions = app.getRandomParameter(n, app.zPositionLowerLimitSpinner.Value, app.zPositionUpperLimitSpinner.Value, app.zpositionCheckBox.Value, app.CallingApp.zpositionSpinner.Value);
             parRandomDefocus = app.getRandomParameter(n, app.DefocusLowerLimitSpinner.Value, app.DefocusUpperLimitSpinner.Value, app.DefocusCheckBox.Value, app.CallingApp.defocus.Value);
+            [parRandomInclinationAngles, parRandomAzimuthAngles] = app.getRandomDipole(n, app.DipoleorientationCheckBox.Value);
+            if strcmp(app.CallingApp.DipolerotationButtonGroup.SelectedObject.Text, 'partially rotating') && app.RotationalconstraintCheckBox.Value
+                parRotationalConstraints = rand(n,1);
+            else
+                parRotationalConstraints = repmat(app.CallingApp.RotationalconstraintSpinner.Value, n, 1);
+            end
 
             % Generate data
             numDigits = floor(log10(n)) + 1;
@@ -127,6 +155,10 @@ classdef WindowGenerateDataset_exported < matlab.apps.AppBase
                 par.nPhotons = parRandomPhotonNumbers(k);
                 par.position = Length([parRandomXPositions(k), parRandomYPositions(k), parRandomZPositions(k)], 'nm');
                 par.defocus = Length([parRandomDefocus(k)], 'nm');
+                par.dipole = Dipole(parRandomInclinationAngles(k),parRandomAzimuthAngles(k));
+                if strcmp(app.CallingApp.DipolerotationButtonGroup.SelectedObject.Text, 'partially rotating') && app.RotationalconstraintCheckBox.Value
+                    par.rotationalConstraint = parRotationalConstraints(k);
+                end
                 
                 % Simulate PSF
                 switch app.CallingApp.DipolerotationButtonGroup.SelectedObject.Text
@@ -169,8 +201,19 @@ classdef WindowGenerateDataset_exported < matlab.apps.AppBase
             save(fullPath, 'fixedParameters');
             
             % Save table of changing parameters
-            randomizedParameterTable = table(parRandomWavelengths, parRandomPhotonNumbers, parRandomXPositions, parRandomYPositions, parRandomZPositions, parRandomDefocus, ...
-                                   'VariableNames', {'wavelength', 'nPhotons', 'x-position', 'y-position', 'z-position', 'defocus'});
+            if strcmp(app.CallingApp.DipolerotationButtonGroup.SelectedObject.Text, 'partially rotating')
+                randomizedParameterTable = table(parRandomWavelengths, parRandomPhotonNumbers, ...
+                                             parRandomXPositions, parRandomYPositions, parRandomZPositions, parRandomDefocus, ...
+                                             parRandomInclinationAngles*180/pi, parRandomAzimuthAngles*180/pi, parRotationalConstraints, ...
+                                             'VariableNames', {'wavelength', 'nPhotons', 'x-position', 'y-position', 'z-position', 'defocus', ...
+                                             'inclinationAngle', 'azimuthalAngle', 'rotationalConstraint'});
+            else
+                randomizedParameterTable = table(parRandomWavelengths, parRandomPhotonNumbers, ...
+                                             parRandomXPositions, parRandomYPositions, parRandomZPositions, parRandomDefocus, ...
+                                             parRandomInclinationAngles*180/pi, parRandomAzimuthAngles*180/pi, ...
+                                             'VariableNames', {'wavelength', 'nPhotons', 'x-position', 'y-position', 'z-position', 'defocus', ...
+                                             'inclinationAngle', 'azimuthalAngle'});
+            end
             fileName = 'randomizedParameters.csv';
             fullFilePath = fullfile(app.outputFolderPath, fileName);
             writetable(randomizedParameterTable, fullFilePath);
@@ -221,18 +264,18 @@ classdef WindowGenerateDataset_exported < matlab.apps.AppBase
 
             % Create GeneratedatasetUIFigure and hide until all components are created
             app.GeneratedatasetUIFigure = uifigure('Visible', 'off');
-            app.GeneratedatasetUIFigure.Position = [100 100 391 400];
+            app.GeneratedatasetUIFigure.Position = [100 100 391 464];
             app.GeneratedatasetUIFigure.Name = 'Generate dataset';
 
             % Create GridLayout
             app.GridLayout = uigridlayout(app.GeneratedatasetUIFigure);
             app.GridLayout.ColumnWidth = {'1x', 100, 100};
-            app.GridLayout.RowHeight = {22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, '1x'};
+            app.GridLayout.RowHeight = {22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, '1x'};
 
             % Create GeneraterandomizeddataButton
             app.GeneraterandomizeddataButton = uibutton(app.GridLayout, 'push');
             app.GeneraterandomizeddataButton.ButtonPushedFcn = createCallbackFcn(app, @GeneraterandomizeddataButtonPushed, true);
-            app.GeneraterandomizeddataButton.Layout.Row = 12;
+            app.GeneraterandomizeddataButton.Layout.Row = 14;
             app.GeneraterandomizeddataButton.Layout.Column = [1 3];
             app.GeneraterandomizeddataButton.Text = 'Generate randomized data';
 
@@ -257,6 +300,7 @@ classdef WindowGenerateDataset_exported < matlab.apps.AppBase
             app.DefocusCheckBox.Text = 'Defocus';
             app.DefocusCheckBox.Layout.Row = 7;
             app.DefocusCheckBox.Layout.Column = 1;
+            app.DefocusCheckBox.Value = true;
 
             % Create zPositionUpperLimitSpinner
             app.zPositionUpperLimitSpinner = uispinner(app.GridLayout);
@@ -279,6 +323,7 @@ classdef WindowGenerateDataset_exported < matlab.apps.AppBase
             app.zpositionCheckBox.Text = 'z-position';
             app.zpositionCheckBox.Layout.Row = 6;
             app.zpositionCheckBox.Layout.Column = 1;
+            app.zpositionCheckBox.Value = true;
 
             % Create yPositionUpperLimitSpinner
             app.yPositionUpperLimitSpinner = uispinner(app.GridLayout);
@@ -301,6 +346,7 @@ classdef WindowGenerateDataset_exported < matlab.apps.AppBase
             app.ypositionCheckBox.Text = 'y-position';
             app.ypositionCheckBox.Layout.Row = 5;
             app.ypositionCheckBox.Layout.Column = 1;
+            app.ypositionCheckBox.Value = true;
 
             % Create xPositionUpperLimitSpinner
             app.xPositionUpperLimitSpinner = uispinner(app.GridLayout);
@@ -323,6 +369,7 @@ classdef WindowGenerateDataset_exported < matlab.apps.AppBase
             app.xpositionCheckBox.Text = 'x-position';
             app.xpositionCheckBox.Layout.Row = 4;
             app.xpositionCheckBox.Layout.Column = 1;
+            app.xpositionCheckBox.Value = true;
 
             % Create PhotonsUpperLimitSpinner
             app.PhotonsUpperLimitSpinner = uispinner(app.GridLayout);
@@ -347,6 +394,7 @@ classdef WindowGenerateDataset_exported < matlab.apps.AppBase
             app.PhotonnumberCheckBox.Text = 'Photon number';
             app.PhotonnumberCheckBox.Layout.Row = 3;
             app.PhotonnumberCheckBox.Layout.Column = 1;
+            app.PhotonnumberCheckBox.Value = true;
 
             % Create WavelengthUpperLimitSpinner
             app.WavelengthUpperLimitSpinner = uispinner(app.GridLayout);
@@ -371,6 +419,7 @@ classdef WindowGenerateDataset_exported < matlab.apps.AppBase
             app.EmissionwavelengthCheckBox.Text = 'Emission wavelength';
             app.EmissionwavelengthCheckBox.Layout.Row = 2;
             app.EmissionwavelengthCheckBox.Layout.Column = 1;
+            app.EmissionwavelengthCheckBox.Value = true;
 
             % Create SetparameterrangesLabel
             app.SetparameterrangesLabel = uilabel(app.GridLayout);
@@ -382,7 +431,7 @@ classdef WindowGenerateDataset_exported < matlab.apps.AppBase
 
             % Create NumberofgeneratedPSFsSpinnerLabel
             app.NumberofgeneratedPSFsSpinnerLabel = uilabel(app.GridLayout);
-            app.NumberofgeneratedPSFsSpinnerLabel.Layout.Row = 8;
+            app.NumberofgeneratedPSFsSpinnerLabel.Layout.Row = 10;
             app.NumberofgeneratedPSFsSpinnerLabel.Layout.Column = 1;
             app.NumberofgeneratedPSFsSpinnerLabel.Text = 'Number of generated PSFs';
 
@@ -392,34 +441,49 @@ classdef WindowGenerateDataset_exported < matlab.apps.AppBase
             app.NumberofgeneratedPSFsSpinner.Limits = [1 10000];
             app.NumberofgeneratedPSFsSpinner.RoundFractionalValues = 'on';
             app.NumberofgeneratedPSFsSpinner.ValueDisplayFormat = '%d';
-            app.NumberofgeneratedPSFsSpinner.Layout.Row = 8;
+            app.NumberofgeneratedPSFsSpinner.Layout.Row = 10;
             app.NumberofgeneratedPSFsSpinner.Layout.Column = 2;
             app.NumberofgeneratedPSFsSpinner.Value = 2;
 
             % Create SelectfolderButton
             app.SelectfolderButton = uibutton(app.GridLayout, 'push');
             app.SelectfolderButton.ButtonPushedFcn = createCallbackFcn(app, @SelectfolderButtonPushed, true);
-            app.SelectfolderButton.Layout.Row = 9;
+            app.SelectfolderButton.Layout.Row = 11;
             app.SelectfolderButton.Layout.Column = 3;
             app.SelectfolderButton.Text = 'Select folder';
 
             % Create OutputfolderLabel
             app.OutputfolderLabel = uilabel(app.GridLayout);
-            app.OutputfolderLabel.Layout.Row = 9;
+            app.OutputfolderLabel.Layout.Row = 11;
             app.OutputfolderLabel.Layout.Column = [1 2];
             app.OutputfolderLabel.Text = 'Output folder:';
 
             % Create OutputFolder
             app.OutputFolder = uilabel(app.GridLayout);
-            app.OutputFolder.Layout.Row = 10;
+            app.OutputFolder.Layout.Row = 12;
             app.OutputFolder.Layout.Column = [1 3];
             app.OutputFolder.Text = '';
 
             % Create SaveimagesCheckBox
             app.SaveimagesCheckBox = uicheckbox(app.GridLayout);
             app.SaveimagesCheckBox.Text = 'Save images';
-            app.SaveimagesCheckBox.Layout.Row = 11;
+            app.SaveimagesCheckBox.Layout.Row = 13;
             app.SaveimagesCheckBox.Layout.Column = 1;
+
+            % Create DipoleorientationCheckBox
+            app.DipoleorientationCheckBox = uicheckbox(app.GridLayout);
+            app.DipoleorientationCheckBox.Tooltip = {'Range 0-1'};
+            app.DipoleorientationCheckBox.Text = 'Dipole orientation';
+            app.DipoleorientationCheckBox.Layout.Row = 8;
+            app.DipoleorientationCheckBox.Layout.Column = 1;
+            app.DipoleorientationCheckBox.Value = true;
+
+            % Create RotationalconstraintCheckBox
+            app.RotationalconstraintCheckBox = uicheckbox(app.GridLayout);
+            app.RotationalconstraintCheckBox.Text = 'Rotational constraint';
+            app.RotationalconstraintCheckBox.Layout.Row = 9;
+            app.RotationalconstraintCheckBox.Layout.Column = 1;
+            app.RotationalconstraintCheckBox.Value = true;
 
             % Show the figure after all components are created
             app.GeneratedatasetUIFigure.Visible = 'on';

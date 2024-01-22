@@ -142,7 +142,7 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
         Export2DPSFButton               matlab.ui.control.Button
         CramrRaoBoundLabel              matlab.ui.control.Label
         CRBOutputField                  matlab.ui.control.Label
-        CalculateCramrRaoBoundCheckBox  matlab.ui.control.CheckBox
+        CalculateCheckBox               matlab.ui.control.CheckBox
         zstepsize3DPSFEditField         matlab.ui.control.NumericEditField
         zstepsize3DPSFEditFieldLabel    matlab.ui.control.Label
         Numberzsteps3DPSFEditField      matlab.ui.control.NumericEditField
@@ -257,7 +257,7 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
                     end
             end
             
-            if strcmp(app.TabGroup.SelectedTab.Title, 'Options') && app.CalculateCramrRaoBoundCheckBox.Value 
+            if strcmp(app.TabGroup.SelectedTab.Title, 'Options') && app.CalculateCheckBox.Value 
                 psf.CRB = psf.calculateCRB;
                 CRBinNanometer = round(psf.CRB.inNanometer, 3, 'significant');
                 upperBound = 1000; % display upper bound if CRB is larger than some threshold
@@ -655,7 +655,7 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.zpositionSpinner.Visible = "off";
             app.PositionLabel.Visible = 'off';
 
-            app.CalculateCramrRaoBoundCheckBox.Visible = 'off'; 
+            app.CalculateCheckBox.Visible = 'off'; 
             app.CRBOutputField.Visible = 'off';
             app.CramrRaoBoundLabel.Visible = 'off';
           
@@ -1443,9 +1443,9 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             simulateAndDisplayPSF(app);
         end
 
-        % Value changed function: CalculateCramrRaoBoundCheckBox
-        function CalculateCramrRaoBoundCheckBoxValueChanged(app, event)
-            app.CalculateCramrRaoBoundCheckBox.Value = event.Value;
+        % Value changed function: CalculateCheckBox
+        function CalculateCheckBoxValueChanged(app, event)
+            app.CalculateCheckBox.Value = event.Value;
             if event.Value
                 simulateAndDisplayPSF(app);
             else
@@ -2593,7 +2593,7 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.Numberzsteps3DPSFEditField.Enable = 'off';
             app.Numberzsteps3DPSFEditField.Visible = 'off';
             app.Numberzsteps3DPSFEditField.Tooltip = {''};
-            app.Numberzsteps3DPSFEditField.Position = [520 258 36 22];
+            app.Numberzsteps3DPSFEditField.Position = [539 258 36 22];
             app.Numberzsteps3DPSFEditField.Value = 25;
 
             % Create zstepsize3DPSFEditFieldLabel
@@ -2613,18 +2613,18 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.zstepsize3DPSFEditField.BusyAction = 'cancel';
             app.zstepsize3DPSFEditField.Enable = 'off';
             app.zstepsize3DPSFEditField.Visible = 'off';
-            app.zstepsize3DPSFEditField.Position = [488 229 68 22];
+            app.zstepsize3DPSFEditField.Position = [507 229 68 22];
             app.zstepsize3DPSFEditField.Value = 100;
 
-            % Create CalculateCramrRaoBoundCheckBox
-            app.CalculateCramrRaoBoundCheckBox = uicheckbox(app.OptionsTab);
-            app.CalculateCramrRaoBoundCheckBox.ValueChangedFcn = createCallbackFcn(app, @CalculateCramrRaoBoundCheckBoxValueChanged, true);
-            app.CalculateCramrRaoBoundCheckBox.Text = 'Calculate Cramér Rao Bound';
-            app.CalculateCramrRaoBoundCheckBox.Position = [351 59 179 22];
+            % Create CalculateCheckBox
+            app.CalculateCheckBox = uicheckbox(app.OptionsTab);
+            app.CalculateCheckBox.ValueChangedFcn = createCallbackFcn(app, @CalculateCheckBoxValueChanged, true);
+            app.CalculateCheckBox.Text = 'Calculate';
+            app.CalculateCheckBox.Position = [475 83 72 22];
 
             % Create CRBOutputField
             app.CRBOutputField = uilabel(app.OptionsTab);
-            app.CRBOutputField.Position = [370 9 137 47];
+            app.CRBOutputField.Position = [475 23 133 47];
             app.CRBOutputField.Text = '';
 
             % Create CramrRaoBoundLabel
@@ -2672,7 +2672,7 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.DiscretizationBFPEditField.ValueChangedFcn = createCallbackFcn(app, @DiscretizationBFPEditFieldValueChanged, true);
             app.DiscretizationBFPEditField.BusyAction = 'cancel';
             app.DiscretizationBFPEditField.Tooltip = {'Must be an odd integer'};
-            app.DiscretizationBFPEditField.Position = [516 286 40 22];
+            app.DiscretizationBFPEditField.Position = [535 286 40 22];
             app.DiscretizationBFPEditField.Value = 129;
 
             % Create ComputationalsettingsLabel
@@ -2701,13 +2701,13 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.FitPSFButton = uibutton(app.OptionsTab, 'push');
             app.FitPSFButton.ButtonPushedFcn = createCallbackFcn(app, @FitPSFButtonPushed, true);
             app.FitPSFButton.Tooltip = {'Estimate Zernike coefficients and transmission from experimental data'};
-            app.FitPSFButton.Position = [456 147 100 23];
+            app.FitPSFButton.Position = [475 147 100 23];
             app.FitPSFButton.Text = 'Fit PSF';
 
             % Create GeneratedataButton
             app.GeneratedataButton = uibutton(app.OptionsTab, 'push');
             app.GeneratedataButton.ButtonPushedFcn = createCallbackFcn(app, @GeneratedataButtonPushed, true);
-            app.GeneratedataButton.Position = [456 116 100 23];
+            app.GeneratedataButton.Position = [475 116 100 23];
             app.GeneratedataButton.Text = 'Generate data';
 
             % Create RandomdatasetLabel
