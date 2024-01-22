@@ -501,6 +501,9 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
                 case 'freely rotating'
                     app.RotationalconstraintSpinner.Visible = "off";
                     app.RotationalconstraintSpinnerLabel.Visible = "off";
+                    app.ReducedexcitationSwitch.Value = "Off";
+                    app.ReducedexcitationSwitch.Visible = "off";
+                    app.ReducedexcitationSwitchLabel.Visible = "off";
                     if app.SwitchMultipleFluorophores
                         for k = 1:app.Fluorophores.getNumberFluorophores
                             app.Fluorophores.updateDipoleRotation('freely rotating',k);
@@ -512,11 +515,12 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
                         app.InclinationAngleSliderLabel.Visible = "off";
                         app.InclinationAngleSlider.Visible = "off";
                         app.theta.Visible = "off";
-                        app.ReducedexcitationSwitch.Visible = "off";
-                        app.ReducedexcitationSwitchLabel.Visible = "off";
                         app.ConfiguremultiplefluorophoresButton.Visible = "on";
                     end
                 case 'partially rotating'
+                    app.ReducedexcitationSwitch.Value = "Off";
+                    app.ReducedexcitationSwitch.Visible = "off";
+                    app.ReducedexcitationSwitchLabel.Visible = "off";
                     if app.SwitchMultipleFluorophores
                         app.RotationalconstraintSpinner.Visible = "off";
                         app.RotationalconstraintSpinnerLabel.Visible = "off";
@@ -532,8 +536,6 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
                         app.InclinationAngleSliderLabel.Visible = "on";
                         app.InclinationAngleSlider.Visible = "on";
                         app.theta.Visible = "on";
-                        app.ReducedexcitationSwitch.Visible = "on";
-                        app.ReducedexcitationSwitchLabel.Visible = "on";
                         app.ConfiguremultiplefluorophoresButton.Visible = "on";
                     end
                 otherwise
