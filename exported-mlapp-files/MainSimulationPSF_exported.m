@@ -6,8 +6,8 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
         CalculatingLamp                 matlab.ui.control.Lamp
         TabGroup                        matlab.ui.container.TabGroup
         FluorophoreTab                  matlab.ui.container.Tab
-        RotationalconstraintSpinner     matlab.ui.control.Spinner
-        RotationalconstraintSpinnerLabel  matlab.ui.control.Label
+        RotationalfreedomSpinner        matlab.ui.control.Spinner
+        RotationalfreedomSpinnerLabel   matlab.ui.control.Label
         OrientationLabel                matlab.ui.control.Label
         PositionLabel                   matlab.ui.control.Label
         xpositionSpinner                matlab.ui.control.Spinner
@@ -305,7 +305,7 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
 
             switch app.DipolerotationButtonGroup.SelectedObject.Text
                 case 'partially rotating'
-                    par.rotationalConstraint = app.RotationalconstraintSpinner.Value;
+                    par.rotationalConstraint = 1 - app.RotationalfreedomSpinner.Value;
                 case 'freely rotating'
                     par.rotationalConstraint = 0;
                 case 'fixed'
@@ -481,8 +481,8 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
         function DipolerotationButtonGroupSelectionChanged(app, event)
             switch app.DipolerotationButtonGroup.SelectedObject.Text
                 case 'fixed'
-                    app.RotationalconstraintSpinner.Visible = "off";
-                    app.RotationalconstraintSpinnerLabel.Visible = "off";
+                    app.RotationalfreedomSpinner.Visible = "off";
+                    app.RotationalfreedomSpinnerLabel.Visible = "off";
                     if app.SwitchMultipleFluorophores
                         for k = 1:app.Fluorophores.getNumberFluorophores
                             app.Fluorophores.updateDipoleRotation('fixed',k);
@@ -499,8 +499,8 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
                         app.ConfiguremultiplefluorophoresButton.Visible = "on";
                     end
                 case 'freely rotating'
-                    app.RotationalconstraintSpinner.Visible = "off";
-                    app.RotationalconstraintSpinnerLabel.Visible = "off";
+                    app.RotationalfreedomSpinner.Visible = "off";
+                    app.RotationalfreedomSpinnerLabel.Visible = "off";
                     app.ReducedexcitationSwitch.Value = "Off";
                     app.ReducedexcitationSwitch.Visible = "off";
                     app.ReducedexcitationSwitchLabel.Visible = "off";
@@ -522,14 +522,14 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
                     app.ReducedexcitationSwitch.Visible = "off";
                     app.ReducedexcitationSwitchLabel.Visible = "off";
                     if app.SwitchMultipleFluorophores
-                        app.RotationalconstraintSpinner.Visible = "off";
-                        app.RotationalconstraintSpinnerLabel.Visible = "off";
+                        app.RotationalfreedomSpinner.Visible = "off";
+                        app.RotationalfreedomSpinnerLabel.Visible = "off";
                         for k = 1:app.Fluorophores.getNumberFluorophores
                             app.Fluorophores.updateDipoleRotation('partially rotating',k);
                         end
                     else
-                        app.RotationalconstraintSpinner.Visible = "on";
-                        app.RotationalconstraintSpinnerLabel.Visible = "on";
+                        app.RotationalfreedomSpinner.Visible = "on";
+                        app.RotationalfreedomSpinnerLabel.Visible = "on";
                         app.AzimuthalAngleSliderLabel.Visible = "on";
                         app.AzimuthalAngleSlider.Visible = "on";
                         app.phi.Visible = "on";
@@ -646,8 +646,8 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.InclinationAngleSliderLabel.Visible = "off";
             app.InclinationAngleSlider.Visible = "off";
             app.theta.Visible = "off";
-            app.RotationalconstraintSpinnerLabel.Visible = "off";
-            app.RotationalconstraintSpinner.Visible = "off";
+            app.RotationalfreedomSpinnerLabel.Visible = "off";
+            app.RotationalfreedomSpinner.Visible = "off";
 
             app.xpositionSpinnerLabel.Visible = "off";
             app.xpositionSpinner.Visible = "off";
@@ -1536,15 +1536,15 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             simulateAndDisplayPSF(app);
         end
 
-        % Value changed function: RotationalconstraintSpinner
-        function RotationalconstraintSpinnerValueChanged(app, event)
-            app.RotationalconstraintSpinner.Value = event.Value;
+        % Value changed function: RotationalfreedomSpinner
+        function RotationalfreedomSpinnerValueChanged(app, event)
+            app.RotationalfreedomSpinner.Value = event.Value;
             simulateAndDisplayPSF(app);
         end
 
-        % Value changing function: RotationalconstraintSpinner
-        function RotationalconstraintSpinnerValueChanging(app, event)
-            app.RotationalconstraintSpinner.Value = event.Value;
+        % Value changing function: RotationalfreedomSpinner
+        function RotationalfreedomSpinnerValueChanging(app, event)
+            app.RotationalfreedomSpinner.Value = event.Value;
             simulateAndDisplayPSF(app);
         end
 
@@ -1779,23 +1779,23 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.OrientationLabel.Position = [12 152 82 22];
             app.OrientationLabel.Text = 'Orientation';
 
-            % Create RotationalconstraintSpinnerLabel
-            app.RotationalconstraintSpinnerLabel = uilabel(app.FluorophoreTab);
-            app.RotationalconstraintSpinnerLabel.Visible = 'off';
-            app.RotationalconstraintSpinnerLabel.Position = [426 121 118 22];
-            app.RotationalconstraintSpinnerLabel.Text = 'Rotational constraint';
+            % Create RotationalfreedomSpinnerLabel
+            app.RotationalfreedomSpinnerLabel = uilabel(app.FluorophoreTab);
+            app.RotationalfreedomSpinnerLabel.Visible = 'off';
+            app.RotationalfreedomSpinnerLabel.Position = [426 121 118 22];
+            app.RotationalfreedomSpinnerLabel.Text = 'Rotational freedom';
 
-            % Create RotationalconstraintSpinner
-            app.RotationalconstraintSpinner = uispinner(app.FluorophoreTab);
-            app.RotationalconstraintSpinner.Step = 0.05;
-            app.RotationalconstraintSpinner.ValueChangingFcn = createCallbackFcn(app, @RotationalconstraintSpinnerValueChanging, true);
-            app.RotationalconstraintSpinner.Limits = [0 1];
-            app.RotationalconstraintSpinner.ValueChangedFcn = createCallbackFcn(app, @RotationalconstraintSpinnerValueChanged, true);
-            app.RotationalconstraintSpinner.BusyAction = 'cancel';
-            app.RotationalconstraintSpinner.Visible = 'off';
-            app.RotationalconstraintSpinner.Tooltip = {'0 = freely rotating, 1 = fixed'};
-            app.RotationalconstraintSpinner.Position = [543 121 58 22];
-            app.RotationalconstraintSpinner.Value = 0.1;
+            % Create RotationalfreedomSpinner
+            app.RotationalfreedomSpinner = uispinner(app.FluorophoreTab);
+            app.RotationalfreedomSpinner.Step = 0.05;
+            app.RotationalfreedomSpinner.ValueChangingFcn = createCallbackFcn(app, @RotationalfreedomSpinnerValueChanging, true);
+            app.RotationalfreedomSpinner.Limits = [0 1];
+            app.RotationalfreedomSpinner.ValueChangedFcn = createCallbackFcn(app, @RotationalfreedomSpinnerValueChanged, true);
+            app.RotationalfreedomSpinner.BusyAction = 'cancel';
+            app.RotationalfreedomSpinner.Visible = 'off';
+            app.RotationalfreedomSpinner.Tooltip = {'0 = fixed, 1 = freely rotating'};
+            app.RotationalfreedomSpinner.Position = [543 121 58 22];
+            app.RotationalfreedomSpinner.Value = 0.1;
 
             % Create MicroscopeRITab
             app.MicroscopeRITab = uitab(app.TabGroup);
