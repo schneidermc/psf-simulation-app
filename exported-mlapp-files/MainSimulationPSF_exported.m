@@ -178,6 +178,7 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
         GenerateDataset        % Subwindow generate dataset
         
         SwitchMultipleFluorophores logical = 0
+        SwitchSubwindowGenerateDataset logical = 0
 
         phaseMask        % store loaded phase mask
         transmissionMask % store loaded transmission mask
@@ -253,7 +254,7 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
 
                 case 1 % 'Multiple'
                     for k = 1:app.Fluorophores.getNumberFluorophores
-                        app.Fluorophores.simulateAndDisplayPSFs(k)
+                        app.Fluorophores.simulateAndDisplayPSFs(k);
                     end
             end
             
@@ -498,6 +499,10 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
                         app.ReducedexcitationSwitchLabel.Visible = "on";
                         app.ConfiguremultiplefluorophoresButton.Visible = "on";
                     end
+                    if app.SwitchSubwindowGenerateDataset
+                        app.GenerateDataset.DipoleorientationCheckBox.Visible = "on";
+                        app.GenerateDataset.RotationalfreedomCheckBox.Visible = "off";
+                    end
                 case 'freely rotating'
                     app.RotationalfreedomSpinner.Visible = "off";
                     app.RotationalfreedomSpinnerLabel.Visible = "off";
@@ -516,6 +521,10 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
                         app.InclinationAngleSlider.Visible = "off";
                         app.theta.Visible = "off";
                         app.ConfiguremultiplefluorophoresButton.Visible = "on";
+                    end
+                    if app.SwitchSubwindowGenerateDataset
+                        app.GenerateDataset.DipoleorientationCheckBox.Visible = "off";
+                        app.GenerateDataset.RotationalfreedomCheckBox.Visible = "off";
                     end
                 case 'partially rotating'
                     app.ReducedexcitationSwitch.Value = "Off";
@@ -537,6 +546,10 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
                         app.InclinationAngleSlider.Visible = "on";
                         app.theta.Visible = "on";
                         app.ConfiguremultiplefluorophoresButton.Visible = "on";
+                    end
+                    if app.SwitchSubwindowGenerateDataset
+                        app.GenerateDataset.DipoleorientationCheckBox.Visible = "on";
+                        app.GenerateDataset.RotationalfreedomCheckBox.Visible = "on";
                     end
                 otherwise
                     error('Invalid input value for dipole rotation!')
@@ -1551,6 +1564,7 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
         % Button pushed function: GeneratedataButton
         function GeneratedataButtonPushed(app, event)
             app.GenerateDataset = WindowGenerateDataset(app);
+            app.SwitchSubwindowGenerateDataset = 1;
         end
     end
 
