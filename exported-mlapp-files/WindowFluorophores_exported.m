@@ -555,10 +555,10 @@ classdef WindowFluorophores_exported < matlab.apps.AppBase
             app.CallingApp.PositionLabel.Visible = 'on';
             app.CallingApp.DipolerotationButtonGroup.Visible = 'on';
             app.CallingApp.DipoleorientationLabel.Visible = 'on';
-            app.CallingApp.simulateAndDisplayPSF()
+            app.CallingApp.simulateAndDisplayPSF();
             set(app.CallingApp.ConfiguremultiplefluorophoresButton, 'Enable', 'on')
 
-            app.CallingApp.CalculateCramrRaoBoundCheckBox.Visible = 'on'; 
+            app.CallingApp.CalculateCheckBox.Visible = 'on'; % checkbox for CRB
             app.CallingApp.CRBOutputField.Visible = 'on';
             app.CallingApp.CramrRaoBoundLabel.Visible = 'on';
             % Switch on option for 3D plot again (currently not compatible
