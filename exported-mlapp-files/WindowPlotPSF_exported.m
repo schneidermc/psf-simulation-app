@@ -84,22 +84,20 @@ classdef WindowPlotPSF_exported < matlab.apps.AppBase
             path(appPath);
         end
 
-        % Callback function: PushTool
+        % Clicked callback: PushTool
         function PushToolClicked(app, event)
-            % save image as .mat file 
-            temp = app.CallingApp.readParametersPhaseMask();
-            mask = temp(129); 
+           % save image as .csv file 
             psf = app.psfImage; 
-            data = {mask,psf}; 
-
-            % save file 
-            k = 0; 
-            filename = ['data', num2str(k), '.mat']; 
-            while isfile(filename)
-                k=k+1;
-                filename = ['data', num2str(k), '.mat']; 
+            startingFolder = userpath;
+            defaultFileName = fullfile(startingFolder, 'psf.csv');
+            [filename, folder] = uiputfile(defaultFileName, 'Specify a file');
+            if filename == 0
+              % User clicked the Cancel button.
+              return;
             end
-            save(filename, 'data');
+            % save file 
+            filename = fullfile(folder,filename); 
+            writematrix(psf, filename);
         end
     end
 
@@ -120,17 +118,14 @@ classdef WindowPlotPSF_exported < matlab.apps.AppBase
 
             % Create PushTool
             app.PushTool = uipushtool(app.Toolbar);
-            app.PushTool.Tooltip = {'Save as .mat'};
+            app.PushTool.Tooltip = {'Save as .csv'};
             app.PushTool.ClickedCallback = createCallbackFcn(app, @PushToolClicked, true);
 
             % Create UIAxesPSF
             app.UIAxesPSF = uiaxes(app.PSFimageUIFigure);
             app.UIAxesPSF.PlotBoxAspectRatio = [1 1 1];
             app.UIAxesPSF.XTick = [];
-            app.UIAxesPSF.XTickLabelRotation = 0;
             app.UIAxesPSF.YTick = [];
-            app.UIAxesPSF.YTickLabelRotation = 0;
-            app.UIAxesPSF.ZTickLabelRotation = 0;
             app.UIAxesPSF.FontSize = 15;
             app.UIAxesPSF.Position = [30 13 368 317];
 

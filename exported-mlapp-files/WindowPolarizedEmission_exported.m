@@ -3,8 +3,10 @@ classdef WindowPolarizedEmission_exported < matlab.apps.AppBase
     % Properties that correspond to app components
     properties (Access = public)
         PolarizedEmissionUIFigure  matlab.ui.Figure
-        PlotoptionsMenu            matlab.ui.container.Menu
+        OptionsMenu                matlab.ui.container.Menu
         ShareColorbarMenu          matlab.ui.container.Menu
+        SavexpolarizedasMenu       matlab.ui.container.Menu
+        SaveypolarizedasMenu       matlab.ui.container.Menu
         UIAxesPolarizedEmission_y  matlab.ui.control.UIAxes
         UIAxesPolarizedEmission_x  matlab.ui.control.UIAxes
     end
@@ -91,6 +93,36 @@ classdef WindowPolarizedEmission_exported < matlab.apps.AppBase
                     app.CallingApp.Fluorophores.updatePolarizedEmissionChannels();
             end
         end
+
+        % Menu selected function: SavexpolarizedasMenu
+        function SavexpolarizedasMenuSelected(app, event)
+            psf_x = getimage(app.UIAxesPolarizedEmission_x);
+            startingFolder = userpath;
+            defaultFileName = fullfile(startingFolder, 'psf_x.csv');
+            [filename, folder] = uiputfile(defaultFileName, 'Specify a file');
+            if filename == 0
+              % User clicked the Cancel button.
+              return;
+            end
+            % save file 
+            filename = fullfile(folder,filename); 
+            writematrix(psf_x, filename);
+        end
+
+        % Menu selected function: SaveypolarizedasMenu
+        function SaveypolarizedasMenuSelected(app, event)
+            psf_y = getimage(app.UIAxesPolarizedEmission_y);
+            startingFolder = userpath;
+            defaultFileName = fullfile(startingFolder, 'psf_y.csv');
+            [filename, folder] = uiputfile(defaultFileName, 'Specify a file');
+            if filename == 0
+              % User clicked the Cancel button.
+              return;
+            end
+            % save file 
+            filename = fullfile(folder,filename); 
+            writematrix(psf_y, filename);
+        end
     end
 
     % Component initialization
@@ -107,14 +139,24 @@ classdef WindowPolarizedEmission_exported < matlab.apps.AppBase
             app.PolarizedEmissionUIFigure.BusyAction = 'cancel';
             app.PolarizedEmissionUIFigure.HandleVisibility = 'callback';
 
-            % Create PlotoptionsMenu
-            app.PlotoptionsMenu = uimenu(app.PolarizedEmissionUIFigure);
-            app.PlotoptionsMenu.Text = 'Plot options';
+            % Create OptionsMenu
+            app.OptionsMenu = uimenu(app.PolarizedEmissionUIFigure);
+            app.OptionsMenu.Text = 'Options';
 
             % Create ShareColorbarMenu
-            app.ShareColorbarMenu = uimenu(app.PlotoptionsMenu);
+            app.ShareColorbarMenu = uimenu(app.OptionsMenu);
             app.ShareColorbarMenu.MenuSelectedFcn = createCallbackFcn(app, @ShareColorbarMenuSelected, true);
             app.ShareColorbarMenu.Text = 'Share Colorbar';
+
+            % Create SavexpolarizedasMenu
+            app.SavexpolarizedasMenu = uimenu(app.OptionsMenu);
+            app.SavexpolarizedasMenu.MenuSelectedFcn = createCallbackFcn(app, @SavexpolarizedasMenuSelected, true);
+            app.SavexpolarizedasMenu.Text = 'Save x-polarized as';
+
+            % Create SaveypolarizedasMenu
+            app.SaveypolarizedasMenu = uimenu(app.OptionsMenu);
+            app.SaveypolarizedasMenu.MenuSelectedFcn = createCallbackFcn(app, @SaveypolarizedasMenuSelected, true);
+            app.SaveypolarizedasMenu.Text = 'Save y-polarized as';
 
             % Create UIAxesPolarizedEmission_x
             app.UIAxesPolarizedEmission_x = uiaxes(app.PolarizedEmissionUIFigure);
