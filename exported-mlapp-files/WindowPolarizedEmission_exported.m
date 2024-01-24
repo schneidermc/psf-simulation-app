@@ -35,7 +35,7 @@ classdef WindowPolarizedEmission_exported < matlab.apps.AppBase
 
         function updatePlot(app, psf)
             if app.CallingApp.ShowPsf3DCheckBox.Value
-                nSteps = app.CallingApp.NumberstepsEditField.Value - 1;
+                nSteps = app.CallingApp.Numberzsteps3DPSFEditField.Value - 1;
                 midSlice = floor(nSteps/2);
                 Ix = psf.Ix(:,:,midSlice);
                 Iy = psf.Iy(:,:,midSlice);
