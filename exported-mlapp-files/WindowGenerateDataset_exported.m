@@ -112,9 +112,8 @@ classdef WindowGenerateDataset_exported < matlab.apps.AppBase
             
             % Create output folders
             % Create subfolder with timestamp
-            t = datetime('now','TimeZone','local','Format','yyyy-MM-dd_HH-mm-ss');
-            timestamp = datestr(t, 'yyyy-MM-dd_HH-mm-ss');
-            parentFolder = fullfile(app.outputFolderPath, ['psf_dataset_', timestamp]);
+            timestamp = datetime('now','TimeZone','local','Format','yyyy-MM-dd_HH-mm-ss');
+            parentFolder = fullfile(app.outputFolderPath, ['psf_dataset_', char(timestamp)]);
             mkdir(parentFolder);
 
             subfolderDataName = 'psf_data';
