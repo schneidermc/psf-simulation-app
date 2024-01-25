@@ -2336,8 +2336,11 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             % Create RotatephasemaskSlider
             app.RotatephasemaskSlider = uislider(app.PhasemaskTab);
             app.RotatephasemaskSlider.Limits = [0 1];
+            app.RotatephasemaskSlider.MajorTicks = [0 0.166666666666667 0.333333333333333 0.5 0.666666666666667 0.833333333333333 1];
+            app.RotatephasemaskSlider.MajorTickLabels = {'0', '60', '120', '180', '240', '300', '360'};
             app.RotatephasemaskSlider.ValueChangedFcn = createCallbackFcn(app, @RotatephasemaskSliderValueChanged, true);
             app.RotatephasemaskSlider.ValueChangingFcn = createCallbackFcn(app, @RotatephasemaskSliderValueChanging, true);
+            app.RotatephasemaskSlider.MinorTicks = [0.0278 0.0556 0.0833 0.1111 0.1389 0.1944 0.2222 0.25 0.2778 0.3056 0.3611 0.3889 0.4167 0.4444 0.4722 0.5278 0.5556 0.5833 0.6111 0.6389 0.6944 0.7222 0.75 0.7778 0.8056 0.8611 0.8889 0.9167 0.9444 0.9722];
             app.RotatephasemaskSlider.BusyAction = 'cancel';
             app.RotatephasemaskSlider.Visible = 'off';
             app.RotatephasemaskSlider.Position = [136 164 150 3];
