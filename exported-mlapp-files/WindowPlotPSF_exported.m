@@ -89,15 +89,27 @@ classdef WindowPlotPSF_exported < matlab.apps.AppBase
            % save image as .csv file 
             psf = app.psfImage; 
             startingFolder = userpath;
-            defaultFileName = fullfile(startingFolder, 'psf.csv');
-            [filename, folder] = uiputfile(defaultFileName, 'Specify a file');
+            filter = {'*.dat'; '*.xls'; '*.xlsx'; '*.csv'; '*.txt'; '*.mat'; '*.png'; '*.jpg'; '*.tif'};
+            defaultFileName = fullfile(startingFolder, filter);
+            [filename, folder] = uiputfile(defaultFileName, 'Specify a file', 'psf');
             if filename == 0
               % User clicked the Cancel button.
               return;
             end
-            % save file 
+            [~,~,ext] = fileparts(filename); 
             filename = fullfile(folder,filename); 
-            writematrix(psf, filename);
+            switch ext 
+                case {'.dat', '.xls', '.xlsx', '.csv', '.txt'}
+                    writematrix(psf, filename);
+                case '.mat'
+                    save(filename,'psf');
+                case {'.png', '.tif'}
+                    imwrite( ind2rgb(im2uint8(mat2gray(psf)), colormap(app.PSFimageUIFigure, app.CallingApp.ColormapDropDown.Value)), filename)
+                case '.jpg'
+                    Nx = app.CallingApp.PixelsperlateralaxisEditField.Value; 
+                    psf = interp2(1:Nx, (1:Nx)', psf, 1:0.02:Nx, (1:0.02:Nx)', 'nearest');
+                    imwrite( ind2rgb(im2uint8(mat2gray(psf)), colormap(app.PSFimageUIFigure, app.CallingApp.ColormapDropDown.Value)), filename)
+            end
         end
     end
 
@@ -120,6 +132,7 @@ classdef WindowPlotPSF_exported < matlab.apps.AppBase
             app.PushTool = uipushtool(app.Toolbar);
             app.PushTool.Tooltip = {'Save as .csv'};
             app.PushTool.ClickedCallback = createCallbackFcn(app, @PushToolClicked, true);
+            app.PushTool.Icon = 'save.png';
 
             % Create UIAxesPSF
             app.UIAxesPSF = uiaxes(app.PSFimageUIFigure);

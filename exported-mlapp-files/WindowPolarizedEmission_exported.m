@@ -3,10 +3,10 @@ classdef WindowPolarizedEmission_exported < matlab.apps.AppBase
     % Properties that correspond to app components
     properties (Access = public)
         PolarizedEmissionUIFigure  matlab.ui.Figure
-        OptionsMenu                matlab.ui.container.Menu
-        ShareColorbarMenu          matlab.ui.container.Menu
-        SavexpolarizedasMenu       matlab.ui.container.Menu
-        SaveypolarizedasMenu       matlab.ui.container.Menu
+        Toolbar                    matlab.ui.container.Toolbar
+        SaveXPolarized             matlab.ui.container.toolbar.PushTool
+        SaveYPolarized             matlab.ui.container.toolbar.PushTool
+        ShareColorbar              matlab.ui.container.toolbar.PushTool
         UIAxesPolarizedEmission_y  matlab.ui.control.UIAxes
         UIAxesPolarizedEmission_x  matlab.ui.control.UIAxes
     end
@@ -46,15 +46,16 @@ classdef WindowPolarizedEmission_exported < matlab.apps.AppBase
                 imagesc(app.UIAxesPolarizedEmission_y, psf.Iy)
             end
             colorbar(app.UIAxesPolarizedEmission_y)
-            if strcmp(app.ShareColorbarMenu.Checked,'on')
-                limits = ([0 max(max(psf.Ix(:), psf.Iy(:)))]);
-                caxis(app.UIAxesPolarizedEmission_x, limits)
-                caxis(app.UIAxesPolarizedEmission_y, limits)
-                %colorbar(app.UIAxesPolarizedEmission_x,'off')
-            else
-                colorbar(app.UIAxesPolarizedEmission_x)
-                caxis(app.UIAxesPolarizedEmission_x, 'auto')
-                caxis(app.UIAxesPolarizedEmission_y, 'auto')
+            switch app.ShareColorbar.Icon
+                case 'brushActive.png'
+                    limits = ([0 max(max(psf.Ix(:), psf.Iy(:)))]);
+                    caxis(app.UIAxesPolarizedEmission_x, limits)
+                    caxis(app.UIAxesPolarizedEmission_y, limits)
+                    %colorbar(app.UIAxesPolarizedEmission_x,'off')
+                case 'brushInactive.png'
+                    colorbar(app.UIAxesPolarizedEmission_x)
+                    caxis(app.UIAxesPolarizedEmission_x, 'auto')
+                    caxis(app.UIAxesPolarizedEmission_y, 'auto')
             end
         end
 
@@ -78,23 +79,7 @@ classdef WindowPolarizedEmission_exported < matlab.apps.AppBase
             delete(app)
         end
 
-        % Menu selected function: ShareColorbarMenu
-        function ShareColorbarMenuSelected(app, event)
-            if strcmp(app.ShareColorbarMenu.Checked,'on')
-                app.ShareColorbarMenu.Checked = 'off';
-            else
-                app.ShareColorbarMenu.Checked = 'on';
-            end
-            switch app.CallingApp.SwitchMultipleFluorophores
-                case 0 % 'Single'
-                    psf = app.CallingApp.simulateAndDisplayPSF;
-                    app.CallingApp.PlotPolarizedEmission.updatePlot(psf);
-                case 1 % 'Multiple'
-                    app.CallingApp.Fluorophores.updatePolarizedEmissionChannels();
-            end
-        end
-
-        % Menu selected function: SavexpolarizedasMenu
+        % Callback function
         function SavexpolarizedasMenuSelected(app, event)
             psf_x = getimage(app.UIAxesPolarizedEmission_x);
             startingFolder = userpath;
@@ -109,7 +94,7 @@ classdef WindowPolarizedEmission_exported < matlab.apps.AppBase
             writematrix(psf_x, filename);
         end
 
-        % Menu selected function: SaveypolarizedasMenu
+        % Callback function
         function SaveypolarizedasMenuSelected(app, event)
             psf_y = getimage(app.UIAxesPolarizedEmission_y);
             startingFolder = userpath;
@@ -122,6 +107,77 @@ classdef WindowPolarizedEmission_exported < matlab.apps.AppBase
             % save file 
             filename = fullfile(folder,filename); 
             writematrix(psf_y, filename);
+        end
+
+        % Clicked callback: ShareColorbar
+        function ShareColorbarClicked(app, event)
+            switch app.ShareColorbar.Icon
+                case 'brushInactive.png'
+                    app.ShareColorbar.Icon = 'brushActive.png';
+                case 'brushActive.png'
+                    app.ShareColorbar.Icon = 'brushInactive.png';
+            end
+            switch app.CallingApp.SwitchMultipleFluorophores
+                case 0 % 'Single'
+                    psf = app.CallingApp.simulateAndDisplayPSF;
+                    app.CallingApp.PlotPolarizedEmission.updatePlot(psf);
+                case 1 % 'Multiple'
+                    app.CallingApp.Fluorophores.updatePolarizedEmissionChannels();
+            end
+        end
+
+        % Clicked callback: SaveXPolarized
+        function SaveXPolarizedClicked(app, event)
+            psf_x = getimage(app.UIAxesPolarizedEmission_x);
+            startingFolder = userpath;
+            filter = {'*.dat'; '*.xls'; '*.xlsx'; '*.csv'; '*.txt'; '*.mat'; '*.png'; '*.jpg'; '*.tif'};
+            defaultFileName = fullfile(startingFolder, filter);
+            [filename, folder] = uiputfile(defaultFileName, 'Specify a file', 'psf_x');
+            if filename == 0
+              % User clicked the Cancel button.
+              return;
+            end
+            [~,~,ext] = fileparts(filename); 
+            filename = fullfile(folder,filename);  
+            switch ext 
+                case {'.dat', '.xls', '.xlsx', '.csv', '.txt'}
+                    writematrix(psf_x, filename);
+                case '.mat'
+                    save(filename,'psf_x');
+                case {'.png', '.tif'}
+                    imwrite( ind2rgb(im2uint8(mat2gray(psf_x)), colormap(app.PolarizedEmissionUIFigure, app.CallingApp.ColormapDropDown.Value)), filename)
+                case '.jpg'
+                    Nx = app.CallingApp.PixelsperlateralaxisEditField.Value; 
+                    psf_x = interp2(1:Nx, (1:Nx)', psf_x, 1:0.02:Nx, (1:0.02:Nx)', 'nearest');
+                    imwrite( ind2rgb(im2uint8(mat2gray(psf_x)), colormap(app.PolarizedEmissionUIFigure, app.CallingApp.ColormapDropDown.Value)), filename)
+            end
+        end
+
+        % Clicked callback: SaveYPolarized
+        function SaveYPolarizedClicked(app, event)
+            psf_y = getimage(app.UIAxesPolarizedEmission_y);
+            startingFolder = userpath;
+            filter = {'*.dat'; '*.xls'; '*.xlsx'; '*.csv'; '*.txt'; '*.mat'; '*.png'; '*.jpg'; '*.tif'};
+            defaultFileName = fullfile(startingFolder, filter);
+            [filename, folder] = uiputfile(defaultFileName, 'Specify a file', 'psf_y');
+            if filename == 0
+              % User clicked the Cancel button.
+              return;
+            end
+            [~,~,ext] = fileparts(filename); 
+            filename = fullfile(folder,filename);  
+            switch ext 
+                case {'.dat', '.xls', '.xlsx', '.csv', '.txt'}
+                    writematrix(psf_y, filename);
+                case '.mat'
+                    save(filename,'psf_y');
+                case {'.png', '.tif'}
+                    imwrite( ind2rgb(im2uint8(mat2gray(psf_y)), colormap(app.PolarizedEmissionUIFigure, app.CallingApp.ColormapDropDown.Value)), filename)
+                case '.jpg'
+                    Nx = app.CallingApp.PixelsperlateralaxisEditField.Value; 
+                    psf_y = interp2(1:Nx, (1:Nx)', psf_y, 1:0.02:Nx, (1:0.02:Nx)', 'nearest');
+                    imwrite( ind2rgb(im2uint8(mat2gray(psf_y)), colormap(app.PolarizedEmissionUIFigure, app.CallingApp.ColormapDropDown.Value)), filename)
+            end
         end
     end
 
@@ -139,24 +195,26 @@ classdef WindowPolarizedEmission_exported < matlab.apps.AppBase
             app.PolarizedEmissionUIFigure.BusyAction = 'cancel';
             app.PolarizedEmissionUIFigure.HandleVisibility = 'callback';
 
-            % Create OptionsMenu
-            app.OptionsMenu = uimenu(app.PolarizedEmissionUIFigure);
-            app.OptionsMenu.Text = 'Options';
+            % Create Toolbar
+            app.Toolbar = uitoolbar(app.PolarizedEmissionUIFigure);
 
-            % Create ShareColorbarMenu
-            app.ShareColorbarMenu = uimenu(app.OptionsMenu);
-            app.ShareColorbarMenu.MenuSelectedFcn = createCallbackFcn(app, @ShareColorbarMenuSelected, true);
-            app.ShareColorbarMenu.Text = 'Share Colorbar';
+            % Create SaveXPolarized
+            app.SaveXPolarized = uipushtool(app.Toolbar);
+            app.SaveXPolarized.Tooltip = {'Save x-polarized'};
+            app.SaveXPolarized.ClickedCallback = createCallbackFcn(app, @SaveXPolarizedClicked, true);
+            app.SaveXPolarized.Icon = 'save.png';
 
-            % Create SavexpolarizedasMenu
-            app.SavexpolarizedasMenu = uimenu(app.OptionsMenu);
-            app.SavexpolarizedasMenu.MenuSelectedFcn = createCallbackFcn(app, @SavexpolarizedasMenuSelected, true);
-            app.SavexpolarizedasMenu.Text = 'Save x-polarized as';
+            % Create SaveYPolarized
+            app.SaveYPolarized = uipushtool(app.Toolbar);
+            app.SaveYPolarized.Tooltip = {'Save y-polarized'};
+            app.SaveYPolarized.ClickedCallback = createCallbackFcn(app, @SaveYPolarizedClicked, true);
+            app.SaveYPolarized.Icon = 'save.png';
 
-            % Create SaveypolarizedasMenu
-            app.SaveypolarizedasMenu = uimenu(app.OptionsMenu);
-            app.SaveypolarizedasMenu.MenuSelectedFcn = createCallbackFcn(app, @SaveypolarizedasMenuSelected, true);
-            app.SaveypolarizedasMenu.Text = 'Save y-polarized as';
+            % Create ShareColorbar
+            app.ShareColorbar = uipushtool(app.Toolbar);
+            app.ShareColorbar.Tooltip = {'Share Colorbar'};
+            app.ShareColorbar.ClickedCallback = createCallbackFcn(app, @ShareColorbarClicked, true);
+            app.ShareColorbar.Icon = 'brushInactive.png';
 
             % Create UIAxesPolarizedEmission_x
             app.UIAxesPolarizedEmission_x = uiaxes(app.PolarizedEmissionUIFigure);
