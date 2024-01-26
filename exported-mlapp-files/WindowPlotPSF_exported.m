@@ -103,9 +103,9 @@ classdef WindowPlotPSF_exported < matlab.apps.AppBase
                     writematrix(psf, filename);
                 case '.mat'
                     save(filename,'psf');
-                case {'.png', '.tif'}
+                case '.tif'
                     imwrite( ind2rgb(im2uint8(mat2gray(psf)), colormap(app.PSFimageUIFigure, app.CallingApp.ColormapDropDown.Value)), filename)
-                case '.jpg'
+                case {'.png', '.jpg'}
                     Nx = app.CallingApp.PixelsperlateralaxisEditField.Value; 
                     psf = interp2(1:Nx, (1:Nx)', psf, 1:0.02:Nx, (1:0.02:Nx)', 'nearest');
                     imwrite( ind2rgb(im2uint8(mat2gray(psf)), colormap(app.PSFimageUIFigure, app.CallingApp.ColormapDropDown.Value)), filename)
@@ -130,7 +130,7 @@ classdef WindowPlotPSF_exported < matlab.apps.AppBase
 
             % Create PushTool
             app.PushTool = uipushtool(app.Toolbar);
-            app.PushTool.Tooltip = {'Save as .csv'};
+            app.PushTool.Tooltip = {'Save'};
             app.PushTool.ClickedCallback = createCallbackFcn(app, @PushToolClicked, true);
             app.PushTool.Icon = 'save.png';
 

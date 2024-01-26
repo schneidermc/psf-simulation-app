@@ -171,9 +171,9 @@ classdef WindowPolarizedEmission_exported < matlab.apps.AppBase
                     writematrix(psf_y, filename);
                 case '.mat'
                     save(filename,'psf_y');
-                case {'.png', '.tif'}
+                case '.tif'
                     imwrite( ind2rgb(im2uint8(mat2gray(psf_y)), colormap(app.PolarizedEmissionUIFigure, app.CallingApp.ColormapDropDown.Value)), filename)
-                case '.jpg'
+                case {'.png', '.jpg'}
                     Nx = app.CallingApp.PixelsperlateralaxisEditField.Value; 
                     psf_y = interp2(1:Nx, (1:Nx)', psf_y, 1:0.02:Nx, (1:0.02:Nx)', 'nearest');
                     imwrite( ind2rgb(im2uint8(mat2gray(psf_y)), colormap(app.PolarizedEmissionUIFigure, app.CallingApp.ColormapDropDown.Value)), filename)

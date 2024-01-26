@@ -4,10 +4,10 @@ classdef WindowPlotPSFThreeDim_exported < matlab.apps.AppBase
     properties (Access = public)
         PSFThreeDimUIFigure       matlab.ui.Figure
         Toolbar                   matlab.ui.container.Toolbar
-        PushTool                  matlab.ui.container.toolbar.PushTool
+        saveProjectionPlot        matlab.ui.container.toolbar.PushTool
+        updateLighting            matlab.ui.container.toolbar.PushTool
         TransparencySpinner       matlab.ui.control.Spinner
         TransparencySpinnerLabel  matlab.ui.control.Label
-        UpdatelightingButton      matlab.ui.control.Button
         IsoSurfaceSlider          matlab.ui.control.Slider
         IsosurfaceLabel           matlab.ui.control.Label
         UIAxesIsoSurface          matlab.ui.control.UIAxes
@@ -152,22 +152,31 @@ classdef WindowPlotPSFThreeDim_exported < matlab.apps.AppBase
             delete(app)
         end
 
-        % Callback function: PushTool
-        function PushToolClicked(app, event)
-            % save image as .mat file 
-            temp = app.CallingApp.readParametersPhaseMask();
-            mask = temp(129); 
-            psf = app.psfImage; 
-            data = {mask,psf}; 
-
-            % save file 
-            k = 0; 
-            filename = ['data', num2str(k), '.mat']; 
-            while isfile(filename)
-                k=k+1;
-                filename = ['data', num2str(k), '.mat']; 
+        % Clicked callback: saveProjectionPlot
+        function saveProjectionPlotClicked(app, event)
+            psfXZ = getimage(app.UIAxesPSF);
+            startingFolder = userpath;
+            filter = {'*.dat'; '*.xls'; '*.xlsx'; '*.csv'; '*.txt'; '*.mat'; '*.png'; '*.jpg'; '*.tif'};
+            defaultFileName = fullfile(startingFolder, filter);
+            [filename, folder] = uiputfile(defaultFileName, 'Specify a file', 'psfXZ');
+            if filename == 0
+              % User clicked the Cancel button.
+              return;
             end
-            save(filename, 'data');
+            [~,~,ext] = fileparts(filename); 
+            filename = fullfile(folder,filename);  
+            switch ext 
+                case {'.dat', '.xls', '.xlsx', '.csv', '.txt'}
+                    writematrix(psfXZ, filename);
+                case '.mat'
+                    save(filename,'psfXZ');
+                case {'.tif'}
+                    imwrite( ind2rgb(im2uint8(mat2gray(psfXZ)), colormap(app.PSFThreeDimUIFigure, app.CallingApp.ColormapDropDown.Value)), filename)
+                case {'.png', '.jpg'}
+                    Nx = app.CallingApp.PixelsperlateralaxisEditField.Value; 
+                    psfXZ = interp2(1:Nx, (1:Nx)', psfXZ, 1:0.02:Nx, (1:0.02:Nx)', 'nearest');
+                    imwrite( ind2rgb(im2uint8(mat2gray(psfXZ)), colormap(app.PSFThreeDimUIFigure, app.CallingApp.ColormapDropDown.Value)), filename)
+            end
         end
 
         % Value changed function: IsoSurfaceSlider
@@ -182,16 +191,16 @@ classdef WindowPlotPSFThreeDim_exported < matlab.apps.AppBase
             app.calculateIsoSurface(app.psfImage);
         end
 
-        % Button pushed function: UpdatelightingButton
-        function UpdatelightingButtonPushed(app, event)
-            camlight(app.cameraLight, 'right');
-        end
-
         % Value changed function: TransparencySpinner
         function TransparencySpinnerValueChanged(app, event)
             app.TransparencySpinner.Value = event.Value;
             app.isosurfaceTransparency = app.TransparencySpinner.Value;
             alpha(app.UIAxesIsoSurface, app.isosurfaceTransparency);
+        end
+
+        % Clicked callback: updateLighting
+        function updateLightingClicked(app, event)
+            camlight(app.cameraLight, 'right');
         end
     end
 
@@ -210,10 +219,17 @@ classdef WindowPlotPSFThreeDim_exported < matlab.apps.AppBase
             % Create Toolbar
             app.Toolbar = uitoolbar(app.PSFThreeDimUIFigure);
 
-            % Create PushTool
-            app.PushTool = uipushtool(app.Toolbar);
-            app.PushTool.Tooltip = {'Save as .mat'};
-            app.PushTool.ClickedCallback = createCallbackFcn(app, @PushToolClicked, true);
+            % Create saveProjectionPlot
+            app.saveProjectionPlot = uipushtool(app.Toolbar);
+            app.saveProjectionPlot.Tooltip = {'Save xz-Projection'};
+            app.saveProjectionPlot.ClickedCallback = createCallbackFcn(app, @saveProjectionPlotClicked, true);
+            app.saveProjectionPlot.Icon = 'save.png';
+
+            % Create updateLighting
+            app.updateLighting = uipushtool(app.Toolbar);
+            app.updateLighting.Tooltip = {'Update isosurface lighting'};
+            app.updateLighting.ClickedCallback = createCallbackFcn(app, @updateLightingClicked, true);
+            app.updateLighting.Icon = 'lightbulb.png';
 
             % Create UIAxesPSF
             app.UIAxesPSF = uiaxes(app.PSFThreeDimUIFigure);
@@ -222,11 +238,8 @@ classdef WindowPlotPSFThreeDim_exported < matlab.apps.AppBase
             app.UIAxesPSF.PlotBoxAspectRatio = [1 1 1];
             app.UIAxesPSF.XLim = [0 1];
             app.UIAxesPSF.XTick = [];
-            app.UIAxesPSF.XTickLabelRotation = 0;
             app.UIAxesPSF.XTickLabel = '';
             app.UIAxesPSF.YTick = [];
-            app.UIAxesPSF.YTickLabelRotation = 0;
-            app.UIAxesPSF.ZTickLabelRotation = 0;
             app.UIAxesPSF.FontSize = 12;
             app.UIAxesPSF.Position = [48 61 269 272];
 
@@ -256,12 +269,6 @@ classdef WindowPlotPSFThreeDim_exported < matlab.apps.AppBase
             app.IsoSurfaceSlider.BusyAction = 'cancel';
             app.IsoSurfaceSlider.Position = [715 111 3 150];
             app.IsoSurfaceSlider.Value = 0.5;
-
-            % Create UpdatelightingButton
-            app.UpdatelightingButton = uibutton(app.PSFThreeDimUIFigure, 'push');
-            app.UpdatelightingButton.ButtonPushedFcn = createCallbackFcn(app, @UpdatelightingButtonPushed, true);
-            app.UpdatelightingButton.Position = [426 19 100 23];
-            app.UpdatelightingButton.Text = 'Update lighting';
 
             % Create TransparencySpinnerLabel
             app.TransparencySpinnerLabel = uilabel(app.PSFThreeDimUIFigure);

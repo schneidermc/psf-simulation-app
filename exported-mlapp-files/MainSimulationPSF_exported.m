@@ -917,15 +917,18 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
                 end
                 app.PlotPSF = WindowPlotPSF(app);
                 app.PlotPSF.initializePlot();
+                app.Export2DPSFButton.Visible = "on";
             else
                 appPath = app.originalPath;
                 delete(app.PlotPSF);
+                delete(app.PlotPSFThreeDim);
                 path(appPath);
                 app.CalculatingLamp.Enable = 'off';
                 app.ShowPsf2DCheckBox.Value = false;
                 app.ShowPsf3DCheckBox.Value = false;
                 app.ShowPsf2DCheckBox.Enable = "off";
                 app.ShowPsf3DCheckBox.Enable = "off";
+                app.Export3DPSFButton.Visible = "off";
             end
         end
 
@@ -1512,8 +1515,11 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             else
                 image = psf.image; 
             end
-            
             [baseFileName, folder] = uiputfile('2DPSF');
+            if baseFileName == 0
+              % User clicked the Cancel button.
+              return;
+            end
             fullFileName = fullfile(folder, baseFileName);
             save(fullFileName,'image');
 
@@ -1529,9 +1535,12 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             psf = simulateAndDisplayPSF(app);
             image = psf.image; 
             [baseFileName, folder] = uiputfile('3DPSF');
+            if baseFileName == 0
+              % User clicked the Cancel button.
+              return;
+            end
             fullFileName = fullfile(folder, baseFileName);
             save(fullFileName,'image');
-
             app.Export3DPSFOutputField.Text = {'3D PSF saved'};
             app.Export3DPSFOutputField.Visible = 'on'; 
             pause(2)
