@@ -75,9 +75,75 @@ classdef WindowGenerateDataset_exported < matlab.apps.AppBase
                 azimuth = repmat(app.CallingApp.phi.Value*pi/180, n, 1);
             end
         end
-    end
 
-    methods (Access = private)
+        function fixedParameters = getFixedParameters(app)
+            propertiesList = {
+                'emissionWavelength', 'EmissionWavelengthSpinner';
+                'photonNumber', 'PhotonnumberSpinner';
+                'reducedExcitation', 'ReducedexcitationSwitch';
+                'photonShotNoise', 'PhotonshotnoiseSwitch';
+                'xPosition', 'xpositionSpinner';
+                'yPosition', 'ypositionSpinner';
+                'zPosition', 'zpositionSpinner';
+                'rotationalFreedom', 'RotationalfreedomSpinner';
+                'azimuthalAngle', 'phi';
+                'inclinationAngle', 'theta';
+                'objectiveNA', 'ObjectiveNaSpinner';
+                'magnification', 'MagnificationSpinner';
+                'objectiveFocalLength', 'ObjectiveFocalLengthSpinner';
+                'tubeLensFocalLength', 'TubeLensFocalLengthSpinner';
+                'defocus', 'defocus';
+                'refractiveIndexSampleLayer', 'RefractiveIndexSpecimenSpinner';
+                'refractiveIndexImmersionMedium', 'RefractiveIndexImmersionMediumSpinner';
+                'refractiveIndexIntermediateLayer', 'RefractiveIndexIntermediateLayerSpinner';
+                'intermediateLayerThickness', 'IntermediateLayerThicknessSpinner';
+                'pixelSizeObjectSpace', 'PixelsizeObjectSpaceSpinner';
+                'pixelSizePhysical', 'PixelsizePhysicalSpinner';
+                'backgroundNoiseStd', 'BackgroundnoisestdSpinner'; 
+                'discretizationBFP', 'DiscretizationBFPEditField';
+                'nPixels', 'PixelsperlateralaxisEditField';
+                'roiSideLength', 'ROIsidelengthEditField';
+            };
+            for i = 1:size(propertiesList, 1)
+                customPropName = propertiesList{i, 1};
+                appPropName = propertiesList{i, 2};
+            
+                if isprop(app.CallingApp, appPropName)
+                    propValue = app.CallingApp.(appPropName).Value;
+                    fixedParameters.(customPropName) = propValue; 
+                else
+                    warning('Property %s does not exist in the app.\n', appPropName);
+                end
+            end
+            fixedParameters.('dipoleRotation') = app.CallingApp.('DipolerotationButtonGroup').SelectedObject.Text;
+            fixedParameters.('zernikeNollIndices') = app.CallingApp.('zernikeIndices');
+            fixedParameters.('zernikeCoefficients') = app.CallingApp.('zernikeWeights');
+            switch app.CallingApp.DipolerotationButtonGroup.SelectedObject.Text
+                case 'fixed'
+                    fieldsToRemove = {'rotationalFreedom'};
+                case 'freely rotating'
+                    fieldsToRemove = {'dipole', 'rotationalFreedom'};
+                otherwise
+                    error('Invalid input value for dipole rotation!')
+            end
+            % Remove fields that were randomized
+            checkboxes = {
+                'emissionWavelength', 'EmissionwavelengthCheckBox';
+                'photonNumber', 'PhotonnumberCheckBox';
+                'xPosition', 'xpositionCheckBox';
+                'yPosition', 'ypositionCheckBox';
+                'zPosition', 'zpositionCheckBox';
+                'defocus', 'DefocusCheckBox';
+                'rotationalFreedom', 'RotationalfreedomCheckBox';
+            };
+            for i = 1:length(checkboxes)
+                if app.(checkboxes{i,2}).Value == 1
+                    fieldsToRemove{end + 1} = checkboxes{i,1};
+                end
+            end
+            fixedParameters = rmfield(fixedParameters, fieldsToRemove);
+        end
+
         function savePsfAsImage(app, psfValues, pngFullFilePath)
             f = figure('visible', 'off');
             imagesc(psfValues);
@@ -207,12 +273,24 @@ classdef WindowGenerateDataset_exported < matlab.apps.AppBase
             end
 
             % Save fixed parameters
-            fixedParameters = par;
-            fieldsToRemove = {'wavelength', 'nPhotons', 'position', 'defocus', 'dipole', 'rotationalConstraint'};
-            fixedParameters = rmfield(fixedParameters, fieldsToRemove);
+            fixedParameters = getFixedParameters(app);
             fileName = 'fixedParameters.mat';
             fullPath = fullfile(parentFolder, fileName);
             save(fullPath, 'fixedParameters');
+            
+            % Phase mask
+            if ~strcmp(app.CallingApp.BFPmanipulationDropDown.Value,'none')
+                fullFilePath = fullfile(parentFolder, 'phaseMask.mat');
+                phaseMask = app.CallingApp.phaseMask.mask;
+                save(fullFilePath, 'phaseMask')
+            end
+            
+            % Transmission mask
+            if ~strcmp(app.CallingApp.TransmissionmaskDropDown.Value,'none')
+                fullFilePath = fullfile(parentFolder, 'transmission.mat');
+                transmissionMask = app.CallingApp.transmissionMask.mask;
+                save(fullFilePath, 'transmissionMask')
+            end
             
             % Save table of changing parameters
             if strcmp(app.CallingApp.DipolerotationButtonGroup.SelectedObject.Text, 'partially rotating')

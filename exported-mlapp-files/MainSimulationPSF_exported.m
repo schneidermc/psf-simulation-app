@@ -140,7 +140,7 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
         Export2DPSFOutputField          matlab.ui.control.Label
         Export3DPSFButton               matlab.ui.control.Button
         Export2DPSFButton               matlab.ui.control.Button
-        CramrRaoBoundLabel              matlab.ui.control.Label
+        CramerRaoBoundLabel             matlab.ui.control.Label
         CRBOutputField                  matlab.ui.control.Label
         CalculateCheckBox               matlab.ui.control.CheckBox
         zstepsize3DPSFEditField         matlab.ui.control.NumericEditField
@@ -372,8 +372,8 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
                         yg = 1:sz(2);
                         F = griddedInterpolant({xg,yg},double(app.phaseMask.mask));
     
-                        xq = linspace(1,sz(1),app.nDiscretizationBFP);
-                        yq = linspace(1,sz(2),app.nDiscretizationBFP);
+                        xq = linspace(1,sz(1),app.DiscretizationBFPEditField.Value);
+                        yq = linspace(1,sz(2),app.DiscretizationBFPEditField.Value);
                         phaseMaskInterpolated = F({xq,yq});
                         parPhaseMask = PhaseMask(phaseMaskInterpolated);
                     end
@@ -394,8 +394,8 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
                         yg = 1:sz(2);
                         F = griddedInterpolant({xg,yg},double(app.transmissionMask.mask));
     
-                        xq = linspace(1,sz(1),app.nDiscretizationBFP);
-                        yq = linspace(1,sz(2),app.nDiscretizationBFP);
+                        xq = linspace(1,sz(1),app.DiscretizationBFPEditField.Value);
+                        yq = linspace(1,sz(2),app.DiscretizationBFPEditField.Value);
                         transmissionMaskInterpolated = F({xq,yq});
                         parTransmissionMask = Transmission(transmissionMaskInterpolated);
                     end
@@ -672,7 +672,7 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
 
             app.CalculateCheckBox.Visible = 'off'; 
             app.CRBOutputField.Visible = 'off';
-            app.CramrRaoBoundLabel.Visible = 'off';
+            app.CramerRaoBoundLabel.Visible = 'off';
           
             app.Fluorophores = WindowFluorophores(app);
             set(app.ConfiguremultiplefluorophoresButton, 'Enable', 'off')
@@ -794,6 +794,12 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
                 otherwise
                     app.LoadCustomPhaseMaskButton.Visible = "off";
                     app.PhaseMaskFilepathLabel.Visible = "off";
+            end
+            parPhaseMask = readParametersPhaseMask(app);
+            if isa(parPhaseMask, 'function_handle')
+                app.phaseMask = parPhaseMask(app.DiscretizationBFPEditField.Value);
+            else
+                app.phaseMask = parPhaseMask;
             end
             simulateAndDisplayPSF(app);
         end
@@ -2655,12 +2661,12 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.CRBOutputField.Position = [475 23 133 47];
             app.CRBOutputField.Text = '';
 
-            % Create CramrRaoBoundLabel
-            app.CramrRaoBoundLabel = uilabel(app.OptionsTab);
-            app.CramrRaoBoundLabel.FontWeight = 'bold';
-            app.CramrRaoBoundLabel.Tooltip = {'Select which windows are shown'};
-            app.CramrRaoBoundLabel.Position = [351 83 116 22];
-            app.CramrRaoBoundLabel.Text = 'Cramér-Rao Bound';
+            % Create CramerRaoBoundLabel
+            app.CramerRaoBoundLabel = uilabel(app.OptionsTab);
+            app.CramerRaoBoundLabel.FontWeight = 'bold';
+            app.CramerRaoBoundLabel.Tooltip = {'Select which windows are shown'};
+            app.CramerRaoBoundLabel.Position = [351 83 116 22];
+            app.CramerRaoBoundLabel.Text = 'Cramér-Rao Bound';
 
             % Create Export2DPSFButton
             app.Export2DPSFButton = uibutton(app.OptionsTab, 'push');
