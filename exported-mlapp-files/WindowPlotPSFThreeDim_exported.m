@@ -2,16 +2,16 @@ classdef WindowPlotPSFThreeDim_exported < matlab.apps.AppBase
 
     % Properties that correspond to app components
     properties (Access = public)
-        PSFThreeDimUIFigure       matlab.ui.Figure
-        Toolbar                   matlab.ui.container.Toolbar
-        saveProjectionPlot        matlab.ui.container.toolbar.PushTool
-        updateLighting            matlab.ui.container.toolbar.PushTool
-        TransparencySpinner       matlab.ui.control.Spinner
-        TransparencySpinnerLabel  matlab.ui.control.Label
-        IsoSurfaceSlider          matlab.ui.control.Slider
-        IsosurfaceLabel           matlab.ui.control.Label
-        UIAxesIsoSurface          matlab.ui.control.UIAxes
-        UIAxesPSF                 matlab.ui.control.UIAxes
+        PSFThreeDimUIFigure  matlab.ui.Figure
+        Toolbar              matlab.ui.container.Toolbar
+        saveProjectionPlot   matlab.ui.container.toolbar.PushTool
+        updateLighting       matlab.ui.container.toolbar.PushTool
+        TransparencySpinner  matlab.ui.control.Spinner
+        TransparencyLabel    matlab.ui.control.Label
+        IsoSurfaceSlider     matlab.ui.control.Slider
+        IsosurfaceLabel      matlab.ui.control.Label
+        UIAxesIsoSurface     matlab.ui.control.UIAxes
+        UIAxesPSF            matlab.ui.control.UIAxes
     end
 
     properties (Access = private)
@@ -152,7 +152,7 @@ classdef WindowPlotPSFThreeDim_exported < matlab.apps.AppBase
             delete(app)
         end
 
-        % Clicked callback: saveProjectionPlot
+        % Callback function: saveProjectionPlot
         function saveProjectionPlotClicked(app, event)
             psfXZ = getimage(app.UIAxesPSF);
             startingFolder = userpath;
@@ -198,7 +198,7 @@ classdef WindowPlotPSFThreeDim_exported < matlab.apps.AppBase
             alpha(app.UIAxesIsoSurface, app.isosurfaceTransparency);
         end
 
-        % Clicked callback: updateLighting
+        % Callback function: updateLighting
         function updateLightingClicked(app, event)
             camlight(app.cameraLight, 'right');
         end
@@ -212,7 +212,7 @@ classdef WindowPlotPSFThreeDim_exported < matlab.apps.AppBase
 
             % Create PSFThreeDimUIFigure and hide until all components are created
             app.PSFThreeDimUIFigure = uifigure('Visible', 'off');
-            app.PSFThreeDimUIFigure.Position = [650 225 772 360];
+            app.PSFThreeDimUIFigure.Position = [650 225 754 325];
             app.PSFThreeDimUIFigure.Name = 'PSF 3D';
             app.PSFThreeDimUIFigure.CloseRequestFcn = createCallbackFcn(app, @PSFThreeDimUIFigureCloseRequest, true);
 
@@ -238,10 +238,13 @@ classdef WindowPlotPSFThreeDim_exported < matlab.apps.AppBase
             app.UIAxesPSF.PlotBoxAspectRatio = [1 1 1];
             app.UIAxesPSF.XLim = [0 1];
             app.UIAxesPSF.XTick = [];
+            app.UIAxesPSF.XTickLabelRotation = 0;
             app.UIAxesPSF.XTickLabel = '';
             app.UIAxesPSF.YTick = [];
+            app.UIAxesPSF.YTickLabelRotation = 0;
+            app.UIAxesPSF.ZTickLabelRotation = 0;
             app.UIAxesPSF.FontSize = 12;
-            app.UIAxesPSF.Position = [48 61 269 272];
+            app.UIAxesPSF.Position = [48 26 269 272];
 
             % Create UIAxesIsoSurface
             app.UIAxesIsoSurface = uiaxes(app.PSFThreeDimUIFigure);
@@ -250,12 +253,11 @@ classdef WindowPlotPSFThreeDim_exported < matlab.apps.AppBase
             app.UIAxesIsoSurface.YTick = [];
             app.UIAxesIsoSurface.ZTick = [];
             app.UIAxesIsoSurface.BusyAction = 'cancel';
-            app.UIAxesIsoSurface.Position = [402 61 259 272];
+            app.UIAxesIsoSurface.Position = [386 26 259 272];
 
             % Create IsosurfaceLabel
             app.IsosurfaceLabel = uilabel(app.PSFThreeDimUIFigure);
-            app.IsosurfaceLabel.HorizontalAlignment = 'center';
-            app.IsosurfaceLabel.Position = [660 277 93 23];
+            app.IsosurfaceLabel.Position = [659 267 93 23];
             app.IsosurfaceLabel.Text = 'Surface value';
 
             % Create IsoSurfaceSlider
@@ -267,14 +269,13 @@ classdef WindowPlotPSFThreeDim_exported < matlab.apps.AppBase
             app.IsoSurfaceSlider.ValueChangedFcn = createCallbackFcn(app, @IsoSurfaceSliderValueChanged, true);
             app.IsoSurfaceSlider.ValueChangingFcn = createCallbackFcn(app, @IsoSurfaceSliderValueChanging, true);
             app.IsoSurfaceSlider.BusyAction = 'cancel';
-            app.IsoSurfaceSlider.Position = [715 111 3 150];
+            app.IsoSurfaceSlider.Position = [674 101 3 150];
             app.IsoSurfaceSlider.Value = 0.5;
 
-            % Create TransparencySpinnerLabel
-            app.TransparencySpinnerLabel = uilabel(app.PSFThreeDimUIFigure);
-            app.TransparencySpinnerLabel.HorizontalAlignment = 'right';
-            app.TransparencySpinnerLabel.Position = [548 19 81 22];
-            app.TransparencySpinnerLabel.Text = 'Transparency';
+            % Create TransparencyLabel
+            app.TransparencyLabel = uilabel(app.PSFThreeDimUIFigure);
+            app.TransparencyLabel.Position = [659 60 78 22];
+            app.TransparencyLabel.Text = 'Transparency';
 
             % Create TransparencySpinner
             app.TransparencySpinner = uispinner(app.PSFThreeDimUIFigure);
@@ -282,7 +283,7 @@ classdef WindowPlotPSFThreeDim_exported < matlab.apps.AppBase
             app.TransparencySpinner.Limits = [0.1 1];
             app.TransparencySpinner.ValueChangedFcn = createCallbackFcn(app, @TransparencySpinnerValueChanged, true);
             app.TransparencySpinner.BusyAction = 'cancel';
-            app.TransparencySpinner.Position = [642 19 61 22];
+            app.TransparencySpinner.Position = [659 34 52 22];
             app.TransparencySpinner.Value = 0.2;
 
             % Show the figure after all components are created
