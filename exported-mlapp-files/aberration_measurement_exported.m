@@ -2,53 +2,53 @@ classdef aberration_measurement_exported < matlab.apps.AppBase
 
     % Properties that correspond to app components
     properties (Access = public)
-        PSFcharacterizationUIFigure   matlab.ui.Figure
-        SetcolorbarpersliceCheckBox   matlab.ui.control.CheckBox
-        PloterrorButton               matlab.ui.control.StateButton
-        NumberZernikesEditField       matlab.ui.control.NumericEditField
-        NumberZernikesEditFieldLabel  matlab.ui.control.Label
-        parameterFile                 matlab.ui.control.EditField
-        LoadparametersButton          matlab.ui.control.Button
-        FitresultsLabel               matlab.ui.control.Label
-        PixelsizephysicalEditField    matlab.ui.control.NumericEditField
-        PixelsizephysicalLabel        matlab.ui.control.Label
-        RIimmersionEditField          matlab.ui.control.NumericEditField
-        RIimmersionEditFieldLabel     matlab.ui.control.Label
-        NAEditField                   matlab.ui.control.NumericEditField
-        NAEditFieldLabel              matlab.ui.control.Label
-        MagnificationEditField        matlab.ui.control.NumericEditField
-        MagnificationEditFieldLabel   matlab.ui.control.Label
-        RIsamplelayerEditField        matlab.ui.control.NumericEditField
-        RIsamplelayerEditFieldLabel   matlab.ui.control.Label
-        BeaddiameterEditField         matlab.ui.control.NumericEditField
-        BeaddiameterEditFieldLabel    matlab.ui.control.Label
-        EmissionwavelengthEditField   matlab.ui.control.NumericEditField
+        PSFcharacterizationUIFigure     matlab.ui.Figure
+        SetcolorlimitspersliceCheckBox  matlab.ui.control.CheckBox
+        PloterrorButton                 matlab.ui.control.StateButton
+        NumberZernikesEditField         matlab.ui.control.NumericEditField
+        NumberZernikesEditFieldLabel    matlab.ui.control.Label
+        parameterFile                   matlab.ui.control.EditField
+        LoadparametersButton            matlab.ui.control.Button
+        FitresultsLabel                 matlab.ui.control.Label
+        PixelsizephysicalEditField      matlab.ui.control.NumericEditField
+        PixelsizephysicalLabel          matlab.ui.control.Label
+        RIimmersionEditField            matlab.ui.control.NumericEditField
+        RIimmersionEditFieldLabel       matlab.ui.control.Label
+        NAEditField                     matlab.ui.control.NumericEditField
+        NAEditFieldLabel                matlab.ui.control.Label
+        MagnificationEditField          matlab.ui.control.NumericEditField
+        MagnificationEditFieldLabel     matlab.ui.control.Label
+        RIsamplelayerEditField          matlab.ui.control.NumericEditField
+        RIsamplelayerEditFieldLabel     matlab.ui.control.Label
+        BeaddiameterEditField           matlab.ui.control.NumericEditField
+        BeaddiameterEditFieldLabel      matlab.ui.control.Label
+        EmissionwavelengthEditField     matlab.ui.control.NumericEditField
         EmissionwavelengthEditFieldLabel  matlab.ui.control.Label
-        zincrementEditField           matlab.ui.control.NumericEditField
-        zincrementEditFieldLabel      matlab.ui.control.Label
-        IterationsEditField           matlab.ui.control.NumericEditField
-        MaxiterationsLabel            matlab.ui.control.Label
-        CalibrationsampleLabel        matlab.ui.control.Label
-        MicroscopeparametersLabel     matlab.ui.control.Label
-        text_stackfile                matlab.ui.control.EditField
-        ErrorLabel                    matlab.ui.control.Label
-        Lamp                          matlab.ui.control.Lamp
-        LoadzstackButton              matlab.ui.control.Button
-        FitButton                     matlab.ui.control.Button
-        zSliderSimulation             matlab.ui.control.Slider
-        CalculatemodelButton          matlab.ui.control.Button
-        zSliderMeasurement            matlab.ui.control.Slider
-        FitZernikeaberrationsLabel    matlab.ui.control.Label
-        SaveparametersButton          matlab.ui.control.Button
-        SaveaberrationsButton         matlab.ui.control.Button
-        SavetransmissionButton        matlab.ui.control.Button
-        UIAxes_Transmission           matlab.ui.control.UIAxes
-        UIAxes_Zernike                matlab.ui.control.UIAxes
-        UIAxes_PhaseAberration        matlab.ui.control.UIAxes
-        UIAxesSimulationPsfXY         matlab.ui.control.UIAxes
-        UIAxesSimulationPsfXZ         matlab.ui.control.UIAxes
-        UIAxesMeasurementPsfXZ        matlab.ui.control.UIAxes
-        UIAxesMeasurementPsfXY        matlab.ui.control.UIAxes
+        zincrementEditField             matlab.ui.control.NumericEditField
+        zincrementEditFieldLabel        matlab.ui.control.Label
+        IterationsEditField             matlab.ui.control.NumericEditField
+        MaxiterationsLabel              matlab.ui.control.Label
+        CalibrationsampleLabel          matlab.ui.control.Label
+        MicroscopeparametersLabel       matlab.ui.control.Label
+        text_stackfile                  matlab.ui.control.EditField
+        ErrorLabel                      matlab.ui.control.Label
+        Lamp                            matlab.ui.control.Lamp
+        LoadzstackButton                matlab.ui.control.Button
+        FitButton                       matlab.ui.control.Button
+        zSliderSimulation               matlab.ui.control.Slider
+        CalculatemodelButton            matlab.ui.control.Button
+        zSliderMeasurement              matlab.ui.control.Slider
+        FitZernikeaberrationsLabel      matlab.ui.control.Label
+        SaveparametersButton            matlab.ui.control.Button
+        SaveaberrationsButton           matlab.ui.control.Button
+        SavetransmissionButton          matlab.ui.control.Button
+        UIAxes_Transmission             matlab.ui.control.UIAxes
+        UIAxes_Zernike                  matlab.ui.control.UIAxes
+        UIAxes_PhaseAberration          matlab.ui.control.UIAxes
+        UIAxesSimulationPsfXY           matlab.ui.control.UIAxes
+        UIAxesSimulationPsfXZ           matlab.ui.control.UIAxes
+        UIAxesMeasurementPsfXZ          matlab.ui.control.UIAxes
+        UIAxesMeasurementPsfXY          matlab.ui.control.UIAxes
     end
 
     properties (Access = private)
@@ -100,9 +100,13 @@ classdef aberration_measurement_exported < matlab.apps.AppBase
             if nargin < 2
                 slice = false;
             end
-            if app.SetcolorbarpersliceCheckBox.Value && slice
+            if app.SetcolorlimitspersliceCheckBox.Value && slice
                 sliceExp = app.stack(:,:,slice);
-                sliceModel = app.stack_simu(:,:,slice);
+                if ~isempty(app.stack_simu)
+                    sliceModel = app.stack_simu(:,:,slice);
+                else
+                    sliceModel = [];
+                end
                 colorMin = min([sliceExp(:); sliceModel(:)]);
                 colorMax = max([sliceExp(:); sliceModel(:)]);
             else
@@ -112,7 +116,7 @@ classdef aberration_measurement_exported < matlab.apps.AppBase
         end
 
         function [colorMin, colorMax] = getColorLimitsError(app, slice)
-            if app.SetcolorbarpersliceCheckBox.Value
+            if app.SetcolorlimitspersliceCheckBox.Value
                 sliceValues = app.stack_error(:,:,slice);
                 colorMin = min(sliceValues(:));
                 colorMax = max(sliceValues(:));
@@ -675,7 +679,8 @@ classdef aberration_measurement_exported < matlab.apps.AppBase
             app.zSliderMeasurement.Value = round(event.Value);
             flippedValue = app.Nz + 1 - app.zSliderMeasurement.Value;
             data = app.stack(:,:,flippedValue);
-            display_single_image(app, app.UIAxesMeasurementPsfXY, app.Nx, app.Ny, app.ux, data)
+            [colorMin, colorMax] = app.getColorLimitsPsf(flippedValue);
+            display_single_image(app, app.UIAxesMeasurementPsfXY, app.Nx, app.Ny, app.ux, data,colorMin, colorMax)
             app.drawZLineMeasurement((flippedValue-1)*app.zincrementEditField.Value)
         end
 
@@ -684,7 +689,8 @@ classdef aberration_measurement_exported < matlab.apps.AppBase
             app.zSliderMeasurement.Value = round(event.Value);
             flippedValue = app.Nz + 1 - app.zSliderMeasurement.Value;
             data = app.stack(:,:,flippedValue);
-            display_single_image(app, app.UIAxesMeasurementPsfXY, app.Nx, app.Ny, app.ux, data)
+            [colorMin, colorMax] = app.getColorLimitsPsf(flippedValue);
+            display_single_image(app, app.UIAxesMeasurementPsfXY, app.Nx, app.Ny, app.ux, data,colorMin, colorMax)
             app.drawZLineMeasurement((flippedValue-1)*app.zincrementEditField.Value)
         end
 
@@ -760,37 +766,47 @@ classdef aberration_measurement_exported < matlab.apps.AppBase
             app.drawZLineSimulation((val-1)*app.zincrementEditField.Value)
         end
 
-        % Value changed function: SetcolorbarpersliceCheckBox
-        function SetcolorbarpersliceCheckBoxValueChanged(app, event)
-            app.SetcolorbarpersliceCheckBox.Value = event.Value;
-            % Update single slice plots
-            val = app.Nz + 1 - app.zSliderSimulation.Value;
+        % Value changed function: SetcolorlimitspersliceCheckBox
+        function SetcolorlimitspersliceCheckBoxValueChanged(app, event)
+            app.SetcolorlimitspersliceCheckBox.Value = event.Value;
             
-            [colorMin, colorMax] = app.getColorLimitsPsf(val);
-            
-            if app.PloterrorButton.Value
-                app.PloterrorButton.Text = 'Plot model';
-                % Show error plot
-                [colorMinError, colorMaxError] = app.getColorLimitsError(val);
-                display_projection(app, app.UIAxesSimulationPsfXZ, app.PSF_simu_xz_error, app.Nx, app.Ny, app.Nz, app.ux, app.dz);
-                display_single_image(app, app.UIAxesSimulationPsfXY, app.Nx, app.Ny, app.ux, app.stack_error(:,:,val), colorMinError, colorMaxError);
-                app.UIAxesSimulationPsfXZ.Title.String = 'Model error';
-                colormap(app.UIAxesSimulationPsfXZ,'hot')
-                colormap(app.UIAxesSimulationPsfXY,'hot')
-            else
-                app.PloterrorButton.Text = 'Plot error';
-                % Show fitted model
-                display_projection(app, app.UIAxesSimulationPsfXZ, app.PSF_simu_xz, app.Nx, app.Ny, app.Nz, app.ux, app.dz);
-                display_single_image(app, app.UIAxesSimulationPsfXY, app.Nx, app.Ny, app.ux, app.stack_simu(:,:,val), colorMin, colorMax);
-                app.UIAxesSimulationPsfXZ.Title.String = 'Model';
-                colormap(app.UIAxesSimulationPsfXZ,app.CallingApp.ColormapDropDown.Value)
-                colormap(app.UIAxesSimulationPsfXY,app.CallingApp.ColormapDropDown.Value)
+            if ~isempty(app.stack)
+                % Update single slice plots
+                if app.zSliderSimulation.Visible == "on"
+                    val = app.Nz + 1 - app.zSliderSimulation.Value;
+                else
+                    val = app.Nz + 1 - app.zSliderMeasurement.Value;
+                end
+                
+                [colorMin, colorMax] = app.getColorLimitsPsf(val);
+    
+                if app.PloterrorButton.Value
+                    if ~isempty(app.stack_error)
+                        % Show error plot
+                        [colorMinError, colorMaxError] = app.getColorLimitsError(val);
+                        display_projection(app, app.UIAxesSimulationPsfXZ, app.PSF_simu_xz_error, app.Nx, app.Ny, app.Nz, app.ux, app.dz);
+                        display_single_image(app, app.UIAxesSimulationPsfXY, app.Nx, app.Ny, app.ux, app.stack_error(:,:,val), colorMinError, colorMaxError);
+                        app.UIAxesSimulationPsfXZ.Title.String = 'Model error';
+                        colormap(app.UIAxesSimulationPsfXZ,'hot')
+                        colormap(app.UIAxesSimulationPsfXY,'hot')
+                        app.drawZLineSimulation((val-1)*app.zincrementEditField.Value)
+                    end
+                else
+                    if ~isempty(app.stack_simu)
+                        % Show fitted model
+                        display_projection(app, app.UIAxesSimulationPsfXZ, app.PSF_simu_xz, app.Nx, app.Ny, app.Nz, app.ux, app.dz);
+                        display_single_image(app, app.UIAxesSimulationPsfXY, app.Nx, app.Ny, app.ux, app.stack_simu(:,:,val), colorMin, colorMax);
+                        app.UIAxesSimulationPsfXZ.Title.String = 'Model';
+                        colormap(app.UIAxesSimulationPsfXZ,app.CallingApp.ColormapDropDown.Value)
+                        colormap(app.UIAxesSimulationPsfXY,app.CallingApp.ColormapDropDown.Value)
+                        app.drawZLineSimulation((val-1)*app.zincrementEditField.Value)
+                    end
+                end
+                
+                psfSliceExperiment = app.stack(:,:,val);
+                display_single_image(app, app.UIAxesMeasurementPsfXY, app.Nx, app.Ny, app.ux, psfSliceExperiment, colorMin, colorMax);
+                app.drawZLineMeasurement((val-1)*app.zincrementEditField.Value)
             end
-            app.drawZLineSimulation((val-1)*app.zincrementEditField.Value)
-            
-            psfSliceExperiment = app.stack(:,:,val);
-            display_single_image(app, app.UIAxesMeasurementPsfXY, app.Nx, app.Ny, app.ux, psfSliceExperiment, colorMin, colorMax);
-            app.drawZLineMeasurement((val-1)*app.zincrementEditField.Value)
         end
     end
 
@@ -1135,11 +1151,11 @@ classdef aberration_measurement_exported < matlab.apps.AppBase
             app.PloterrorButton.Text = 'Plot error';
             app.PloterrorButton.Position = [820 568 75 23];
 
-            % Create SetcolorbarpersliceCheckBox
-            app.SetcolorbarpersliceCheckBox = uicheckbox(app.PSFcharacterizationUIFigure);
-            app.SetcolorbarpersliceCheckBox.ValueChangedFcn = createCallbackFcn(app, @SetcolorbarpersliceCheckBoxValueChanged, true);
-            app.SetcolorbarpersliceCheckBox.Text = 'Set colorbar per slice';
-            app.SetcolorbarpersliceCheckBox.Position = [770 674 135 22];
+            % Create SetcolorlimitspersliceCheckBox
+            app.SetcolorlimitspersliceCheckBox = uicheckbox(app.PSFcharacterizationUIFigure);
+            app.SetcolorlimitspersliceCheckBox.ValueChangedFcn = createCallbackFcn(app, @SetcolorlimitspersliceCheckBoxValueChanged, true);
+            app.SetcolorlimitspersliceCheckBox.Text = 'Set color limits per slice';
+            app.SetcolorlimitspersliceCheckBox.Position = [747 674 148 22];
 
             % Show the figure after all components are created
             app.PSFcharacterizationUIFigure.Visible = 'on';
