@@ -3,6 +3,7 @@ classdef aberration_measurement_exported < matlab.apps.AppBase
     % Properties that correspond to app components
     properties (Access = public)
         PSFcharacterizationUIFigure   matlab.ui.Figure
+        SetcolorbarpersliceCheckBox   matlab.ui.control.CheckBox
         PloterrorButton               matlab.ui.control.StateButton
         NumberZernikesEditField       matlab.ui.control.NumericEditField
         NumberZernikesEditFieldLabel  matlab.ui.control.Label
@@ -95,6 +96,32 @@ classdef aberration_measurement_exported < matlab.apps.AppBase
     end
     
     methods (Access = private)
+        function [colorMin, colorMax] = getColorLimitsPsf(app, slice)
+            if nargin < 2
+                slice = false;
+            end
+            if app.SetcolorbarpersliceCheckBox.Value && slice
+                sliceExp = app.stack(:,:,slice);
+                sliceModel = app.stack_simu(:,:,slice);
+                colorMin = min([sliceExp(:); sliceModel(:)]);
+                colorMax = max([sliceExp(:); sliceModel(:)]);
+            else
+                colorMin = min([app.stack_simu(:); app.stack(:)]);
+                colorMax = max([app.stack_simu(:); app.stack(:)]);
+            end
+        end
+
+        function [colorMin, colorMax] = getColorLimitsError(app, slice)
+            if app.SetcolorbarpersliceCheckBox.Value
+                sliceValues = app.stack_error(:,:,slice);
+                colorMin = min(sliceValues(:));
+                colorMax = max(sliceValues(:));
+            else
+                colorMin = min(app.stack_error(:));
+                colorMax = max(app.stack_error(:));
+            end
+        end
+
         function display_projection(app, axes, data_xz, Nx, Ny, Nz, ux, dz)
             x_axis = linspace(0, (Nx-1)*ux*1e6, Nx);
             y_axis = linspace(0, (Ny-1)*ux*1e6, Ny);
@@ -107,7 +134,7 @@ classdef aberration_measurement_exported < matlab.apps.AppBase
             colormap(h,app.CallingApp.ColormapDropDown.Value)
         end
                
-        function display_single_image(app, axes, Nx, Ny, ux, data)
+        function display_single_image(app, axes, Nx, Ny, ux, data, cmin, cmax)
             h = axes; % select figure
             x_axis = linspace(0, (Nx-1)*ux*1e6, Nx);
             y_axis = linspace(0, (Ny-1)*ux*1e6, Ny);
@@ -116,6 +143,16 @@ classdef aberration_measurement_exported < matlab.apps.AppBase
             set(h,'YDir','normal')
             axis(h,"tight");
             colormap(h,app.CallingApp.ColormapDropDown.Value)
+            caxis(h,[cmin,cmax])
+        end
+
+        function addColorbar(app, uiAxes)
+            originalPosition = get(uiAxes, 'Position');
+            cb = colorbar(uiAxes);
+            set(uiAxes, 'Position', originalPosition);
+            cbPosition = get(cb, 'Position');
+            cbPosition(3) = 0.01; % Set the width
+            set(cb, 'Position', cbPosition);
         end
         
         function drawZLineMeasurement(app,value)
@@ -349,10 +386,11 @@ classdef aberration_measurement_exported < matlab.apps.AppBase
 
             % Display the bead images
             display_projection(app, app.UIAxesMeasurementPsfXZ, app.PSF_xz, app.Nx, app.Ny, app.Nz, app.ux, app.dz);
-            display_single_image(app, app.UIAxesMeasurementPsfXY, app.Nx, app.Ny, app.ux, app.stack(:,:,round(app.zSliderMeasurement.Value)));
+            psfSlice = app.stack(:,:,round(app.zSliderMeasurement.Value));
+            display_single_image(app, app.UIAxesMeasurementPsfXY, app.Nx, app.Ny, app.ux, psfSlice, min(psfSlice(:)), max(psfSlice(:)));
             
             app.stack_loaded = true; % flag that stack has been loaded
-            app.CalculatemodelButton.Enable = "on"; 
+            app.CalculatemodelButton.Enable = "on";
 
             % Set slider parameters
             if app.zSliderSimulation.Visible == "off"
@@ -411,7 +449,12 @@ classdef aberration_measurement_exported < matlab.apps.AppBase
             app.PloterrorButton.Value = 0;
 
             display_projection(app, app.UIAxesSimulationPsfXZ, app.PSF_simu_xz, app.Nx, app.Ny, app.Nz, app.ux, app.dz);
-            display_single_image(app, app.UIAxesSimulationPsfXY, app.Nx, app.Ny, app.ux, app.stack_simu(:,:,val));
+            psfSliceModel = app.stack_simu(:,:,val);
+            psfSliceExperiment = app.stack(:,:,val);
+            [colorMin, colorMax] = app.getColorLimitsPsf(val);
+            display_single_image(app, app.UIAxesSimulationPsfXY, app.Nx, app.Ny, app.ux, psfSliceModel, colorMin, colorMax);
+            app.addColorbar(app.UIAxesSimulationPsfXY)
+            display_single_image(app, app.UIAxesMeasurementPsfXY, app.Nx, app.Ny, app.ux, psfSliceExperiment, colorMin, colorMax);
             drawZLineSimulation(app, (flippedValue-1)*app.zincrementEditField.Value);
         end
 
@@ -571,12 +614,16 @@ classdef aberration_measurement_exported < matlab.apps.AppBase
             % Display simulated bead images with aberrations taken into account
             app.PSF_simu_xz = rot90(squeeze(sum(app.stack_simu,2))); %standard projection
             display_projection(app, app.UIAxesSimulationPsfXZ, app.PSF_simu_xz, app.Nx, app.Ny, app.Nz, app.ux, app.dz);
-            display_single_image(app, app.UIAxesSimulationPsfXY, app.Nx, app.Ny, app.ux, app.stack_simu(:,:,1));
+            psfSliceModel = app.stack_simu(:,:,1);
+            psfSliceExperiment = app.stack(:,:,1);
+            [colorMin, colorMax] = app.getColorLimitsPsf(1);
+            display_single_image(app, app.UIAxesSimulationPsfXY, app.Nx, app.Ny, app.ux, psfSliceModel, colorMin, colorMax);
+            app.addColorbar(app.UIAxesSimulationPsfXY)
             app.UIAxesSimulationPsfXZ.Title.String = 'Model';
             app.PloterrorButton.Text = 'Plot error';
             app.zSliderSimulation.Value = app.Nz;
             drawZLineMeasurement(app, 0);
-            display_single_image(app, app.UIAxesMeasurementPsfXY, app.Nx, app.Ny, app.ux, app.stack(:,:,1));
+            display_single_image(app, app.UIAxesMeasurementPsfXY, app.Nx, app.Ny, app.ux, psfSliceExperiment, colorMin, colorMax);
             app.zSliderMeasurement.Value = app.Nz;
             drawZLineSimulation(app, 0);
             
@@ -596,20 +643,24 @@ classdef aberration_measurement_exported < matlab.apps.AppBase
             app.zSliderSimulation.Value = round(event.Value);
             app.zSliderMeasurement.Value = app.zSliderSimulation.Value;
             flippedValue = app.Nz + 1 - app.zSliderSimulation.Value;
+            
+            [colorMin, colorMax] = app.getColorLimitsPsf(flippedValue);
+
             if app.PloterrorButton.Value
                 % Show error plot
+                [colorMinError, colorMaxError] = app.getColorLimitsError(flippedValue);
                 data = app.stack_error(:,:,flippedValue);
-                display_single_image(app, app.UIAxesSimulationPsfXY, app.Nx, app.Ny, app.ux, data)
+                display_single_image(app, app.UIAxesSimulationPsfXY, app.Nx, app.Ny, app.ux, data, colorMinError, colorMaxError)
                 colormap(app.UIAxesSimulationPsfXZ,'hot')
                 colormap(app.UIAxesSimulationPsfXY,'hot')
             else
                 % Show fitted model
                 data = app.stack_simu(:,:,flippedValue);
-                display_single_image(app, app.UIAxesSimulationPsfXY, app.Nx, app.Ny, app.ux, data)
+                display_single_image(app, app.UIAxesSimulationPsfXY, app.Nx, app.Ny, app.ux, data, colorMin, colorMax)
                 colormap(app.UIAxesSimulationPsfXZ,app.CallingApp.ColormapDropDown.Value)
                 colormap(app.UIAxesSimulationPsfXY,app.CallingApp.ColormapDropDown.Value)
             end
-            display_single_image(app, app.UIAxesMeasurementPsfXY, app.Nx, app.Ny, app.ux, app.stack(:,:,flippedValue))
+            display_single_image(app, app.UIAxesMeasurementPsfXY, app.Nx, app.Ny, app.ux, app.stack(:,:,flippedValue), colorMin, colorMax)
             app.drawZLineMeasurement((flippedValue-1)*app.zincrementEditField.Value)
             app.drawZLineSimulation((flippedValue-1)*app.zincrementEditField.Value)
         end
@@ -686,11 +737,43 @@ classdef aberration_measurement_exported < matlab.apps.AppBase
         function PloterrorButtonValueChanged(app, event)
             app.PloterrorButton.Value = event.Value;
             val = app.Nz + 1 - app.zSliderSimulation.Value;
+            
             if app.PloterrorButton.Value
                 app.PloterrorButton.Text = 'Plot model';
                 % Show error plot
+                [colorMinError, colorMaxError] = app.getColorLimitsError(val);
                 display_projection(app, app.UIAxesSimulationPsfXZ, app.PSF_simu_xz_error, app.Nx, app.Ny, app.Nz, app.ux, app.dz);
-                display_single_image(app, app.UIAxesSimulationPsfXY, app.Nx, app.Ny, app.ux, app.stack_error(:,:,val));
+                display_single_image(app, app.UIAxesSimulationPsfXY, app.Nx, app.Ny, app.ux, app.stack_error(:,:,val), colorMinError, colorMaxError);
+                app.UIAxesSimulationPsfXZ.Title.String = 'Model error';
+                colormap(app.UIAxesSimulationPsfXZ,'hot')
+                colormap(app.UIAxesSimulationPsfXY,'hot')
+            else
+                app.PloterrorButton.Text = 'Plot error';
+                % Show fitted model
+                [colorMin, colorMax] = app.getColorLimitsPsf(val);
+                display_projection(app, app.UIAxesSimulationPsfXZ, app.PSF_simu_xz, app.Nx, app.Ny, app.Nz, app.ux, app.dz);
+                display_single_image(app, app.UIAxesSimulationPsfXY, app.Nx, app.Ny, app.ux, app.stack_simu(:,:,val), colorMin, colorMax);
+                app.UIAxesSimulationPsfXZ.Title.String = 'Model';
+                colormap(app.UIAxesSimulationPsfXZ,app.CallingApp.ColormapDropDown.Value)
+                colormap(app.UIAxesSimulationPsfXY,app.CallingApp.ColormapDropDown.Value)
+            end
+            app.drawZLineSimulation((val-1)*app.zincrementEditField.Value)
+        end
+
+        % Value changed function: SetcolorbarpersliceCheckBox
+        function SetcolorbarpersliceCheckBoxValueChanged(app, event)
+            app.SetcolorbarpersliceCheckBox.Value = event.Value;
+            % Update single slice plots
+            val = app.Nz + 1 - app.zSliderSimulation.Value;
+            
+            [colorMin, colorMax] = app.getColorLimitsPsf(val);
+            
+            if app.PloterrorButton.Value
+                app.PloterrorButton.Text = 'Plot model';
+                % Show error plot
+                [colorMinError, colorMaxError] = app.getColorLimitsError(val);
+                display_projection(app, app.UIAxesSimulationPsfXZ, app.PSF_simu_xz_error, app.Nx, app.Ny, app.Nz, app.ux, app.dz);
+                display_single_image(app, app.UIAxesSimulationPsfXY, app.Nx, app.Ny, app.ux, app.stack_error(:,:,val), colorMinError, colorMaxError);
                 app.UIAxesSimulationPsfXZ.Title.String = 'Model error';
                 colormap(app.UIAxesSimulationPsfXZ,'hot')
                 colormap(app.UIAxesSimulationPsfXY,'hot')
@@ -698,12 +781,16 @@ classdef aberration_measurement_exported < matlab.apps.AppBase
                 app.PloterrorButton.Text = 'Plot error';
                 % Show fitted model
                 display_projection(app, app.UIAxesSimulationPsfXZ, app.PSF_simu_xz, app.Nx, app.Ny, app.Nz, app.ux, app.dz);
-                display_single_image(app, app.UIAxesSimulationPsfXY, app.Nx, app.Ny, app.ux, app.stack_simu(:,:,val));
+                display_single_image(app, app.UIAxesSimulationPsfXY, app.Nx, app.Ny, app.ux, app.stack_simu(:,:,val), colorMin, colorMax);
                 app.UIAxesSimulationPsfXZ.Title.String = 'Model';
                 colormap(app.UIAxesSimulationPsfXZ,app.CallingApp.ColormapDropDown.Value)
                 colormap(app.UIAxesSimulationPsfXY,app.CallingApp.ColormapDropDown.Value)
             end
             app.drawZLineSimulation((val-1)*app.zincrementEditField.Value)
+            
+            psfSliceExperiment = app.stack(:,:,val);
+            display_single_image(app, app.UIAxesMeasurementPsfXY, app.Nx, app.Ny, app.ux, psfSliceExperiment, colorMin, colorMax);
+            app.drawZLineMeasurement((val-1)*app.zincrementEditField.Value)
         end
     end
 
@@ -1047,6 +1134,12 @@ classdef aberration_measurement_exported < matlab.apps.AppBase
             app.PloterrorButton.Visible = 'off';
             app.PloterrorButton.Text = 'Plot error';
             app.PloterrorButton.Position = [820 568 75 23];
+
+            % Create SetcolorbarpersliceCheckBox
+            app.SetcolorbarpersliceCheckBox = uicheckbox(app.PSFcharacterizationUIFigure);
+            app.SetcolorbarpersliceCheckBox.ValueChangedFcn = createCallbackFcn(app, @SetcolorbarpersliceCheckBoxValueChanged, true);
+            app.SetcolorbarpersliceCheckBox.Text = 'Set colorbar per slice';
+            app.SetcolorbarpersliceCheckBox.Position = [770 674 135 22];
 
             % Show the figure after all components are created
             app.PSFcharacterizationUIFigure.Visible = 'on';
