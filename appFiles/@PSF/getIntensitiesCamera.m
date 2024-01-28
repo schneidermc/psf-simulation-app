@@ -15,6 +15,11 @@ function [psf, Ix, Iy] = getIntensitiesCamera(obj, fieldBFP)
 
     % Normalization
     totalIntensity = sum(sum(psf));
+
+    % normalize photon count using in-focus slice 
+    midSlice = ceil(size(totalIntensity,3)/2);
+    totalIntensity = sum(psf(:,:,midSlice),'all');
+
     psf = psf ./ totalIntensity * obj.nPhotons;
     Ix = Ix ./ totalIntensity * obj.nPhotons;
     Iy = Iy ./ totalIntensity * obj.nPhotons;
