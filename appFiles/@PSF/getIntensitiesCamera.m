@@ -13,11 +13,8 @@ function [psf, Ix, Iy] = getIntensitiesCamera(obj, fieldBFP)
     % Sum over block matrices (to return to desired pixelsize)
     [psf, Ix, Iy] = reduceOversampling(obj, psf, Ix, Iy);
 
-    % Normalization
-    totalIntensity = sum(sum(psf));
-
-    % normalize photon count using in-focus slice 
-    midSlice = ceil(size(totalIntensity,3)/2);
+    % Normalize photon count using in-focus slice 
+    midSlice = ceil(size(psf,3)/2);
     totalIntensity = sum(psf(:,:,midSlice),'all');
 
     psf = psf ./ totalIntensity * obj.nPhotons;
