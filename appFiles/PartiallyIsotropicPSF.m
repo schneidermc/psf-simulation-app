@@ -30,7 +30,8 @@ classdef PartiallyIsotropicPSF < IsotropicPSF
             psf = reduceOversampling(obj, psf);
 
             % Normalization
-            totalIntensity = sum(sum(psf));
+            midSlice = ceil(size(psf,3)/2);
+            totalIntensity = sum(psf(:,:,midSlice), 'all');
             psf = psf ./ totalIntensity * obj.nPhotons;
 
             % Ix
