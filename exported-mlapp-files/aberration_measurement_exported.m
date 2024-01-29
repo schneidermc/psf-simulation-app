@@ -186,6 +186,8 @@ classdef aberration_measurement_exported < matlab.apps.AppBase
         end
 
         function calculate_error(app)
+            % Absolute error: abs(app.stack_simu - app.stack)
+            % Relative error: abs(app.stack_simu - app.stack)./abs(app.stack_simu)
             app.stack_error = abs(app.stack_simu - app.stack);
             app.PSF_simu_xz_error = abs(app.PSF_simu_xz - app.PSF_xz);
             app.PSF_simu_xy_error = abs(app.PSF_simu_xy - app.PSF_xy);
@@ -392,6 +394,7 @@ classdef aberration_measurement_exported < matlab.apps.AppBase
             display_projection(app, app.UIAxesMeasurementPsfXZ, app.PSF_xz, app.Nx, app.Ny, app.Nz, app.ux, app.dz);
             psfSlice = app.stack(:,:,round(app.zSliderMeasurement.Value));
             display_single_image(app, app.UIAxesMeasurementPsfXY, app.Nx, app.Ny, app.ux, psfSlice, min(psfSlice(:)), max(psfSlice(:)));
+            app.addColorbar(app.UIAxesMeasurementPsfXY)
             
             app.stack_loaded = true; % flag that stack has been loaded
             app.CalculatemodelButton.Enable = "on";
@@ -459,6 +462,7 @@ classdef aberration_measurement_exported < matlab.apps.AppBase
             display_single_image(app, app.UIAxesSimulationPsfXY, app.Nx, app.Ny, app.ux, psfSliceModel, colorMin, colorMax);
             app.addColorbar(app.UIAxesSimulationPsfXY)
             display_single_image(app, app.UIAxesMeasurementPsfXY, app.Nx, app.Ny, app.ux, psfSliceExperiment, colorMin, colorMax);
+            delete(app.UIAxesMeasurementPsfXY.Colorbar); % remove colorbar
             drawZLineSimulation(app, (flippedValue-1)*app.zincrementEditField.Value);
         end
 
@@ -887,8 +891,8 @@ classdef aberration_measurement_exported < matlab.apps.AppBase
             app.UIAxes_Transmission.YTick = [];
             app.UIAxes_Transmission.ZTick = [];
             app.UIAxes_Transmission.Box = 'on';
-            colormap(app.UIAxes_Transmission, 'gray')
             app.UIAxes_Transmission.Visible = 'off';
+            colormap(app.UIAxes_Transmission, 'gray')
             app.UIAxes_Transmission.Position = [729 289 165 160];
 
             % Create SavetransmissionButton
