@@ -934,6 +934,7 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
                 app.ShowPsf3DCheckBox.Value = false;
                 app.ShowPsf2DCheckBox.Enable = "off";
                 app.ShowPsf3DCheckBox.Enable = "off";
+                app.Export2DPSFButton.Visible = "of";
                 app.Export3DPSFButton.Visible = "off";
             end
         end
@@ -944,7 +945,9 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             if value
                 app.PlotPSF = WindowPlotPSF(app);
                 app.PlotPSF.initializePlot();
+                app.Export2DPSFButton.Visible = "on";
             else
+                app.Export2DPSFButton.Visible = "off";
                 appPath = app.originalPath;
                 delete(app.PlotPSF);
                 path(appPath);
@@ -1517,17 +1520,32 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
                 image = psf.image;
                 nSteps = size(image,3);
                 midSlice = ceil(nSteps/2);
-                image = image(:,:,midSlice);
+                psf2D = image(:,:,midSlice);
             else
-                image = psf.image; 
+                psf2D = psf.image; 
             end
-            [baseFileName, folder] = uiputfile('2DPSF');
-            if baseFileName == 0
+            startingFolder = userpath;
+            filter = {'*.dat'; '*.xls'; '*.xlsx'; '*.csv'; '*.txt'; '*.mat'; '*.png'; '*.jpg'; '*.tif'};
+            defaultFileName = fullfile(startingFolder, filter);
+            [filename, folder] = uiputfile(defaultFileName, 'Specify a file', 'psf');
+            if filename == 0
               % User clicked the Cancel button.
               return;
             end
-            fullFileName = fullfile(folder, baseFileName);
-            save(fullFileName,'image');
+            [~,~,ext] = fileparts(filename); 
+            filename = fullfile(folder,filename); 
+            switch ext 
+                case {'.dat', '.xls', '.xlsx', '.csv', '.txt'}
+                    writematrix(psf2D, filename);
+                case '.mat'
+                    save(filename,'psf2D');
+                case '.tif'
+                    imwrite( ind2rgb(im2uint8(mat2gray(psf2D)), colormap(app.PlotPSF.PSFimageUIFigure, app.ColormapDropDown.Value)), filename)
+                case {'.png', '.jpg'}
+                    Nx = app.PixelsperlateralaxisEditField.Value; 
+                    psf2D = interp2(1:Nx, (1:Nx)', psf2D, 1:0.02:Nx, (1:0.02:Nx)', 'nearest');
+                    imwrite( ind2rgb(im2uint8(mat2gray(psf2D)), colormap(app.PlotPSF.PSFimageUIFigure, app.ColormapDropDown.Value)), filename)
+            end
 
             app.Export2DPSFOutputField.Text = {'2D PSF saved'};
             app.Export2DPSFOutputField.Visible = 'on'; 
@@ -1539,14 +1557,41 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
         function Export3DPSFButtonPushed(app, event)
             % Button only visible when 3D PSF is activated 
             psf = simulateAndDisplayPSF(app);
-            image = psf.image; 
-            [baseFileName, folder] = uiputfile('3DPSF');
-            if baseFileName == 0
+            psf3D = psf.image; 
+
+            startingFolder = userpath;
+            filter = {'*.dat'; '*.xls'; '*.xlsx'; '*.csv'; '*.txt'; '*.mat'; '*.tif'};
+            defaultFileName = fullfile(startingFolder, filter);
+
+            [filename, folder] = uiputfile(defaultFileName, 'Specify a file', '3Dpsf');
+            if filename == 0
               % User clicked the Cancel button.
               return;
             end
-            fullFileName = fullfile(folder, baseFileName);
-            save(fullFileName,'image');
+            [~,~,ext] = fileparts(filename);
+            filename = fullfile(folder,filename); 
+
+            switch ext 
+                case {'.dat', '.xls', '.xlsx', '.csv', '.txt'}
+                    writematrix(psf3D, filename);
+                case '.mat'
+                    save(filename,'psf3D');
+                case '.tif'
+                    for slice = 1:size(psf3D, 3)
+                    % Make an RGB image:
+                        psfSlice = mat2gray(psf3D(:,:,slice));
+                        % Generate your tiff stack:
+                            if slice == 1
+                                % First slice:
+                                imwrite(psfSlice,filename)
+                            else
+                                % Subsequent slices:
+                                imwrite(psfSlice,filename,'WriteMode','append');
+                            end 
+                    end
+
+            end
+            
             app.Export3DPSFOutputField.Text = {'3D PSF saved'};
             app.Export3DPSFOutputField.Visible = 'on'; 
             pause(2)

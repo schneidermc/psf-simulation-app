@@ -152,7 +152,7 @@ classdef WindowPlotPSFThreeDim_exported < matlab.apps.AppBase
             delete(app)
         end
 
-        % Callback function: saveProjectionPlot
+        % Clicked callback: saveProjectionPlot
         function saveProjectionPlotClicked(app, event)
             psfXZ = getimage(app.UIAxesPSF);
             startingFolder = userpath;
@@ -198,7 +198,7 @@ classdef WindowPlotPSFThreeDim_exported < matlab.apps.AppBase
             alpha(app.UIAxesIsoSurface, app.isosurfaceTransparency);
         end
 
-        % Callback function: updateLighting
+        % Clicked callback: updateLighting
         function updateLightingClicked(app, event)
             camlight(app.cameraLight, 'right');
         end
@@ -238,11 +238,8 @@ classdef WindowPlotPSFThreeDim_exported < matlab.apps.AppBase
             app.UIAxesPSF.PlotBoxAspectRatio = [1 1 1];
             app.UIAxesPSF.XLim = [0 1];
             app.UIAxesPSF.XTick = [];
-            app.UIAxesPSF.XTickLabelRotation = 0;
             app.UIAxesPSF.XTickLabel = '';
             app.UIAxesPSF.YTick = [];
-            app.UIAxesPSF.YTickLabelRotation = 0;
-            app.UIAxesPSF.ZTickLabelRotation = 0;
             app.UIAxesPSF.FontSize = 12;
             app.UIAxesPSF.Position = [48 26 269 272];
 
