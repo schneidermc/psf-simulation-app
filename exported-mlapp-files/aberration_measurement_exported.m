@@ -523,18 +523,27 @@ classdef aberration_measurement_exported < matlab.apps.AppBase
             d = uiprogressdlg(app.PSFcharacterizationUIFigure,'Title','Progress bar',...
                 'Message','Fitting Zernike coefficients...','Cancelable','on');
             drawnow
-            outputFunction = @(x,optimValues,state) updateProgress(x,optimValues,state,d,resnorm_initial);
+            outputFunction = @(x,optimValues,state) updateProgress(x,optimValues,state,d,resnorm_initial, app.iter_max);
             options = optimoptions(@lsqnonlin,'Algorithm',algorithm ,'MaxFunctionEvaluations', app.iter_max,'OutputFcn',outputFunction);
-
-            function stop = updateProgress(x,optimValues,state,d,resnorm_initial)
-                % Update the Value property of the progress bar to reflect the progress
-                % based on the decrease in the residual norm
+            
+            function stop = updateProgress(x, optimValues, state, d, resnorm_initial, maxIterations)
+                % Update progress bar based on decrease in the residual norm and iteration number
+            
+                % Calculate progress based on residual norm
                 resnorm_current = optimValues.resnorm;
                 if resnorm_current < resnorm_initial
-                    progress = (resnorm_initial - resnorm_current) / resnorm_initial;
+                    progress_resnorm = (resnorm_initial - resnorm_current) / resnorm_initial;
                 else
-                    progress = 0.01;
+                    progress_resnorm = 0;
                 end
+            
+                % Calculate progress based on iterations
+                progress_iteration = optimValues.funccount / maxIterations;
+            
+                % Combine the two progress measures, assuming equal weight
+                progress = 0.3 * progress_resnorm + 0.7 * progress_iteration;
+                progress = max(progress, 0.01);
+                progress = min(progress, 1);
                 d.Value = progress;
                 stop = false; % This should only be true if you want to halt the algorithm.
             end
@@ -569,6 +578,7 @@ classdef aberration_measurement_exported < matlab.apps.AppBase
             a_def = dot(defocus_coefs/norm(defocus_coefs), app.Z_phase); 
             app.Z_phase = (app.Z_phase - a_def*defocus_coefs'/norm(defocus_coefs)); %defocus-free Zernike-coefs
             
+            Z_tiptilt = app.Z_phase(1:2);
             app.Z_phase(1:2) = 0; %setting tip/tilt to zero
             phase = sum(flipud(ZernikeCalc(app.modes,app.Z_phase', app.pupil,'Noll')),3);
             app.Z_phase = app.Z_phase / (2*pi);
@@ -613,7 +623,10 @@ classdef aberration_measurement_exported < matlab.apps.AppBase
             app.transmissionMask = fittedTransmissionMask;
             
             % Zernikes
-            stem(app.UIAxes_Zernike, app.modes(3:end), app.Z_phase(3:end)); % omit 2nd and 3rd (tip/tilt) as they are set to 0
+            stem(app.UIAxes_Zernike, app.modes(1:2), app.Z_phase(1:2), 'Color', 0.7*[1 1 1]); % tip/tilt (set to 0)
+            hold(app.UIAxes_Zernike, 'on');
+            stem(app.UIAxes_Zernike, app.modes(3:end), app.Z_phase(3:end), 'Color', [0, 0.4470, 0.7410]); % omit 2nd and 3rd (tip/tilt) as they are set to 0
+            hold(app.UIAxes_Zernike, 'off');
             grid(app.UIAxes_Zernike, "on");
             
             % Check retrieved bead image
