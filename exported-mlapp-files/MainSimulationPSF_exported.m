@@ -934,7 +934,7 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
                 app.ShowPsf3DCheckBox.Value = false;
                 app.ShowPsf2DCheckBox.Enable = "off";
                 app.ShowPsf3DCheckBox.Enable = "off";
-                app.Export2DPSFButton.Visible = "of";
+                app.Export2DPSFButton.Visible = "off";
                 app.Export3DPSFButton.Visible = "off";
             end
         end
