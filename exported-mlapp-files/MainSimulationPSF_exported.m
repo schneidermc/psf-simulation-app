@@ -2027,12 +2027,12 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.CameraLabel = uilabel(app.MicroscopeRITab);
             app.CameraLabel.FontSize = 13;
             app.CameraLabel.FontWeight = 'bold';
-            app.CameraLabel.Position = [267 143 53 22];
+            app.CameraLabel.Position = [330 143 53 22];
             app.CameraLabel.Text = 'Camera';
 
             % Create BackgroundnoisestdSpinnerLabel
             app.BackgroundnoisestdSpinnerLabel = uilabel(app.MicroscopeRITab);
-            app.BackgroundnoisestdSpinnerLabel.Position = [267 59 129 22];
+            app.BackgroundnoisestdSpinnerLabel.Position = [330 59 129 22];
             app.BackgroundnoisestdSpinnerLabel.Text = 'Background noise (std)';
 
             % Create BackgroundnoisestdSpinner
@@ -2043,11 +2043,11 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.BackgroundnoisestdSpinner.ValueDisplayFormat = '%.0f';
             app.BackgroundnoisestdSpinner.ValueChangedFcn = createCallbackFcn(app, @BackgroundnoisestdSpinnerValueChanged, true);
             app.BackgroundnoisestdSpinner.BusyAction = 'cancel';
-            app.BackgroundnoisestdSpinner.Position = [403 59 90 22];
+            app.BackgroundnoisestdSpinner.Position = [466 59 90 22];
 
             % Create PixelsizephysicalSpinnerLabel
             app.PixelsizephysicalSpinnerLabel = uilabel(app.MicroscopeRITab);
-            app.PixelsizephysicalSpinnerLabel.Position = [267 114 110 22];
+            app.PixelsizephysicalSpinnerLabel.Position = [330 114 110 22];
             app.PixelsizephysicalSpinnerLabel.Text = 'Pixel size (physical)';
 
             % Create PixelsizePhysicalSpinner
@@ -2058,12 +2058,12 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.PixelsizePhysicalSpinner.ValueDisplayFormat = '%11.4g µm';
             app.PixelsizePhysicalSpinner.ValueChangedFcn = createCallbackFcn(app, @PixelsizePhysicalSpinnerValueChanged, true);
             app.PixelsizePhysicalSpinner.BusyAction = 'cancel';
-            app.PixelsizePhysicalSpinner.Position = [403 114 90 22];
+            app.PixelsizePhysicalSpinner.Position = [466 114 90 22];
             app.PixelsizePhysicalSpinner.Value = 6;
 
             % Create PixelsizeobjectspaceLabel
             app.PixelsizeobjectspaceLabel = uilabel(app.MicroscopeRITab);
-            app.PixelsizeobjectspaceLabel.Position = [267 85 134 22];
+            app.PixelsizeobjectspaceLabel.Position = [330 85 134 22];
             app.PixelsizeobjectspaceLabel.Text = 'Pixel size (object space)';
 
             % Create PixelsizeObjectSpaceSpinner
@@ -2073,12 +2073,12 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.PixelsizeObjectSpaceSpinner.ValueDisplayFormat = '%11.4g nm';
             app.PixelsizeObjectSpaceSpinner.ValueChangedFcn = createCallbackFcn(app, @PixelsizeObjectSpaceSpinnerValueChanged, true);
             app.PixelsizeObjectSpaceSpinner.BusyAction = 'cancel';
-            app.PixelsizeObjectSpaceSpinner.Position = [403 85 90 22];
+            app.PixelsizeObjectSpaceSpinner.Position = [466 85 90 22];
             app.PixelsizeObjectSpaceSpinner.Value = 100;
 
             % Create TubelensfocallengthLabel
             app.TubelensfocallengthLabel = uilabel(app.MicroscopeRITab);
-            app.TubelensfocallengthLabel.Position = [269 257 122 22];
+            app.TubelensfocallengthLabel.Position = [330 257 122 22];
             app.TubelensfocallengthLabel.Text = 'Tube lens focal length';
 
             % Create TubeLensFocalLengthSpinner
@@ -2087,12 +2087,12 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.TubeLensFocalLengthSpinner.ValueDisplayFormat = '%11.4g mm';
             app.TubeLensFocalLengthSpinner.ValueChangedFcn = createCallbackFcn(app, @TubeLensFocalLengthSpinnerValueChanged, true);
             app.TubeLensFocalLengthSpinner.BusyAction = 'cancel';
-            app.TubeLensFocalLengthSpinner.Position = [405 257 90 22];
+            app.TubeLensFocalLengthSpinner.Position = [466 257 90 22];
             app.TubeLensFocalLengthSpinner.Value = 180;
 
             % Create ObjectivefocallengthLabel
             app.ObjectivefocallengthLabel = uilabel(app.MicroscopeRITab);
-            app.ObjectivefocallengthLabel.Position = [269 286 120 22];
+            app.ObjectivefocallengthLabel.Position = [330 286 120 22];
             app.ObjectivefocallengthLabel.Text = 'Objective focal length';
 
             % Create ObjectiveFocalLengthSpinner
@@ -2101,7 +2101,7 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.ObjectiveFocalLengthSpinner.ValueDisplayFormat = '%11.4g mm';
             app.ObjectiveFocalLengthSpinner.ValueChangedFcn = createCallbackFcn(app, @ObjectiveFocalLengthSpinnerValueChanged, true);
             app.ObjectiveFocalLengthSpinner.BusyAction = 'cancel';
-            app.ObjectiveFocalLengthSpinner.Position = [405 286 90 22];
+            app.ObjectiveFocalLengthSpinner.Position = [466 286 90 22];
             app.ObjectiveFocalLengthSpinner.Value = 3;
 
             % Create AberrationsTab
@@ -2112,26 +2112,26 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.SpecifyZernikeaberrationsButtonGroup = uibuttongroup(app.AberrationsTab);
             app.SpecifyZernikeaberrationsButtonGroup.SelectionChangedFcn = createCallbackFcn(app, @SpecifyZernikeaberrationsButtonGroupSelectionChanged, true);
             app.SpecifyZernikeaberrationsButtonGroup.Title = 'Specify Zernike aberrations';
-            app.SpecifyZernikeaberrationsButtonGroup.Position = [12 81 588 233];
+            app.SpecifyZernikeaberrationsButtonGroup.Position = [12 17 588 289];
 
             % Create ZernikeCommonAberrationsButton
             app.ZernikeCommonAberrationsButton = uiradiobutton(app.SpecifyZernikeaberrationsButtonGroup);
             app.ZernikeCommonAberrationsButton.Text = 'Select common aberrations';
-            app.ZernikeCommonAberrationsButton.Position = [11 181 168 22];
+            app.ZernikeCommonAberrationsButton.Position = [11 233 168 22];
             app.ZernikeCommonAberrationsButton.Value = true;
 
             % Create ZernikeInputVectorButton
             app.ZernikeInputVectorButton = uiradiobutton(app.SpecifyZernikeaberrationsButtonGroup);
             app.ZernikeInputVectorButton.Tooltip = {''};
             app.ZernikeInputVectorButton.Text = 'Specify Zernike indices (Noll) and coefficients via input vector';
-            app.ZernikeInputVectorButton.Position = [11 44 356 22];
+            app.ZernikeInputVectorButton.Position = [11 56 356 22];
 
             % Create LoadZernikeIndicesWeightsButton
             app.LoadZernikeIndicesWeightsButton = uibutton(app.SpecifyZernikeaberrationsButtonGroup, 'push');
             app.LoadZernikeIndicesWeightsButton.ButtonPushedFcn = createCallbackFcn(app, @LoadZernikeIndicesWeightsButtonPushed, true);
             app.LoadZernikeIndicesWeightsButton.Enable = 'off';
             app.LoadZernikeIndicesWeightsButton.Tooltip = {'Load Zernike indices and weights from file'};
-            app.LoadZernikeIndicesWeightsButton.Position = [455 16 53 23];
+            app.LoadZernikeIndicesWeightsButton.Position = [455 23 53 23];
             app.LoadZernikeIndicesWeightsButton.Text = 'Load';
 
             % Create IndicesWeightsEditField
@@ -2140,14 +2140,14 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.IndicesWeightsEditField.Enable = 'off';
             app.IndicesWeightsEditField.Tooltip = {'Specify Zernike Noll indices and coefficients in the format index:weight separated by semicolons. Zernike coefficients should be specified in units of the wavelength.'};
             app.IndicesWeightsEditField.Placeholder = '1:0.0;2:0.0;3:0.0;4:0.0';
-            app.IndicesWeightsEditField.Position = [30 16 403 22];
+            app.IndicesWeightsEditField.Position = [30 23 403 22];
 
             % Create SaveZernikeIndicesWeightsButton
             app.SaveZernikeIndicesWeightsButton = uibutton(app.SpecifyZernikeaberrationsButtonGroup, 'push');
             app.SaveZernikeIndicesWeightsButton.ButtonPushedFcn = createCallbackFcn(app, @SaveZernikeIndicesWeightsButtonPushed, true);
             app.SaveZernikeIndicesWeightsButton.Enable = 'off';
             app.SaveZernikeIndicesWeightsButton.Tooltip = {'Load Zernike indices and weights from file'};
-            app.SaveZernikeIndicesWeightsButton.Position = [514 16 53 23];
+            app.SaveZernikeIndicesWeightsButton.Position = [514 23 53 23];
             app.SaveZernikeIndicesWeightsButton.Text = 'Save';
 
             % Create ZernikeaberrationsLabel
@@ -2168,55 +2168,55 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.HorizontalComaCheckBox.ValueChangedFcn = createCallbackFcn(app, @HorizontalComaCheckBoxValueChanged, true);
             app.HorizontalComaCheckBox.Tooltip = {'Noll index: 8'};
             app.HorizontalComaCheckBox.Text = 'Horizontal coma';
-            app.HorizontalComaCheckBox.Position = [337 166 128 22];
+            app.HorizontalComaCheckBox.Position = [337 125 128 22];
 
             % Create VerticalComaCheckBox
             app.VerticalComaCheckBox = uicheckbox(app.AberrationsTab);
             app.VerticalComaCheckBox.ValueChangedFcn = createCallbackFcn(app, @VerticalComaCheckBoxValueChanged, true);
             app.VerticalComaCheckBox.Tooltip = {'Noll index: 7'};
             app.VerticalComaCheckBox.Text = 'Vertical coma';
-            app.VerticalComaCheckBox.Position = [337 189 128 22];
+            app.VerticalComaCheckBox.Position = [337 155 128 22];
 
             % Create VerticalAstigmatismCheckBox
             app.VerticalAstigmatismCheckBox = uicheckbox(app.AberrationsTab);
             app.VerticalAstigmatismCheckBox.ValueChangedFcn = createCallbackFcn(app, @VerticalAstigmatismCheckBoxValueChanged, true);
             app.VerticalAstigmatismCheckBox.Tooltip = {'Noll index: 6'};
             app.VerticalAstigmatismCheckBox.Text = 'Vertical astigmatism';
-            app.VerticalAstigmatismCheckBox.Position = [337 212 128 22];
+            app.VerticalAstigmatismCheckBox.Position = [337 185 128 22];
 
             % Create ObliqueAstigmatismCheckBox
             app.ObliqueAstigmatismCheckBox = uicheckbox(app.AberrationsTab);
             app.ObliqueAstigmatismCheckBox.ValueChangedFcn = createCallbackFcn(app, @ObliqueAstigmatismCheckBoxValueChanged, true);
             app.ObliqueAstigmatismCheckBox.Tooltip = {'Noll index: 5'};
             app.ObliqueAstigmatismCheckBox.Text = 'Oblique astigmatism';
-            app.ObliqueAstigmatismCheckBox.Position = [337 235 128 22];
+            app.ObliqueAstigmatismCheckBox.Position = [337 216 128 22];
 
             % Create PrimarySphericalCheckBox
             app.PrimarySphericalCheckBox = uicheckbox(app.AberrationsTab);
             app.PrimarySphericalCheckBox.ValueChangedFcn = createCallbackFcn(app, @PrimarySphericalCheckBoxValueChanged, true);
             app.PrimarySphericalCheckBox.Tooltip = {'Noll index: 11'};
             app.PrimarySphericalCheckBox.Text = 'Primary spherical';
-            app.PrimarySphericalCheckBox.Position = [42 164 128 22];
+            app.PrimarySphericalCheckBox.Position = [42 125 128 22];
 
             % Create DefocusCheckBox
             app.DefocusCheckBox = uicheckbox(app.AberrationsTab);
             app.DefocusCheckBox.ValueChangedFcn = createCallbackFcn(app, @DefocusCheckBoxValueChanged, true);
             app.DefocusCheckBox.Tooltip = {'Noll index: 4'};
             app.DefocusCheckBox.Text = 'Defocus';
-            app.DefocusCheckBox.Position = [42 188 128 22];
+            app.DefocusCheckBox.Position = [42 155 128 22];
 
             % Create HorizontalTiltCheckBox
             app.HorizontalTiltCheckBox = uicheckbox(app.AberrationsTab);
             app.HorizontalTiltCheckBox.ValueChangedFcn = createCallbackFcn(app, @HorizontalTiltCheckBoxValueChanged, true);
             app.HorizontalTiltCheckBox.Tooltip = {'Noll index: 2'};
             app.HorizontalTiltCheckBox.Text = 'Horizontal tilt';
-            app.HorizontalTiltCheckBox.Position = [42 212 128 22];
+            app.HorizontalTiltCheckBox.Position = [42 186 128 22];
 
             % Create WeightVerticalTiltSpinnerLabel
             app.WeightVerticalTiltSpinnerLabel = uilabel(app.AberrationsTab);
             app.WeightVerticalTiltSpinnerLabel.HorizontalAlignment = 'right';
             app.WeightVerticalTiltSpinnerLabel.Enable = 'off';
-            app.WeightVerticalTiltSpinnerLabel.Position = [171 236 25 22];
+            app.WeightVerticalTiltSpinnerLabel.Position = [171 216 25 22];
             app.WeightVerticalTiltSpinnerLabel.Text = 'w =';
 
             % Create WeightVerticalTiltSpinner
@@ -2226,20 +2226,20 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.WeightVerticalTiltSpinner.ValueChangedFcn = createCallbackFcn(app, @WeightVerticalTiltSpinnerValueChanged, true);
             app.WeightVerticalTiltSpinner.BusyAction = 'cancel';
             app.WeightVerticalTiltSpinner.Enable = 'off';
-            app.WeightVerticalTiltSpinner.Position = [201 236 67 22];
+            app.WeightVerticalTiltSpinner.Position = [201 216 67 22];
 
             % Create VerticalTiltCheckBox
             app.VerticalTiltCheckBox = uicheckbox(app.AberrationsTab);
             app.VerticalTiltCheckBox.ValueChangedFcn = createCallbackFcn(app, @VerticalTiltCheckBoxValueChanged, true);
             app.VerticalTiltCheckBox.Tooltip = {'Noll index: 3'};
             app.VerticalTiltCheckBox.Text = 'Vertical tilt';
-            app.VerticalTiltCheckBox.Position = [42 236 128 22];
+            app.VerticalTiltCheckBox.Position = [42 216 128 22];
 
             % Create WeightHorizontalTiltSpinnerLabel
             app.WeightHorizontalTiltSpinnerLabel = uilabel(app.AberrationsTab);
             app.WeightHorizontalTiltSpinnerLabel.HorizontalAlignment = 'right';
             app.WeightHorizontalTiltSpinnerLabel.Enable = 'off';
-            app.WeightHorizontalTiltSpinnerLabel.Position = [171 212 25 22];
+            app.WeightHorizontalTiltSpinnerLabel.Position = [171 186 25 22];
             app.WeightHorizontalTiltSpinnerLabel.Text = 'w =';
 
             % Create WeightHorizontalTiltSpinner
@@ -2249,13 +2249,13 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.WeightHorizontalTiltSpinner.ValueChangedFcn = createCallbackFcn(app, @WeightHorizontalTiltSpinnerValueChanged, true);
             app.WeightHorizontalTiltSpinner.BusyAction = 'cancel';
             app.WeightHorizontalTiltSpinner.Enable = 'off';
-            app.WeightHorizontalTiltSpinner.Position = [201 212 67 22];
+            app.WeightHorizontalTiltSpinner.Position = [201 186 67 22];
 
             % Create WeightDefocusSpinnerLabel
             app.WeightDefocusSpinnerLabel = uilabel(app.AberrationsTab);
             app.WeightDefocusSpinnerLabel.HorizontalAlignment = 'right';
             app.WeightDefocusSpinnerLabel.Enable = 'off';
-            app.WeightDefocusSpinnerLabel.Position = [171 188 25 22];
+            app.WeightDefocusSpinnerLabel.Position = [171 155 25 22];
             app.WeightDefocusSpinnerLabel.Text = 'w =';
 
             % Create WeightDefocusSpinner
@@ -2265,13 +2265,13 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.WeightDefocusSpinner.ValueChangedFcn = createCallbackFcn(app, @WeightDefocusSpinnerValueChanged, true);
             app.WeightDefocusSpinner.BusyAction = 'cancel';
             app.WeightDefocusSpinner.Enable = 'off';
-            app.WeightDefocusSpinner.Position = [201 188 67 22];
+            app.WeightDefocusSpinner.Position = [201 155 67 22];
 
             % Create WeightPrimarySphericalSpinnerLabel
             app.WeightPrimarySphericalSpinnerLabel = uilabel(app.AberrationsTab);
             app.WeightPrimarySphericalSpinnerLabel.HorizontalAlignment = 'right';
             app.WeightPrimarySphericalSpinnerLabel.Enable = 'off';
-            app.WeightPrimarySphericalSpinnerLabel.Position = [171 164 25 22];
+            app.WeightPrimarySphericalSpinnerLabel.Position = [171 125 25 22];
             app.WeightPrimarySphericalSpinnerLabel.Text = 'w =';
 
             % Create WeightPrimarySphericalSpinner
@@ -2281,13 +2281,13 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.WeightPrimarySphericalSpinner.ValueChangedFcn = createCallbackFcn(app, @WeightPrimarySphericalSpinnerValueChanged, true);
             app.WeightPrimarySphericalSpinner.BusyAction = 'cancel';
             app.WeightPrimarySphericalSpinner.Enable = 'off';
-            app.WeightPrimarySphericalSpinner.Position = [201 164 67 22];
+            app.WeightPrimarySphericalSpinner.Position = [201 125 67 22];
 
             % Create WeightObliqueAstigmatismSpinnerLabel
             app.WeightObliqueAstigmatismSpinnerLabel = uilabel(app.AberrationsTab);
             app.WeightObliqueAstigmatismSpinnerLabel.HorizontalAlignment = 'right';
             app.WeightObliqueAstigmatismSpinnerLabel.Enable = 'off';
-            app.WeightObliqueAstigmatismSpinnerLabel.Position = [485 235 25 22];
+            app.WeightObliqueAstigmatismSpinnerLabel.Position = [485 216 25 22];
             app.WeightObliqueAstigmatismSpinnerLabel.Text = 'w =';
 
             % Create WeightObliqueAstigmatismSpinner
@@ -2297,13 +2297,13 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.WeightObliqueAstigmatismSpinner.ValueChangedFcn = createCallbackFcn(app, @WeightObliqueAstigmatismSpinnerValueChanged, true);
             app.WeightObliqueAstigmatismSpinner.BusyAction = 'cancel';
             app.WeightObliqueAstigmatismSpinner.Enable = 'off';
-            app.WeightObliqueAstigmatismSpinner.Position = [515 235 67 22];
+            app.WeightObliqueAstigmatismSpinner.Position = [515 216 67 22];
 
             % Create WeightVerticalAstigmatismSpinnerLabel
             app.WeightVerticalAstigmatismSpinnerLabel = uilabel(app.AberrationsTab);
             app.WeightVerticalAstigmatismSpinnerLabel.HorizontalAlignment = 'right';
             app.WeightVerticalAstigmatismSpinnerLabel.Enable = 'off';
-            app.WeightVerticalAstigmatismSpinnerLabel.Position = [485 212 25 22];
+            app.WeightVerticalAstigmatismSpinnerLabel.Position = [485 185 25 22];
             app.WeightVerticalAstigmatismSpinnerLabel.Text = 'w =';
 
             % Create WeightVerticalAstigmatismSpinner
@@ -2313,13 +2313,13 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.WeightVerticalAstigmatismSpinner.ValueChangedFcn = createCallbackFcn(app, @WeightVerticalAstigmatismSpinnerValueChanged, true);
             app.WeightVerticalAstigmatismSpinner.BusyAction = 'cancel';
             app.WeightVerticalAstigmatismSpinner.Enable = 'off';
-            app.WeightVerticalAstigmatismSpinner.Position = [515 212 67 22];
+            app.WeightVerticalAstigmatismSpinner.Position = [515 185 67 22];
 
             % Create WeightVerticalComaSpinnerLabel
             app.WeightVerticalComaSpinnerLabel = uilabel(app.AberrationsTab);
             app.WeightVerticalComaSpinnerLabel.HorizontalAlignment = 'right';
             app.WeightVerticalComaSpinnerLabel.Enable = 'off';
-            app.WeightVerticalComaSpinnerLabel.Position = [485 189 25 22];
+            app.WeightVerticalComaSpinnerLabel.Position = [485 155 25 22];
             app.WeightVerticalComaSpinnerLabel.Text = 'w =';
 
             % Create WeightVerticalComaSpinner
@@ -2329,13 +2329,13 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.WeightVerticalComaSpinner.ValueChangedFcn = createCallbackFcn(app, @WeightVerticalComaSpinnerValueChanged, true);
             app.WeightVerticalComaSpinner.BusyAction = 'cancel';
             app.WeightVerticalComaSpinner.Enable = 'off';
-            app.WeightVerticalComaSpinner.Position = [515 189 67 22];
+            app.WeightVerticalComaSpinner.Position = [515 155 67 22];
 
             % Create WeightHorizontalComaSpinnerLabel
             app.WeightHorizontalComaSpinnerLabel = uilabel(app.AberrationsTab);
             app.WeightHorizontalComaSpinnerLabel.HorizontalAlignment = 'right';
             app.WeightHorizontalComaSpinnerLabel.Enable = 'off';
-            app.WeightHorizontalComaSpinnerLabel.Position = [485 166 25 22];
+            app.WeightHorizontalComaSpinnerLabel.Position = [485 125 25 22];
             app.WeightHorizontalComaSpinnerLabel.Text = 'w =';
 
             % Create WeightHorizontalComaSpinner
@@ -2345,7 +2345,7 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             app.WeightHorizontalComaSpinner.ValueChangedFcn = createCallbackFcn(app, @WeightHorizontalComaSpinnerValueChanged, true);
             app.WeightHorizontalComaSpinner.BusyAction = 'cancel';
             app.WeightHorizontalComaSpinner.Enable = 'off';
-            app.WeightHorizontalComaSpinner.Position = [515 166 67 22];
+            app.WeightHorizontalComaSpinner.Position = [515 125 67 22];
 
             % Create PhasemaskTab
             app.PhasemaskTab = uitab(app.TabGroup);
