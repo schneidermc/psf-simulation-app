@@ -135,6 +135,7 @@ classdef aberration_measurement_exported < matlab.apps.AppBase
             set(h,'DataAspectRatio',[dz, ux, ux])
             axis(h, "tight");
             colormap(h,app.CallingApp.ColormapDropDown.Value)
+            set(app.UIAxesSimulationPsfXZ,'ColorScale','linear')
         end
                
         function display_single_image(app, axes, Nx, Ny, ux, data, cmin, cmax)
@@ -146,6 +147,7 @@ classdef aberration_measurement_exported < matlab.apps.AppBase
             set(h,'YDir','normal')
             axis(h,"tight");
             colormap(h,app.CallingApp.ColormapDropDown.Value)
+            set(app.UIAxesSimulationPsfXY,'ColorScale','linear')
             caxis(h,[cmin,cmax])
         end
 
@@ -187,11 +189,12 @@ classdef aberration_measurement_exported < matlab.apps.AppBase
         end
 
         function calculate_error(app)
-            % Absolute error: abs(app.stack_simu - app.stack)
-            % Relative error: abs(app.stack_simu - app.stack)./abs(app.stack_simu)
-            app.stack_error = abs(app.stack_simu - app.stack);
-            app.PSF_simu_xz_error = abs(app.PSF_simu_xz - app.PSF_xz);
-            app.PSF_simu_xy_error = abs(app.PSF_simu_xy - app.PSF_xy);
+            % Absolute error:
+            %app.stack_error = abs(app.stack_simu - app.stack);
+            %app.PSF_simu_xz_error = abs(app.PSF_simu_xz - app.PSF_xz);
+            % Relative error:
+            app.stack_error = abs(app.stack - app.stack_simu)./abs(app.stack_simu);
+            app.PSF_simu_xz_error = abs(app.PSF_xz - app.PSF_simu_xz)./abs(app.PSF_simu_xz);
         end
         
         function error = show_error(app, stack_A, stack_B)
@@ -785,7 +788,9 @@ classdef aberration_measurement_exported < matlab.apps.AppBase
                 % Show error plot
                 [colorMinError, colorMaxError] = app.getColorLimitsError(val);
                 display_projection(app, app.UIAxesSimulationPsfXZ, app.PSF_simu_xz_error, app.Nx, app.Ny, app.Nz, app.ux, app.dz);
+                set(app.UIAxesSimulationPsfXZ,'ColorScale','log')
                 display_single_image(app, app.UIAxesSimulationPsfXY, app.Nx, app.Ny, app.ux, app.stack_error(:,:,val), colorMinError, colorMaxError);
+                set(app.UIAxesSimulationPsfXY,'ColorScale','log')
                 app.UIAxesSimulationPsfXZ.Title.String = 'Model error';
                 colormap(app.UIAxesSimulationPsfXZ,'hot')
                 colormap(app.UIAxesSimulationPsfXY,'hot')
@@ -794,7 +799,9 @@ classdef aberration_measurement_exported < matlab.apps.AppBase
                 % Show fitted model
                 [colorMin, colorMax] = app.getColorLimitsPsf(val);
                 display_projection(app, app.UIAxesSimulationPsfXZ, app.PSF_simu_xz, app.Nx, app.Ny, app.Nz, app.ux, app.dz);
+                set(app.UIAxesSimulationPsfXZ,'ColorScale','linear')
                 display_single_image(app, app.UIAxesSimulationPsfXY, app.Nx, app.Ny, app.ux, app.stack_simu(:,:,val), colorMin, colorMax);
+                set(app.UIAxesSimulationPsfXY,'ColorScale','linear')
                 app.UIAxesSimulationPsfXZ.Title.String = 'Model';
                 colormap(app.UIAxesSimulationPsfXZ,app.CallingApp.ColormapDropDown.Value)
                 colormap(app.UIAxesSimulationPsfXY,app.CallingApp.ColormapDropDown.Value)
@@ -821,7 +828,9 @@ classdef aberration_measurement_exported < matlab.apps.AppBase
                         % Show error plot
                         [colorMinError, colorMaxError] = app.getColorLimitsError(val);
                         display_projection(app, app.UIAxesSimulationPsfXZ, app.PSF_simu_xz_error, app.Nx, app.Ny, app.Nz, app.ux, app.dz);
+                        set(app.UIAxesSimulationPsfXZ,'ColorScale','log')
                         display_single_image(app, app.UIAxesSimulationPsfXY, app.Nx, app.Ny, app.ux, app.stack_error(:,:,val), colorMinError, colorMaxError);
+                        set(app.UIAxesSimulationPsfXY,'ColorScale','log')
                         app.UIAxesSimulationPsfXZ.Title.String = 'Model error';
                         colormap(app.UIAxesSimulationPsfXZ,'hot')
                         colormap(app.UIAxesSimulationPsfXY,'hot')
@@ -831,7 +840,9 @@ classdef aberration_measurement_exported < matlab.apps.AppBase
                     if ~isempty(app.stack_simu)
                         % Show fitted model
                         display_projection(app, app.UIAxesSimulationPsfXZ, app.PSF_simu_xz, app.Nx, app.Ny, app.Nz, app.ux, app.dz);
+                        set(app.UIAxesSimulationPsfXZ,'ColorScale','linear')
                         display_single_image(app, app.UIAxesSimulationPsfXY, app.Nx, app.Ny, app.ux, app.stack_simu(:,:,val), colorMin, colorMax);
+                        set(app.UIAxesSimulationPsfXY,'ColorScale','linear')
                         app.UIAxesSimulationPsfXZ.Title.String = 'Model';
                         colormap(app.UIAxesSimulationPsfXZ,app.CallingApp.ColormapDropDown.Value)
                         colormap(app.UIAxesSimulationPsfXY,app.CallingApp.ColormapDropDown.Value)
