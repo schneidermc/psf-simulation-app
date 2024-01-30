@@ -44,7 +44,7 @@ classdef Transmission
         %% Functions
         function attenuatedElectricField = apply(obj, electricField)
             assert(isequal(size(obj.mask),size(electricField)))
-            attenuatedElectricField = sqrt(obj.mask) .* electricField;
+            attenuatedElectricField = obj.mask .* electricField; % apply amplitude modulation
         end
 
         %% Plot
