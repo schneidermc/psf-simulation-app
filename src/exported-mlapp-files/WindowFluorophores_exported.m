@@ -560,7 +560,7 @@ classdef WindowFluorophores_exported < matlab.apps.AppBase
 
             app.CallingApp.CalculateCheckBox.Visible = 'on'; % checkbox for CRB
             app.CallingApp.CRBOutputField.Visible = 'on';
-            app.CallingApp.CramrRaoBoundLabel.Visible = 'on';
+            app.CallingApp.CramerRaoBoundLabel.Visible = 'on';
             % Switch on option for 3D plot again (currently not compatible
             % with multiple fluorophores
             if app.CallingApp.ShowPSFCheckBox.Value == 1
