@@ -122,7 +122,9 @@ classdef WindowGenerateDataset_exported < matlab.apps.AppBase
                 case 'fixed'
                     fieldsToRemove = {'rotationalFreedom'};
                 case 'freely rotating'
-                    fieldsToRemove = {'dipole', 'rotationalFreedom'};
+                    fieldsToRemove = {'azimuthalAngle', 'inclinationAngle', 'rotationalFreedom'};
+                case 'partially rotating'
+                    fieldsToRemove = {};
                 otherwise
                     error('Invalid input value for dipole rotation!')
             end
