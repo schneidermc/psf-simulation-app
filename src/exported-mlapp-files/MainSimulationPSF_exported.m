@@ -874,6 +874,7 @@ classdef MainSimulationPSF_exported < matlab.apps.AppBase
             delete(app.Fluorophores)
             delete(app.PlotPolarizedEmission)
             delete(app.FitZernikeApp)
+            delete(app.GenerateDataset)
             delete(app)
         end
 
