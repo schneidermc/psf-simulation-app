@@ -4,8 +4,8 @@ Matlab app for simulation and visualization of point spread functions (PSFs) for
 
 Tested for Matlab version 2021b and higher. Tested on Windows, Mac and Linux operating systems.
   
-Please cite the corresponding preprint if you are using our tool:  
-Schneider et al. “Interactive simulation and visualization of point spread functions in single molecule imaging" *arxiv* (2023), [DOI: 10.48550/arXiv.2312.14356](https://doi.org/10.48550/arXiv.2312.14356)
+Please cite the corresponding publication if you are using our tool:  
+Schneider et al. “Interactive simulation and visualization of point spread functions in single molecule imaging" *Optics Communications* (2024), [DOI: 10.1016/j.optcom.2024.130463](https://doi.org/10.1016/j.optcom.2024.130463)
 
 
 ## Installation
